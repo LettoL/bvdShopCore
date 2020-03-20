@@ -1,0 +1,34 @@
+﻿
+@{
+    ViewData["Title"] = "ExportFile";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Выбрать магазин для экспорта</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/Admin/ExportProduct" method="post">
+                    <h3 class="title">Выбрать магазин</h3>
+                    <label for="">Название</label>
+                    <select class="form-control" name="id">
+                        <option disabled selected>Выбрать</option>
+                        @foreach(var shop in Model)
+                        {
+                            <option value="@shop.Id">@shop.Title</option>
+                        }
+                    </select> <br />
+                    <button class="btn btn-submit">Отправить</button>
+                    <a href="/Admin/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+

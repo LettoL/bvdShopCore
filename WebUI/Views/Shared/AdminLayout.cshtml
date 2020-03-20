@@ -1,0 +1,227 @@
+﻿@using Microsoft.AspNetCore.Identity
+@{
+    var userName = User.Identity.Name;    
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <title>bvdShop</title>
+    <script src="https://use.fontawesome.com/c28c2b18c5.js"></script>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.3.1/jquery.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.min.css">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/chosen/1.5.1/chosen.jquery.min.js"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <link rel="stylesheet" href="~/Content/css/site.css">
+    <meta name="robots" content="noindex" />
+</head>
+<body>
+    <div class="page-header fixed-top">
+        <div class="page-header-inner">
+            <div class="brand">
+                <span>bvd</span>
+            </div>
+            <div class="logout">
+                <span>
+                    Пользователь: <b>@userName</b>
+                </span>
+                <a href="/Account/Logout" class="btn btn-logout">
+                    Выйти
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <div class="clearfix"></div>
+
+    <div class="page-wrapper">
+        <div class="page-sidebar navbar-collapse" aria-expanded="false">
+            <ul id="accordion" class="page-sidebar-menu accordion">
+                <li>
+                    <a href="/Admin/Index">
+                        Главная
+                    </a>
+                </li>
+                <li>
+                    <a href="" type="button" data-toggle="collapse" data-target="#products" aria-expanded="true" aria-controls="products">Товары</a>
+                </li>
+                <div id="products" class="collapse" aria-labelledby="products" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul class="sub-menu">
+                            <li>
+                                <a href="/Product/Index">
+                                    Товары в наличии
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Product/AllProducts">
+                                    Все товары
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/AdditionalProducts">
+                                    Проданные Доп.Товары
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/SalesByCategories">
+                                    Проданные Товары по Категориям
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/ChangeProducts">
+                                    Перенос Товаров
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/BookingList">
+                                    Забронированные товары
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/ImportProductExel">
+                                    Импорт товаров
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/ExportFile">
+                                    Экспорт товаров
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/Writeoffproduct">
+                                    Списание
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Admin/ProductHistory">
+                                    История товаров
+                                </a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <li>
+                    <a href="" type="button" data-toggle="collapse" data-target="#settings" aria-expanded="true" aria-controls="settings">Настройки</a>
+                </li>
+                <div id="settings" class="collapse" aria-labelledby="settings" data-parent="#accordion">
+                    <div class="card-body">
+                        <ul class="sub-menu">
+                            <li>
+                                <a href="/User/Index">
+                                    Пользователи
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Partner/Index">
+                                    Партнеры
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/Category/Index">
+                                    Категории
+                                </a>
+                            </li>
+                            <li>
+                                <a href="/CategoryExpense/Index">Категории Расходов</a>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+                <li>
+                    <a href="/Statistic/Index">
+                        Статистика
+                    </a>
+                </li>
+                <li>
+                    <a href="/CardKeeper/Index">
+                        Держатели карт
+                    </a>
+                </li>
+                <li>
+                    <a href="/CalculatedScore/Index">
+                        Рассчетные счета
+                    </a>
+                </li>
+                <li>
+                    <a href="/Shop/Index">
+                        Магазины
+                    </a>
+                </li>
+                <li>
+                    <a href="/Supplier/Index">
+                        Поставщики
+                    </a>
+                </li>
+                <li>
+                    <a href="/Sale/Index">
+                        Продажи
+                    </a>
+                </li>
+                <li>
+                    <a href="/Sale/SalesWithPartners">
+                        Продажи Партнерам
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/SupplyProduct">
+                        Поставка
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/Replenishment">Пополнение баланса</a>
+                </li>
+                <li>
+                    <a href="/Admin/MoneyTransfer">
+                        Перевод средств
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/Expense">
+                        Расход
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/SupplierRepayment">
+                        Погашение долга
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/MoneyWorkerBalanceInfo">
+                        История счетов
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/MoneyHistory">
+                        История финансов
+                    </a>
+                </li>
+                <li>
+                    <a href="/Admin/ExpenseList">
+                        Список расходов
+                    </a>
+                </li>
+            </ul>
+        </div>
+        <div class="page-content-wrapper">
+            <div class="page-content">
+                @RenderBody()
+            </div>
+        </div>
+    </div>
+
+
+
+
+
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+    <script>
+        $(".deleteForm").click(function (event) {
+            if (!confirm("Подтвердите удаление"))
+                event.preventDefault();
+        });
+    </script>
+</body>
+</html>

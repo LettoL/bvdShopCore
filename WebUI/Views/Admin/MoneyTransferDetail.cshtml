@@ -1,0 +1,43 @@
+﻿
+@{
+    ViewData["Title"] = "MoneyTransferDetail";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="padding:30px 20px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Подробно о переводе за @Model.PrevInfoMoney.Date</h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        <th>Со счета</th>
+                                        <th>На счет</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.PrevInfoMoney.Date</td>
+                                        <td>@Math.Abs(Model.PrevInfoMoney.Sum)</td>
+                                        <td>@Model.PrevInfoMoney.MoneyWorker.Title</td>
+                                        <td>@Model.NextInfoMoney.MoneyWorker.Title</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+        </div>
+    </div>

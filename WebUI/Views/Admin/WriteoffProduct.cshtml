@@ -1,0 +1,104 @@
+﻿
+@{
+    ViewData["Title"] = "WriteoffProduct";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Списание</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="WriteoffProduct" asp-controller="Admin" method="post">
+                    <label>Выбрать магазин</label>
+                    <select id="shopId" class="form-control"  onchange="shop_onSelect(this.value)">
+                        <option value="0">Выбрать</option>
+                        @foreach (var s in ViewBag.Shops)
+                        {
+                            <option value="@s.Id">@s.Title</option>
+                        }
+                    </select>
+
+                    <label>Выбрать товар</label>
+                    <select id="productId" class="form-control" name="productId" onchange="product_onSelect()">
+                        <option value="0">Выбрать</option>
+                        
+                    </select>
+
+                    <label>Выбрать поставку</label>
+                    <select id="supplyId" class="form-control" name="supplyId">
+                        <option>Выбрать</option>
+                    </select>
+
+                    <label>Количество</label>
+                    <input class="form-control" type="number" name="amount"/>
+                    <br/>
+                    <button class="btn btn-dark">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    $("#productId").chosen();
+
+    function shop_onSelect(value) {
+
+        fetch('/admin/getProductsByShop/' + value,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                $('#productId').html('<option>Выбрать</option>');
+
+                json.products.forEach(json => {
+                    $('#productId').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            }).then(() => { 
+                $("#productId").trigger("chosen:updated");
+            });  
+    }
+
+    product_onSelect = function () {
+        var select = document.getElementById("productId");
+        var value = select.options[select.selectedIndex].value;
+
+        fetch('/admin/getSupplyProductByProduct/' + value,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                $('#supplyId').html('<option>Выбрать</option>');
+
+                json.supplyProducts.forEach(json => {
+                    $('#supplyId').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.additionalCost +
+                        ' / ' +
+                        json.finalCost +
+                        ' / ' +
+                        json.stockAmount +
+                        '</option>');
+                });
+            });     
+    }
+</script>

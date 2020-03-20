@@ -1,0 +1,55 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Пользователи <small>Просмотр и редактирование пользователей</small></h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список пользователей
+                </div>   
+                <div class="portlet-action">
+                    <a href="/User/Create" class="btn add-button">Новый Пользователь</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+               <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Роль</th>
+                            <th>Магазин</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var u in Model)
+                        {
+                        <tr>
+                            <td>@u.Title</td>
+                            <td>@u.Role</td>
+                            <td>@u.Shop?.Title</td>
+                            <td>
+                                <a href="/User/Edit/@u.Id" class="btn btn-dark">
+                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                </a>
+                                <form class="deleteForm" style="display: inline-block" action="/User/Delete/@u.Id" method="post">
+                                    <button class="btn btn-danger">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
+                                    </button>
+                                </form> 
+                            </td>
+                        </tr>
+                        }
+                    </tbody>
+                </table>
+               </div>
+             </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,250 @@
+﻿
+@{
+    ViewData["Title"] = "MoneyHistory";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<h3 class="page-title">История денежных операций</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список Операций
+                </div>
+                <div class="portlet-filters">
+                    <form style="display: inline-block">
+                        <select name="shopId" id="shopFilter" onchange="filterByShop(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Магазин</option>
+                            <option value="0">Все</option>
+                            @foreach (var s in ViewBag.Shops)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+                    </form>
+                    <form style="display: inline-block">
+                        <select name="shopId" id="shopFilter" onchange="filterByScore(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Счет</option>
+                            <option value="0">Все</option>
+                            @foreach (var s in ViewBag.Scores)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+                    </form>
+                    <form style="display: inline-block">
+                        <select name="shopId" id="shopFilter" onchange="filterByType(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Тип</option>
+                            <option value="0">Все</option>
+
+                            <option value="1">Погашение долга перед поставщиком</option>
+                            <option value="2">Инкассация</option>
+                            <option value="3">Бронирование</option>
+                            <option value="4">Продажа</option>
+                            <option value="5">Расход</option>
+                            <option value="6">Перевод</option>
+                            <option value="7">Пополнение</option>
+
+                        </select>
+                    </form>
+                    <form style="display: inline-block">
+                        <input placeholder="Дата с:" type="text" name="value" id="dateFilter1" onchange="filterByDate1(event.target)" class="form-control" style="width: 200px; display: inline-block"/>
+                    </form>
+                    <form style="display: inline-block">
+                        <input placeholder="Дата по:" type="text" name="value" id="dateFilter2" onchange="filterByDate2(event.target)" class="form-control" style="width: 200px; display: inline-block"/>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Тип оплаты</th>
+                                <th>Тип операции</th>
+                                <th>Счета</th>
+                                <th>Магазин</th>
+                                <th>Комментарий</th>
+                                <th>Подробно</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model)
+                            {
+                                <tr>
+                                    <td>@o.Date</td>
+                                    <td>@o.Sum</td>
+                                    @if (o.PaymentType.ToString() == "Cash")
+                                    {
+                                        <td>Наличный</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Безналичный</td>
+                                    }
+                                    @if (o.MoneyOperationType.ToString() == "SupplierRepayment")
+                                    {
+                                        
+                                        <td>Погашение долга перед поставщиком</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Encashment")
+                                    {
+                                        <td>Инкассация</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Booking")
+                                    {
+                                        <td>Бронирование</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Sale")
+                                    {
+                                        <td>Продажа</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Expense")
+                                    {
+                                        <td>Расход</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Transfer")
+                                    {
+                                        <td>Перевод</td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Replenishment")
+                                    {
+                                        <td>Пополнение</td>
+                                    }
+                                    <td>@o.MoneyWorker?.Title</td>
+                                    <td>@o.ShopTitle</td>
+                                    <td>@o.Comment</td>
+                                    @if (o.MoneyOperationType.ToString() == "Booking")
+                                    {
+                                        <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Sale")
+                                    {
+                                        <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Expense")
+                                    {
+                                        <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                                    }
+                                    else if (o.MoneyOperationType.ToString() == "Transfer")
+                                    {
+                                        <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                                    }
+                                    else
+                                    {
+                                        <td></td>
+                                    }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker();
+        $("#dateFilter2").datepicker();
+    });
+</script>
+
+<script type="text/javascript">
+
+    let date1 = null;
+    let date2 = null;
+    let shop = null;
+    let score = null;
+    let type = null;
+    let userId = @ViewBag.UserId;
+
+    function filterByDate1(value) {
+        date1 = value.value;
+
+        loadData(shop, date1, date2, userId, score, type);
+    }
+
+    function filterByDate2(value) {
+        date2 = value.value;
+
+        loadData(shop, date1, date2, userId, score, type);
+    }
+
+    function filterByShop(value) {
+        shop = value.srcElement.value;
+
+        loadData(shop, date1, date2, userId, score, type);
+    }
+
+    function filterByScore(value) {
+        score = value.srcElement.value;
+
+        loadData(shop, date1, date2, userId, score, type);
+    }
+
+    function filterByType(value) {
+        type = value.srcElement.value;
+
+        loadData(shop, date1, date2, userId, score, type);
+    }
+
+    function loadData(shop, date1, date2, userId, score, type) {
+        $('#result').load(
+            "/Admin/MoneyHistoryFilter",
+            {
+                shopId: shop,
+                date1: date1,
+                date2: date2,
+                userId: userId,
+                score: score,
+                type: type
+            }
+        );
+    }
+
+</script>

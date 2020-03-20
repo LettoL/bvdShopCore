@@ -1,0 +1,386 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="sub-header">
+    <div class="row">
+        <div class="col-md-4">
+            <h4 class="page-title">Статистика</h4>
+        </div>
+    </div>
+</div>
+<div class="row statistics">
+    <div class="col-sm-12 col-md-6">
+        <div class="portlet productsSum">
+            <div class="portlet-body" style="padding: 20px 40px;">
+                <h5 class="card-title">Сумма всех товаров в денежном выражении</h5>
+                <h6 class="card-subtitle mb-2 text-muted"></h6>
+                <p class="card-text">На всех складах хранится товаров на сумму: <b>@ViewBag.Sum</b> рублей</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-body">
+                <div class="chart-title">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Количество продаж за:</h4>
+                        <select id="timeType" onchange="chooseTimeType(this.value)" class="form-control">
+                            <option value="месяц">Месяц</option>
+                            <option value="год">Год</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Выбрать месяц:</h4>
+                        <select id="saleMonths" onchange="chooseMonth(this.value)" class="form-control">
+                            <option value="1">Январь</option>
+                            <option value="2">Февраль</option>
+                            <option value="3">Март</option>
+                            <option value="4">Апрель</option>
+                            <option value="5">Май</option>
+                            <option value="6">Июнь</option>
+                            <option value="7">Июль</option>
+                            <option value="8">Август</option>
+                            <option value="9">Сентябрь</option>
+                            <option value="10">Октябрь</option>
+                            <option value="11">Ноябрь</option>
+                            <option value="12">Декабрь</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <canvas class="chart-box" id="sales"></canvas>
+            </div>
+            
+        </div>
+    </div>
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-body">
+                <div class="chart-title">
+                <div class="row">
+                    <div class="col-md-6">
+                        <h4>Наличный оборот за:</h4>
+                        <select id="timeType" onchange="chooseTurnOverType(this.value)" class="form-control">
+                            <option value="месяц">Месяц</option>
+                            <option value="год">Год</option>
+                        </select>
+                    </div>
+                    <div class="col-md-6">
+                        <h4>Выбрать месяц:</h4>
+                        <select id="turnOverMonths" onchange="chooseTurnOverMonth(this.value)" class="form-control">
+                            <option value="1">Январь</option>
+                            <option value="2">Февраль</option>
+                            <option value="3">Март</option>
+                            <option value="4">Апрель</option>
+                            <option value="5">Май</option>
+                            <option value="6">Июнь</option>
+                            <option value="7">Июль</option>
+                            <option value="8">Август</option>
+                            <option value="9">Сентябрь</option>
+                            <option value="10">Октябрь</option>
+                            <option value="11">Ноябрь</option>
+                            <option value="12">Декабрь</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <canvas class="chart-box" id="turnOver"></canvas>
+            </div>        
+        </div>
+    </div>
+</div>
+
+    
+<script type="text/javascript" src="~/Content/js/modernizr-custom.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.bundle.min.js"></script>
+<script type="text/javascript">
+
+    Date.prototype.daysInMonth = function () {
+        return 32 - new Date(this.getFullYear(), this.getMonth(), 32).getDate();
+    };
+
+    var monthNow = new Date().getMonth();
+    let months = document.getElementById("saleMonths");
+    let turnOverMonths = document.getElementById("turnOverMonths");
+    months.value = monthNow;
+    turnOverMonths.value = monthNow;
+   
+
+
+    var saleChart = new Chart(document.getElementById("sales"), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                borderColor: "#3e95cd",
+                label: "Продажи",
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                        stepSize: 1
+                    }
+                }]
+            }
+        }
+    });   
+    var turnOverChart = new Chart(document.getElementById("turnOver"), {
+        type: 'line',
+        data: {
+            labels: [],
+            datasets: [{
+                data: [],
+                borderColor: "#3e95cd",
+                label: "Оборот в рублях",
+                fill: false
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                yAxes: [{
+                    ticks: {
+                        beginAtZero: true,
+                    }
+                }]
+            }
+        }
+    });  
+    
+
+    getSaleData(monthNow);
+    getTurnOverData(monthNow);
+
+    function chooseMonth(value) {
+        let type = "месяц";
+
+        let time = document.getElementById('timeType');
+        time.value = "месяц";
+
+        getSaleData(value, type);
+    }
+
+    function chooseTimeType(value) {
+        getSaleData(null, value);
+    }
+
+    function chooseTurnOverMonth(value) {
+        let type = "месяц";
+
+        let time = document.getElementById('timeType');
+        time.value = "месяц";
+
+        getTurnOverData(value, type);
+    }
+
+    function chooseTurnOverType(value) {
+        getTurnOverData(null, value);
+    }
+
+    function getSaleData(month, type) {
+        let monthForPost;
+
+        if (month !== null)
+            monthForPost = month;
+        else
+            monthForPost = monthNow;
+
+        let timeType = "месяц";
+
+        if (type !== undefined)
+            timeType = type;
+
+        let url;
+
+        if (timeType === "месяц") {
+
+            let options = {
+                method: "POST",
+                body: JSON.stringify(monthForPost),
+                credentials: 'include',
+                headers: new Headers()
+            }
+            options.headers.append('Content-Type', 'application/json');
+
+            fetch("/Sale/GetByMonth", options)
+                .then(res => {
+                    return res.json();
+                })
+                .then(data => {
+
+                    let days = new Date().daysInMonth();
+                    let labelsForChart = new Array(days);
+                    let dataForChart = new Array(days);
+
+                    for (let i = 0; i < dataForChart.length; i++) {
+                        dataForChart[i] = 0;
+                    }
+
+                    data.forEach(item => {
+                        var parts = item.date.split('.');
+
+                        var dt = new Date(Number(parts[2]), Number(parts[1]), Number(parts[0]));
+
+                        let day = dt.getDate();
+
+                        ++dataForChart[day - 1];
+                    });
+
+                    for (let i = 0; i < labelsForChart.length; i++) {
+                        labelsForChart[i] = i + 1;
+                    }
+
+                    saleChart.data.labels = labelsForChart;
+                    saleChart.data.datasets[0].data = dataForChart;
+                    saleChart.update();
+                });
+        }
+        else if (timeType === "год") {
+            let options = {
+                method: "POST",
+                body: JSON.stringify(2018),
+                credentials: 'include',
+                headers: new Headers()
+            }
+            options.headers.append('Content-Type', 'application/json');
+
+            fetch("/Sale/GetByYear", options)
+                .then(res => {
+                    return res.json();
+                })
+                .then(data => {
+                    let months = 12;
+                    let labelsForChart = [
+                        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
+                        'Ноябрь', 'Декабрь'
+                    ];
+                    let dataForChart = new Array(months);
+
+                    for (var i = 0; i < dataForChart.length; i++) {
+                        dataForChart[i] = 0;
+                    }
+
+                    data.forEach(item => {
+                        var parts = item.date.split('.');
+
+                        var dt = new Date(Number(parts[2]), Number(parts[1]), Number(parts[0]));
+
+                        let month = new Date(dt).getMonth();
+                        ++dataForChart[month - 1];
+                    });
+                    saleChart.data.labels = labelsForChart;
+                    saleChart.data.datasets[0].data = dataForChart;
+                    saleChart.update();
+                });
+        }     
+    }
+
+    function getTurnOverData(month, type) {
+        let monthForPost;
+
+        if (month !== null)
+            monthForPost = month;
+        else
+            monthForPost = monthNow;
+
+        let timeType = "месяц";
+
+        if (type !== undefined)
+            timeType = type;
+
+        let url;
+
+        if (timeType === "месяц") {
+
+            let options = {
+                method: "POST",
+                body: JSON.stringify(monthForPost),
+                headers: new Headers(),
+                credentials: 'include'
+            }
+            options.headers.append('Content-Type', 'application/json');
+
+            fetch("/Statistic/GetTurnOverByMonth", options)
+                .then(res => {
+                    return res.json();
+                })
+                .then(data => {
+                    let days = new Date().daysInMonth();
+                    let labelsForChart = new Array(days);
+                    let dataForChart = new Array(days);
+
+                    for (let i = 0; i < dataForChart.length; i++) {
+                        dataForChart[i] = 0;
+                    }
+
+                    data.forEach(item => {
+    
+                        var parts = item.date.split('.');
+
+                        var dt = new Date(Number(parts[2]), Number(parts[1]), Number(parts[0]));
+
+                        let day = new Date(dt).getDate();
+                        dataForChart[day - 1] += item.sum;
+                    });
+
+                    for (let i = 0; i < labelsForChart.length; i++) {
+                        labelsForChart[i] = i + 1;
+                    }
+
+                    turnOverChart.data.labels = labelsForChart;
+                    turnOverChart.data.datasets[0].data = dataForChart;
+                    turnOverChart.update();
+                })
+        }
+        else if (timeType === "год") {
+            let options = {
+                method: "POST",
+                body: JSON.stringify(2018),
+                headers: new Headers(),
+                credentials: 'include'
+            }
+            options.headers.append('Content-Type', 'application/json');
+
+            fetch("/Statistic/GetTurnOverByYear", options)
+                .then(res => {
+                    return res.json();
+                })
+                .then(data => {
+                    let months = 12;
+                    let labelsForChart = [
+                        'Январь', 'Февраль', 'Март', 'Апрель', 'Май', 'Июнь', 'Июль', 'Август', 'Сентябрь', 'Октябрь',
+                        'Ноябрь', 'Декабрь'
+                    ];
+                    let dataForChart = new Array(months);
+
+                    for (var i = 0; i < dataForChart.length; i++) {
+                        dataForChart[i] = 0;
+                    }
+
+                    data.forEach(item => {
+                        var parts = item.date.split('.');
+                        console.log(parts);
+                        var dt = new Date(Number(parts[2]), Number(parts[1]), Number(parts[0]));
+
+                        let month = new Date(dt).getMonth();
+
+                        dataForChart[month - 1] += item.sum;
+                    });
+                    turnOverChart.data.labels = labelsForChart;
+                    turnOverChart.data.datasets[0].data = dataForChart;
+                    turnOverChart.update();
+                });
+        }
+
+    }
+
+</script>

@@ -1,0 +1,152 @@
+﻿
+@{
+    ViewData["Title"] = "CloseDefferedSale";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Закрыть продажу</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form id="closeSale" action="/Admin/CloseDefferedSale" method="post">
+                    <h3 class="title">Закрытие</h3>
+                    <input type="hidden" value="@Model.Id" name="id" />
+
+                    <p style="font-size: 18px">Комментарий к продаже: <b> @Model.Comment </b></p>
+
+                    <h5>Список товаров:</h5>
+                    @foreach (var product in ViewBag.SalesProduct)
+                    {
+                        <p style="font-size: 18px">Название: @product.Product.Title / Количество: @product.Amount</p>
+                    }
+
+                    <label>Выбрать Поставщика</label>
+                    <select name="supplierId" class="form-control">
+                        @foreach (var sup in ViewBag.Suppliers)
+                        {
+                            <option value="@sup.Id">@sup.Title</option>
+                        }
+                    </select><br />
+                    <select name="realization" class="form-control">
+                        <option value="true">Под реализацию</option>
+                        <option value="false">Оплаченный товар</option>                       
+                    </select><br />
+                    
+                    @foreach (var product in ViewBag.SalesProduct)
+                    {
+                             <div id="productPrice">
+
+                                 <label>Стоимость Товара: <b>@product.Product.Title</b></label> <br />
+
+                                 <input type="text" hidden value="@product.Product.Id" name="productIds" />
+                                 <input class="amounts" type="text" hidden value="@product.Amount" name="amounts" />
+
+                                 <label asp-for="code">Закупочная стоимость за 1 шт</label>
+                                 <input class="form-control procurementCosts" type="text" value="0" name="procurementCosts"> <br />
+                                
+                             </div>
+                    }
+
+                    <hr />
+
+                    <label asp-for="title">Дополнительная стоимость</label>
+                    <input id="additionalCost" class="form-control" type="text" value="0" name="additionalCost"><br />
+
+                    <label asp-for="code">Общая стоимость за товары</label>
+                    <input value="0" id="totalCost" class="form-control" type="text" name="totalCost"><br />
+                    
+                    <button id="count" class="btn btn-dark" type="button">Рассчитать</button>
+                    <button id="submitForm" type="submit" class="btn btn-submit">Сохранить</button>
+                    <a href="/Admin/Index" class="btn btn-dark">Назад</a>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+
+<script>
+    let costs = document.getElementsByClassName("procurementCosts");
+    let amounts = document.getElementsByClassName("amounts");
+    let additionalCost = document.getElementById("additionalCost")
+    let totalCostInput = document.getElementById("totalCost");
+    let totalCost = +totalCostInput.value;
+    let countButton = document.getElementById('count')
+
+    countButton.addEventListener('click', totalCostCount)
+
+    function totalCostCount() {
+        totalCost = 0;
+
+        for (var i = 0; i < costs.length; i++) {
+            totalCost += +costs[i].value * amounts[i].value;
+        }
+
+        totalCostInput.value = totalCost + +additionalCost.value;
+    }
+
+    function selectMoneyWorkers(event) {
+
+        console.log(event);
+
+
+        if (event == "chooseMoneyWorkerCash")
+            moneyWorkerSelect = document.getElementById('chooseMoneyWorkerCash');
+
+        else if (event == "chooseMoneyWorkerCashless")
+            moneyWorkerSelect = document.getElementById('chooseMoneyWorkerCashless');
+
+
+
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                if (event == "chooseMoneyWorkerCash") {
+                    $('#moneyWorkerCash').html('');
+                    console.log(json)
+                    json.forEach(json => {
+                        $('#moneyWorkerCash').append('<option value="' +
+                            json.id +
+                            '">' +
+                            json.title +
+                            '</option>');
+                    });
+                }
+                else {
+                    $('#moneyWorkerCashless').html('');
+                    console.log(json);
+                    json.forEach(json => {
+                        $('#moneyWorkerCashless').append('<option value="' +
+                            json.id +
+                            '">' +
+                            json.title +
+                            '</option>');
+                    });
+                }
+            });
+
+            $('#closeSale').submit(function () {
+                $('#submitForm').attr("disabled", true);
+                return true;
+            })
+    }
+</script>

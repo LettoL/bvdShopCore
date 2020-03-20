@@ -1,0 +1,27 @@
+﻿
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Новая категория</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/Category/Create" method="post">
+                    <h3 class="title">Создание</h3>
+                    <label for="">Название</label>
+                    <input class="form-control" name="title" type="text" style="margin-bottom: 40px;">
+                    <button class="btn btn-submit">Сохранить</button>
+                    <a href="/Category/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>           
+        </div>
+    </div>
+</div>

@@ -1,0 +1,61 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<table id="result" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Номер</th>
+        <th>Дата</th>
+        <th>Сумма</th>
+        <th>Магазин</th>
+        <th>Тип платежа</th>
+        <th>Доп. Товары</th>
+        <th>Покупатель</th>
+        <th>Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr>
+            <td>@s.Id</td>
+            <td>@s.Date</td>
+            <td>@s.Sum</td>
+            <td>@s.ShopTitle</td>
+            @if (s.PaymentType.ToString() == "Cash")
+            {
+                <td>Наличный</td>
+            }
+            else if (s.PaymentType.ToString() == "Cashless")
+            {
+                <td>Безналичный</td>
+            }
+            else
+            {
+                <td>Смешанный</td>
+            }
+            @if (s.HasAdditionalProduct)
+            {
+                <td>Есть</td>
+            }
+            else
+            {
+                <td>Нет</td>
+            }
+            <td>
+                @s.BuyerTitle
+            </td>
+            <td>
+                <a href="/Sale/Detail/@s.Id" class="btn btn-dark">
+                    <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                </a>
+                <button class="btn btn-dark">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </button>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

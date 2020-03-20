@@ -1,0 +1,206 @@
+﻿
+@{
+    ViewData["Title"] = "SalePaymentList";
+    Layout = ViewBag.Layout;
+}
+
+<h3 class="page-title">Платежи <small>Просмотр платежей</small></h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список платежей
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    
+                    <table id="data_table" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th class="filterhead">
+                                    <input id="min-date" placeholder="Дата с:" class="date-range-filter" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" />
+                                    <input id="max-date" placeholder="Дата по:" class="date-range-filter" type="text" onfocus="(this.type='date')" onblur="(this.type='text')" />
+                                </th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                                <th class="filterhead"></th>
+                            </tr>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Номер Продажи / Бронирования</th>
+                                <th>Тип операции</th>
+                                <th>Товары</th>
+                                <th>Магазин</th>
+                                <th>Счет</th>
+                                <th>Сумма</th>
+                                <th>Скидка</th>
+                                <th>Тип перевода</th>
+                                <th>По России</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var x in Model)
+                            {
+                                <tr>
+                                    <td><span class="date">@x.Date</span> </td>
+                                    <td>
+                                        @x.SaleNumber                                       
+                                    </td>
+                                    <td>
+                                        @x.OperationType                                 
+                                    </td>
+                                    <td>
+                                            @foreach (var product in x.SaleProducts)
+                                            {
+                                                <span>@product.Title (@product.Amount шт)</span> <br />
+                                            }
+                                        
+                                    </td>
+                                    <td>@x.ShopTitle</td>
+                                    <td>@x.MoneyWorker</td>
+                                    <td>@x.Sum</td>
+                                    <td>@x.Discount</td>
+                                    <td>@x.PaymentType</td>
+                                    
+                                        @if (x.ForRF == true)
+                                        {
+                                            <td>Да</td>
+                                        }
+                                        else
+                                        {
+                                            <td>Нет</td>
+                                        }
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.datatables.net/1.10.19/js/jquery.dataTables.min.js"></script>
+<script src="https://cdn.datatables.net/1.10.19/js/dataTables.bootstrap4.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.18.1/moment.min.js"></script>
+
+
+<script>
+        jQuery.extend(jQuery.fn.dataTableExt.oSort, {
+            "extract-date-pre": function (value) {
+                var date = $(value, '.date')[0].innerHTML;
+                date = date.split('.');
+                return Date.parse(date[1] + '.' + date[0] + '.' + date[2])
+            },
+            "extract-date-asc": function (a, b) {
+                return ((a < b) ? -1 : ((a > b) ? 1 : 0));
+            },
+            "extract-date-desc": function (a, b) {
+                return ((a < b) ? 1 : ((a > b) ? -1 : 0));
+            }
+        });
+</script>
+<script>
+        var table = $("#data_table").DataTable({
+            language: {
+                "processing": "Подождите...",
+                "search": "Поиск:",
+                "lengthMenu": "Показать _MENU_ ",
+                "info": "Записи с _START_ до _END_ из _TOTAL_ записей",
+                "infoEmpty": "Записи с 0 до 0 из 0 записей",
+                "infoFiltered": "(отфильтровано из _MAX_ записей)",
+                "infoPostFix": "",
+                "loadingRecords": "Загрузка записей...",
+                "zeroRecords": "Записи отсутствуют.",
+                "emptyTable": "В таблице отсутствуют данные",
+                "paginate": {
+                    "first": "Первая",
+                    "previous": "Предыдущая",
+                    "next": "Следующая",
+                    "last": "Последняя"
+                },
+                "aria": {
+                    "sortAscending": ": активировать для сортировки столбца по возрастанию",
+                    "sortDescending": ": активировать для сортировки столбца по убыванию"
+                }
+            },
+            order: [[0, "desc"]],
+            lengthChange: false,
+            paging: false,
+            columnDefs: [{
+                type: 'extract-date',
+                targets: [0]
+            }]
+        });
+</script>
+<script>
+
+        $(".filterhead").each(function (i) {
+
+            if (i === 0
+                || i === 1
+                || i === 3
+                || i === 7
+                || i === 6) {
+                return
+            }
+
+            var select = $('<select><option value="">Все</option></select>')
+                .appendTo($(this).empty())
+                .on('change', function () {
+                    var term = $(this).val();
+                    if (term !== "") {
+                        table.column(i).search("^" + term + "$", true, false, true).draw();
+                    }
+                    else
+                        table.column(i).search(term, false, false).draw();
+                });
+            table.column(i).data().unique().sort().each(function (d, j) {
+                select.append('<option value="' + d + '">' + d + '</option>')
+            });
+        });        
+    
+</script>
+
+<script>
+    $.fn.dataTable.ext.search.push(
+        function (settings, data, dataIndex) {
+            var min = $('#min-date').val();
+            var max = $('#max-date').val();
+            var date = $(data[0])[0].innerText || 0;
+
+            date = moment(date, "DD.MM.YYYY").format("YYYY-MM-DD");
+
+            if (max == "" && min != "") {
+                if (moment(date).isSameOrAfter(min))
+                    return true
+                else
+                    return false
+            }
+            else if (min == "" && max != "")
+                if (moment(date).isSameOrBefore(max))
+                    return true
+                else
+                    return false
+            else if (max == "" && min == "")
+                return true
+            else 
+                return false
+
+        }
+    );
+
+    $('.date-range-filter').change(function () {
+        table.draw();
+    });
+</script>

@@ -1,0 +1,61 @@
+﻿.login-wrapper {
+    height: 100vh;
+    background-color: #fff;
+    padding: 40% 40px;
+}
+
+.background-wrapper {
+    height: 100vh;
+    background-image: url(../assets/images/login_bg.jpg);
+    background-size: cover;
+    color: #fff;
+}
+
+h1 {
+    position: absolute;
+    top: 35%;
+    display: inline-block;
+    background-color: rgba(0, 0, 0, 0.8);
+    padding: 10px 15px;
+    font-size: 42px;
+}
+
+h3, h4 {
+    margin-bottom: 20px;
+}
+
+
+.sign-up-header {
+    text-align: center;
+    font-size: 18px;
+}
+
+form {
+    text-align: center;
+}
+
+input {
+    margin-bottom: 10px;
+}
+
+    input:focus {
+        box-shadow: none;
+    }
+
+button {
+    display: inline-block;
+    width: 200px;
+    margin-top: 20px;
+    color: #fff;
+    background-color: rgb(255, 131, 8);
+    border-radius: 6px;
+}
+
+    button:hover {
+        box-shadow: 0 5px 10px 2px rgba(0, 0, 0, .10);
+        -webkit-box-shadow: 0 5px 10px 2px rgba(0, 0, 0, .10);
+        -webkit-transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out;
+        transition: color .15s ease-in-out,background-color .15s ease-in-out,border-color .15s ease-in-out,box-shadow .15s ease-in-out,-webkit-box-shadow .15s ease-in-out;
+    }

@@ -1,0 +1,30 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<table id="result" class="table table-striped">
+    <thead>
+    <tr>
+        <th>Номер Продажи</th>
+        <th>Название</th>
+        <th>Артикул</th>
+        <th>Количество</th>
+        <th>Стоимость</th>
+        <th>Магазин</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var p in Model)
+    {
+        <tr>
+            <td>@p.SaleNumber</td>
+            <td>@p.Title</td>
+            <td>@p.Code</td>
+            <td>@p.Amount</td>
+            <td>@p.Cost</td>
+            <td>@p.ShopTitle</td>
+        </tr>
+    }
+    </tbody>
+</table>

@@ -1,0 +1,56 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<h3 class="page-title">Магазины <small>Просмотр и редактирование магазинов</small></h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список магазинов
+                </div>   
+                <div class="portlet-action">
+                    <a href="/Shop/Create" class="btn add-button">Новый Магазин</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+               <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Касса</th>
+                            <th>Маржа</th>
+                            <th>К-во продаж</th>
+                            <th>Выручка</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td>@s.Title</td>
+                                <td>@s.CashOnHand</td>
+                                <td>@s.Margin</td>
+                                <td>@s.Sales</td>
+                                <td>@s.Turnover</td>
+                                <td>
+                                    <a href="/Shop/Edit/@s.Id" class="btn btn-dark">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+               </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+
+

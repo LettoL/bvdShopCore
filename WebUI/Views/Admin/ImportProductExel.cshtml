@@ -1,0 +1,69 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3 class="title">Импорт</h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="ImportProductExel" asp-controller="Admin" method="post" enctype="multipart/form-data">                  
+                <label asp-for="login">Выберите магазин</label>
+                <select name="shopId" class="form-control">
+                    @foreach (var s in ViewBag.Shops)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select><br />
+                <label asp-for="Password">Выберите поставщика</label>
+                <select name="supplierId" class="form-control">
+                    <option value="0">Без поставщика</option>
+                    @foreach (var s in ViewBag.Suppliers)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select><br />
+                <label>Тип товара</label>
+                <select id="supplyType" class="form-control" name="Realization" onchange="debtPayment()">
+                    <option value="1">Оплаченный товар</option>
+                    <option value="2">Товар под реализацию</option>
+                    <option value="3">Отсроченный платеж</option>
+                </select> <br />
+                <div id="defferDate" style="display: none">
+                    <label>Выбрать дату платежа</label>
+                    <input name="date" type="date" class="form-control" /><br />
+                </div>
+                <label>Выберите категорию</label>
+                <select name="categoryId" class="form-control">
+                    @foreach (var c in ViewBag.Categories)
+                    {
+                        <option value="@c.Id">@c.Title</option>
+                    }
+                </select><br />
+                <label>Введите сумму доставки</label>
+                <input name="deliverySum" class="form-control" />
+                <br />
+                <input type="file" name="file" style="margin-bottom: 40px;"> <br />
+                <button class="btn" type="submit">Отправить</button>
+            </form>
+            </div>
+            
+        </div>
+    </div>
+</div>
+
+<script>
+    function debtPayment(value) {
+        if ($('#supplyType')[0].selectedOptions[0].text == "Отсроченный платеж") {
+            $('#defferDate').show();
+        } else {
+            $('#defferDate').hide();
+        }
+    }
+</script>

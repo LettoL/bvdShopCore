@@ -1,0 +1,46 @@
+﻿
+@{
+    ViewData["Title"] = "ExpenseDetail";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="padding:30px 20px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Подробно о расходе за @Model.InfoMoney.Date</h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        <th>Счет</th>
+                                        <th>Категория</th>
+                                        <th>Комментарий</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.InfoMoney.Date</td>
+                                        <td>@Math.Abs(Model.InfoMoney.Sum)</td>
+                                        <td>@Model.InfoMoney.MoneyWorker.Title</td>
+                                        <td>@Model.ExpenseCategory.Title</td>
+                                        <td>@Model.InfoMoney.Comment</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+    </div>
+</div>
+

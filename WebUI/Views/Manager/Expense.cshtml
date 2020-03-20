@@ -1,0 +1,71 @@
+﻿
+@{
+    ViewData["Title"] = "Expense";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Создание нового расхода</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/Manager/Expense" method="post">
+                    <h3 class="title">Новый расход</h3>
+                    <label for="">Расход c:</label>
+                    <select id="chooseMoneyWorker" name="moneyWorkerType" class="form-control" onchange="selectMoneyWorkers()">
+                        <option>Выбрать откуда списать расход</option>
+                        <option value="1">Держатель карты</option>
+                        <option value="3">Касса магазина</option>
+                    </select><br />
+                    <select id="moneyWorker" name="moneyWorkerId" class="form-control">
+                        <option>Выбрать опцию</option>
+                    </select><br />
+                    <label>Сумма</label>
+                    <input type="text" class="form-control" name="sum" /><br />
+                    <label>Категория расхода</label>
+                    <select name="expenseCategory" class="form-control">
+                        @foreach(var category in ViewBag.CategoryExpense)
+                        {
+                            <option value="@category.Id">@category.Title</option>
+                        }
+                    </select><br />
+                    <label>Коментарий</label>
+                    <input type="text" class="form-control" name="comment" /><br />
+                    <button class="btn btn-submit">Сохранить</button>
+                    <a href="/Manager/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function selectMoneyWorkers()
+    {
+        let moneyWorkerSelect = document.getElementById('chooseMoneyWorker');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        $.when(
+            $.get('/Manager/GetMoneyWorkers/' + moneyWorkerValue)
+        ).done(function (data) {
+
+            $('#moneyWorker').html('');
+            console.log(data);
+            $.each(data,               
+                function () {
+                    $('#moneyWorker').append('<option value="' +
+                        this.id +
+                        '">' +
+                        this.title +
+                        '</option>');
+                });
+            });
+    }
+
+</script>

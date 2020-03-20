@@ -1,0 +1,36 @@
+﻿
+@{
+    ViewData["Title"] = "Encashment";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Инкасация</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="Encashment" asp-controller="Admin" method="post">
+                    <label>Выбрать магазин</label>
+                    <select class="form-control" name="shopId">
+                        @foreach (var s in Model)
+                        {
+                            <option value="@s.Id">@s.Title / Касса: @s.CashOnHand</option>
+                        }
+                    </select>
+                    <div>
+                        
+                    </div>
+                    <label>Сумма</label>
+                    <input class="form-control" type="number" name="sum" />
+                    <br />
+                    <button class="btn btn-dark">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,210 @@
+﻿
+@{
+    ViewData["Title"] = "SalesByCategories";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<h3 class="page-title">Отчет по Продажам по Категориям</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Продажи по Категориям
+                </div>
+                <div class="portlet-filters">
+                    <form id="dateFilter"  style="display: inline-block">
+                        <input placeholder="Дата с:" type="text" name="value" id="dateFilter1" class="form-control" style="width: 200px; display: inline-block" />
+                        <input placeholder="Дата по:" type="text" name="value" id="dateFilter2" class="form-control" style="width: 200px; display: inline-block" />
+                        <button id="dateFilterSubmit" class="btn btn-dark" style="position: relative; top: -3px" type="button">Поиск</button>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Категория</th>
+                                <th>Москва (К-во чеков)</th>
+                                <th>Санкт-Петербург (К-во чеков)</th>
+                                <th>По РФ (К-во чеков)</th>
+                                <th>Оптовые (К-во чеков)</th>
+                                <th>Выручка Всего</th>
+                                <th>Выручка Москва</th>
+                                <th>Выручка Петербург</th>
+                                <th>Выручка РФ</th>
+                                <th>Выручка Оптовые</th>
+                                <th>Маржа</th>
+                                <th>Маржа Москва</th>
+                                <th>Маржа Петербург</th>
+                                <th>Маржа РФ</th>
+                                <th>Маржа Оптовые</th>
+                            </tr>
+                            <tr>
+                                <th><b>Итого:</b></th>
+                                <th>@ViewBag.Totals.SumSalesByMoscow (@ViewBag.Totals.SumChecksByMoscow)</th>
+                                <th>@ViewBag.Totals.SumSalesByPetersburg (@ViewBag.Totals.SumChecksByPetersburg)</th>
+                                <th>@ViewBag.Totals.SumForRussianFederation (@ViewBag.Totals.SumChecksByRF)</th>
+                                <th>@ViewBag.Totals.SumPartnerSales (@ViewBag.Totals.SumChecksByPartners)</th>
+                                <th>@ViewBag.Totals.SumTurnOver</th>
+                                <th>@ViewBag.Totals.SumTurnOverMoscow</th>
+                                <th>@ViewBag.Totals.SumTurnOverPetersburg</th>
+                                <th>@ViewBag.Totals.SumTurnOverRF</th>
+                                <th>@ViewBag.Totals.SumTurnOverPartner</th>
+                                <th>@ViewBag.Totals.SumMargin</th>
+                                <th>@ViewBag.Totals.SumMarginMoscow</th>
+                                <th>@ViewBag.Totals.SumMarginPetersburg</th>
+                                <th>@ViewBag.Totals.SumMarginRF</th>
+                                <th>@ViewBag.Totals.SumMarginPartner</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var saleByCategory in Model)
+                            {
+                                <tr>
+                                    <td>
+                                        @saleByCategory.Category.Title
+                                    </td>
+                                    <td>
+                                        <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=1&categoryId=@saleByCategory.Category.Id">
+                                            @saleByCategory.SalesByMoscow
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=2&categoryId=@saleByCategory.Category.Id">
+                                            @saleByCategory.SalesByPetersburg
+                                        </a>                                     
+                                    </td>
+                                    <td>
+                                        <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=3&categoryId=@saleByCategory.Category.Id">
+                                            @saleByCategory.ForRussianFederation
+                                        </a>                                      
+                                    </td>
+                                    <td>
+                                        <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=4&categoryId=@saleByCategory.Category.Id">
+                                            @saleByCategory.PartnerSales
+                                        </a>                                     
+                                    </td>
+                                    <td>
+                                        @saleByCategory.TurnOver
+                                    </td>
+                                    <td>
+                                        @saleByCategory.TurnOverMoscow
+                                    </td>
+                                    <td>
+                                        @saleByCategory.TurnOverPetersburg
+                                    </td>
+                                    <td>
+                                        @saleByCategory.TurnOverRF
+                                    </td>
+                                    <td>
+                                        @saleByCategory.TurnOverPartner
+                                    </td>
+                                    <td>
+                                        @saleByCategory.Margin
+                                    </td>
+                                    <td>
+                                        @saleByCategory.MarginMoscow
+                                    </td>
+                                    <td>
+                                        @saleByCategory.MarginPetersburg
+                                    </td>
+                                    <td>
+                                        @saleByCategory.MarginRF
+                                    </td>
+                                    <td>
+                                        @saleByCategory.MarginPartner
+                                    </td>
+                                </tr>
+
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker({
+            onSelect: function (dateText) {
+                filterByDate1(dateText)
+            }
+        });
+        $("#dateFilter2").datepicker({
+            onSelect: function (dateText) {
+                filterByDate2(dateText)
+            }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+    let dateFilter1 = document.getElementById("dateFilter1");
+    let dateFilter2 = document.getElementById("dateFilter2");
+    let date1 = null;
+    let date2 = null;
+
+    let submit = document.getElementById("dateFilterSubmit");
+    submit.addEventListener('click', loadData);
+
+    function filterByDate1(date) {
+        date1 = date
+    }
+
+    function filterByDate2(date) {
+        date2 = date;
+    }
+
+    function loadData() {
+
+        $('#result').load(
+            "/Admin/SalesByCategoriesFilter",
+            {
+                fromDate: date1,
+                forDate: date2,
+            }
+        );
+    }
+</script>

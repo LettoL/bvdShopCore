@@ -1,0 +1,74 @@
+﻿@{
+    ViewData["Title"] = "SupplierRepayment";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Погашение долга</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="SupplierRepayment" asp-controller="Admin" method="post">
+                    <label>Выбрать Поставщика</label>
+                    <select class="form-control" name="supId">
+                        @foreach (var s in Model)
+                        {
+                            <option value="@s.Id">@s.Title / Долг: @s.Debt</option>
+                        }
+                    </select> <br/>
+                    
+                    <label>Списать с</label>
+                    <select id="moneyWorkerType" class="form-control" onchange="selectMoneyWorkers()">
+                        <option value="null">Не отправлять</option>
+                        <option value="1">Держатель Карты</option>
+                        <option value="2">Рассчетный Счет</option>
+                    </select> <br />
+
+                    <select id="moneyWorkerId" class="form-control" name="moneyWorkerId">
+                        <option disabled selected value="null">Выбрать</option>
+                    </select> <br/>
+
+                    <label>Сумма</label>
+                    <input class="form-control" type="number" name="sum" />
+                    <br />
+                    <button class="btn btn-dark">Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+
+    function selectMoneyWorkers() {
+        let moneyWorkerSelect = document.getElementById('moneyWorkerType');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#moneyWorkerId').html('');
+
+                json.forEach(json => {
+                    $('#moneyWorkerId').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+    }
+  
+</script>

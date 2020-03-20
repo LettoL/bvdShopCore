@@ -1,0 +1,39 @@
+﻿
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Создание пользователя</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                    <form action="/User/Create" method="post">
+                    <label for="">Имя</label>
+                    <input class="form-control" name="login" type="text"><br />
+                    <label for="">Пароль</label>
+                    <input class="form-control" name="password" type="text"><br />
+                    <label for="">Роль</label>
+                    <select class="form-control" name="role">
+                        <option value="1">Администратор</option>
+                        <option value="2">Менеджер</option>
+                    </select><br />
+                    <label for="">Магазин</label>
+                    <select class="form-control" name="shopId" type="text" style="margin-bottom: 40px;">
+                        @foreach (var s in ViewBag.shops)
+                        {
+                            <option value="@s.Id">@s.Title</option>
+                        }
+                    </select>
+                    <button class="btn btn-submit">Сохранить</button>
+                    <a href="/User/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>          
+        </div>
+    </div>
+</div>

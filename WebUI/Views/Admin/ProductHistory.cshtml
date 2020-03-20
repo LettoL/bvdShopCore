@@ -1,0 +1,178 @@
+﻿
+@{
+    ViewData["Title"] = "ProductHistory";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">История работы с товарами</h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список Операций
+                </div>
+                <div class="portlet-filters">
+                    <form id="filter" style="display: inline-block">
+                        <select name="shopId" id="shopId" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Магазин</option>
+                            <option value="0">Все</option>
+                            @foreach (var s in ViewBag.Shops)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+
+                        <select name="type" id="type" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Тип</option>
+                            <option value="0">Все</option>
+
+                            <option value="1">Поставка</option>
+                            <option value="2">Списание</option>
+                            <option value="3">Перенос</option>
+
+                        </select>
+
+                        <input placeholder="Дата с:" type="text" name="periodStart" id="dateFilter1"  class="form-control" style="width: 200px; display: inline-block" />
+
+                        <input placeholder="Дата по:" type="text" name="periodEnd" id="dateFilter2"  class="form-control" style="width: 200px; display: inline-block" />
+
+                        <button style="position: relative; top: -3px" class="btn btn-dark">Применить</button>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Товар</th>
+                                <th>Количество</th>
+                                <th>Поставщик</th>
+                                <th>Тип</th>
+                                <th>Магазин</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var o in Model)
+                            {
+                                <tr>
+                                    <td>@o.Date.ToString("dd.MM.yyyy")</td>
+                                    <td>@o.Product.Title</td>
+                                    <td>@o.Amount</td>
+                                    <td>@o.Supplier?.Title</td>
+                                    @if (o.Type.ToString() == "Supply")
+                                    {
+                                        <td>Поставка</td>
+
+                                    }
+                                    else if (o.Type.ToString() == "Writeoff")
+                                    {
+                                        <td>Списание</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Перенос</td>
+                                    }
+                                    <td>@o.Shop?.Title</td>
+                                    <td>
+                                        <form class="deleteForm" style="display: inline-block" action="/Admin/SupplyAnnulment/@o.Id" method="post">
+                                            <button class="btn btn-danger">
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker({
+            onSelect: function (dateText) {
+                dateFilter1 = dateText;
+            }
+        });
+        $("#dateFilter2").datepicker({
+            onSelect: function (dateText) {
+                dateFilter2 = dateText;
+            }
+        });
+    });
+
+    let form = document.getElementById('filter');
+    let shopId = 0;
+    let type = 0;
+    let dateFilter1;
+    let dateFilter2;
+
+    form.addEventListener('submit', filter)
+
+    function filter(event) {
+        event.preventDefault();
+
+        shopId = document.getElementById('shopId').value;
+        type = document.getElementById('type').value;
+        
+
+        $('#result').load(
+            "/Admin/ProductHistoryFilter",
+            {
+                type: type,
+                shopId: shopId,
+                periodStart: dateFilter1,
+                periodEnd: dateFilter2
+            }
+        );
+    }
+</script>

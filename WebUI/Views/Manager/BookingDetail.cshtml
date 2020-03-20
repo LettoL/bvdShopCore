@@ -1,0 +1,82 @@
+﻿@{
+    ViewData["Title"] = "BookingDetail";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="padding:30px 20px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Подробно о бронировании номер: @Model.Id </h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <nav class="detail_subnav">
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a style="color: #333;" class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Основное</a>
+                            <a style="color: #333;" class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Забронированные товары</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Номер</th>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        <th>Внесено</th>
+                                        <th>Остаток</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.Id</td>
+                                        <td>@Model.Date</td>
+                                        <td>@Model.Sum</td>
+                                        <td>@Model.Pay</td>
+                                        <td>@Model.Debt</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Артикул</th>
+                                        <th>Количество</th>
+                                        <th>Дополнительный</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in ViewBag.BookingProducts)
+                                    {
+                                        <tr>
+                                            <td>@p.ProductTitle</td>
+                                            <td>@p.ProductCode</td>
+                                            <td>@p.Amount</td>
+                                            @if (p.Additional)
+                                            {
+                                                <td>Да</td>
+                                            }
+                                            else
+                                            {
+                                                <td>Нет</td>
+                                            }
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            <a href="/Manager/BookingList" class="btn btn-dark button-back">Назад</a>
+        </div>
+    </div>
+</div>

@@ -1,0 +1,32 @@
+﻿
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">        
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Изменение поставщика</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/Supplier/Edit" method="post">
+                    <h3 class="title">Редактирование</h3>
+                    <input hidden name="id" type="text" value="@Model.Id">
+                    <label for="">Имя</label>
+                    <input class="form-control" name="title" type="text" value="@Model.Title">
+                    <label for="">Телефон</label>
+                    <input class="form-control" name="phone" type="text" value="@Model.Phone">
+                    <label for="">Email</label>
+                    <input class="form-control" name="email" type="text" value="@Model.Email" style="margin-bottom: 40px">
+                    <button class="btn btn-submit">Сохранить</button>
+                    <a href="/Supplier/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>            
+        </div>
+    </div>
+</div>

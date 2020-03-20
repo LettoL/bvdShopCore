@@ -1,0 +1,102 @@
+﻿
+@{
+    ViewData["Title"] = "MoneyWorkerInfo";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<h3 class="page-title">Информация по счетам <small>по датам</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Информация по счетам
+                </div>
+                <div class="portlet-filters">
+                    <form style="display: inline-block">
+                        <input id="dateFilter" onchange="filter(event.target)" placeholder="Выберите дату для отображения" type="text" name="date" class="form-control" style="width: 400px; display: inline-block" />
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Название</th>
+                                <th>Начало дня</th>
+                                <th>Сейчас</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var moneyWorker in Model)
+                            {
+                                <tr>
+                                    <td>@moneyWorker.Title</td>
+                                    <td>@moneyWorker.MorningCash</td>
+                                    <td>@moneyWorker.EveningCash</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+<script type="text/javascript">
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter").datepicker();
+    });
+
+    function filter(date) {
+        value = date.value;
+
+        $('#result').load(
+            "/Admin/MoneyWorkerBalanceInfoResult",
+            {
+                date: value
+            }
+        );
+    }
+</script>

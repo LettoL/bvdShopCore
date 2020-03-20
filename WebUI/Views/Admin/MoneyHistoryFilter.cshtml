@@ -1,0 +1,88 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Тип оплаты</th>
+            <th>Тип операции</th>
+            <th>Счета</th>
+            <th>Магазин</th>
+            <th>Комментарий</th>
+            <th>Подробно</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@o.Date</td>
+                <td>@o.Sum</td>
+                @if (o.PaymentType.ToString() == "Cash")
+                {
+                    <td>Наличный</td>
+                }
+                else
+                {
+                    <td>Безналичный</td>
+                }
+                @if (o.MoneyOperationType.ToString() == "SupplierRepayment")
+                {
+                    <td>Погашение долга перед поставщиком</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Encashment")
+                {
+                    <td>Инкассация</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Booking")
+                {
+                    <td>Бронирование</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Sale")
+                {
+                    <td>Продажа</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Expense")
+                {
+                    <td>Расход</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Transfer")
+                {
+                    <td>Перевод</td>
+                }
+                else if (o.MoneyOperationType.ToString() == "Replenishment")
+                {
+                    <td>Пополнение</td>
+                }
+                <td>@o.MoneyWorker?.Title</td>
+                <td>@o.ShopTitle</td>
+                <td>@o.Comment</td>
+                @if (o.MoneyOperationType.ToString() == "Booking")
+                 {
+                    <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                 }
+                 else if (o.MoneyOperationType.ToString() == "Sale")
+                 {
+                    <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                 }
+                 else if (o.MoneyOperationType.ToString() == "Expense")
+                 {
+                    <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                 }
+                 else if (o.MoneyOperationType.ToString() == "Transfer")
+                 {
+                    <td><a href="/Admin/MoneyHistoryDetail/@o.Id" class="btn btn-dark">Подробно</a></td>
+                }
+                else
+                {
+                    <td></td>
+                }
+                    
+            </tr>
+        }
+    </tbody>
+</table>

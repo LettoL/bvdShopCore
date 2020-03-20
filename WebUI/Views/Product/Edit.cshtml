@@ -1,0 +1,50 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Изменение товара</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="Edit" asp-controller="Product" method="post">
+                <h3 class="title">Редактирование</h3>
+                <input type="hidden" name="id" value="@Model.Id" />
+
+                <label asp-for="title">Название</label>
+                <input class="form-control" type="text" name="title" value="@Model.Title">
+
+                <label asp-for="code">Артикул</label>
+                <input class="form-control" type="text" name="code" value="@Model.Code">
+                    
+                <label asp-for="Cost">Стоимость для продажи</label>
+                <input class="form-control" type="text" name="cost" value="@Model.Cost">
+
+                <label asp-for="Category">Категория</label>
+                <select class="form-control" name="categoryId">
+                    <option value="@Model.Category.Id">@Model.Category.Title</option>
+                    @foreach (var c in ViewBag.Categories)
+                    {
+                        <option value="@c.Id">@c.Title</option>
+                    }
+                </select>
+                <label asp-for="Shop">Магазин</label>
+                <select class="form-control" name="shopId" style="margin-bottom: 40px;">
+                    <option value="@Model.Shop.Id">@Model.Shop.Title</option>
+                    @foreach (var s in ViewBag.Shops)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select>
+
+                <button class="btn btn-submit">Сохранить</button>
+                <a href="/Product/Index" class="btn btn-dark">Назад</a>
+            </form>
+            </div>
+        </div>
+      </div>
+</div>

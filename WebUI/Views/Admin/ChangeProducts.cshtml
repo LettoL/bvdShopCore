@@ -1,0 +1,119 @@
+﻿
+@{
+    ViewData["Title"] = "ChangeProducts";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3 class="title">Перевод товара</h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="ChangeProducts" asp-controller="Admin" method="post">
+                   
+                    <label>С какого магазина перевести товар</label>
+                    <select id="prevShop" name="prevShop" class="form-control" onchange="selectProducts()">
+                        <option disabled selected>Выберите магазин</option>
+                        @foreach(var s in ViewBag.Shops)
+                        {
+                            <option value="@s.Id">@s.Title</option>
+
+                        }
+                    </select><br />
+
+                    <label>На какой магазин перевести товар</label>
+                    <select class="form-control" name="nextShop">
+                        <option disabled selected>Выберите магазин</option>
+                        @foreach(var s in ViewBag.Shops)
+                        {
+                            <option value="@s.Id">@s.Title</option>
+
+                        }
+                    </select><br />
+
+                    <label>Выбрать товар</label>
+                    <select id="liveSearch" class="form-control" name="ProductId" onchange="product_onSelect()">
+                        <option>Выбрать товар</option>
+                    </select>
+                    <br />
+                    
+                    <label>Выбрать конкретный товар</label>
+                    <select id="supplyProduct" class="form-control" name="supplyProductId">
+                        <option>Выбрать товар</option>
+                    </select>
+                    <br/>
+
+                    <label>Количество</label>
+                    <input class="form-control" type="number" name="Amount" /><br />
+
+                    <button class="btn btn-submit">Сохранить</button>
+
+                </form>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    
+    var selectProducts = function () {
+
+        var shopSelect = document.getElementById('prevShop');
+        var shopId = shopSelect.options[shopSelect.selectedIndex].value;
+
+        fetch('/Admin/GetProductsByShop/' + shopId,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+                $('#liveSearch').html('');
+                $('#liveSearch').append('<option>Выбрать товар</option>');
+
+                json.products.forEach(json => {
+                    $('#liveSearch').append('<option value="' + json.id + '">' + json.title + '</option>');
+                });
+            });       
+    }
+
+    var product_onSelect = function() {
+        var productSelect = document.getElementById('liveSearch');
+        var productId = productSelect.options[productSelect.selectedIndex].value;
+
+        fetch('/Admin/GetSupplyProductsByProduct/' + productId,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#supplyProduct').html('');
+                $('#supplyProduct').append('<option>Выбрать товар</option>');
+
+                json.forEach(json => {
+                    $('#supplyProduct').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.additionalCost +
+                        ' / ' +
+                        json.finalCost +
+                        ' / ' +
+                        json.stockAmount +
+                        '</option>');
+                });
+            }); 
+     
+    }
+
+</script>

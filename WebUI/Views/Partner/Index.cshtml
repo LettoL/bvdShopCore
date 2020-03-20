@@ -1,0 +1,54 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Партнеры <small>Просмотр и редактирование партнеров</small></h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список партнеров
+                </div>
+                <div class="portlet-action">
+                    <a href="/Partner/Create" class="btn add-button">Новый Партнер</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Куплено</th>
+                            <th>Телефон</th>
+                            <th>Email</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>@p.Title</td>
+                                <td>@p.BuyProductsAmount</td>
+                                <td>@p.Phone</td>
+                                <td>@p.Email</td>
+                                <td>
+                                    <a href="/Partner/Edit/@p.Id" class="btn btn-dark">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+

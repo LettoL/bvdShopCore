@@ -1,0 +1,57 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Поставщики <small>Просмотр и редактирование поставщиков</small></h3>
+<div class="row">
+    <div class="col-md-12">
+
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список поставщиков
+                </div>   
+                <div class="portlet-action">
+                    <a href="/Supplier/Create" class="btn add-button">Новый Поставщик</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+               <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Название</th>
+                            <th>Телефон</th>
+                            <th>Email</th>
+                            <th>Долг</th>
+                            <th>Стоимость товаров под реализацию на складе</th>
+                            <th>Стоимость товаров на складе</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td>@s.Title</td>
+                                <td>@s.Phone</td>
+                                <td>@s.Email</td>
+                                <td>@s.Debt</td>
+                                <td>@s.CostRealizationProductOnStock</td>
+                                <td>@s.CostProductOnStock</td>
+                                <td>
+                                    <a href="/Supplier/Edit/@s.Id" class="btn btn-dark">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+               </div>
+             </div>
+        </div>
+    </div>
+</div>
+

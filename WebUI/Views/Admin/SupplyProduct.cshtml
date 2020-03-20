@@ -1,0 +1,86 @@
+﻿
+@{
+    ViewData["Title"] = "SupplyProduct";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3 class="title">Поставка</h3>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form id="supplyProduct" asp-action="SupplyProduct" asp-controller="Admin" method="post">               
+                <label>Выбрать товар</label>
+                <select id="liveSearch" class="form-control" name="ProductId">
+                    @foreach (var p in ViewBag.Products)
+                    {
+                        <option value="@p.Id">@p.Title</option>
+                    }
+                </select>
+                <br />
+                
+                
+                <label>Количество</label>
+                <input class="form-control" type="number" name="Amount" /><br />
+                    
+                <label>Магазин</label>
+                <select class="form-control" name="shopId">
+                    @foreach (var s in ViewBag.Shops)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select><br /> 
+
+                <label>Добавочная стоимость</label>
+                <input class="form-control" type="number" name="AdditionalCost"/><br />
+                
+                <label>Закупочная стоимость</label>
+                <input class="form-control" type="number" name="ProcurementCost"/><br /> 
+
+                <label>Поставщики</label>
+                <select class="form-control" name="SupplierId">
+                    <option value="0">Без поставщика</option>
+                    @foreach (var s in ViewBag.Suppliers)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select><br />
+
+                <label>Тип товара</label>
+                <select id="supplyType" class="form-control" name="Realization" onchange="debtPayment()">
+                    <option value="1">Оплаченный товар</option>
+                    <option value="2">Товар под реализацию</option>
+                    <option value="3">Отсроченный платеж</option>
+                </select> <br />
+                
+                <div id="defferDate" style="display: none">
+                    <label>Выбрать дату платежа</label>
+                    <input name="date" type="date" class="form-control" /><br />
+                </div>
+                
+                
+                <button class="btn btn-submit">Сохранить</button>
+            </form>
+            </div>
+              
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+    $("#liveSearch").chosen();
+
+    function debtPayment(value) {
+        if ($('#supplyType')[0].selectedOptions[0].text == "Отсроченный платеж") {
+            $('#defferDate').show();
+        } else {
+            $('#defferDate').hide();
+        }
+    }
+</script>

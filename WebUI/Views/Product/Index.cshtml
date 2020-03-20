@@ -1,0 +1,168 @@
+﻿@{
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+
+}
+
+<h3 class="page-title">Товары в наличии <small>Просмотр и редактирование товаров</small></h3>
+<div id="change_success" hidden class="change_success">Изменение цены прошло успешно</div>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список товаров
+                </div>
+                <div class="portlet-filters">
+                    <form id="productFilter" style="display: inline-block">
+                        <select name="shopId" id="shopFilter" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Магазин</option>
+                            <option value="0">Все</option>
+                            @foreach (var s in ViewBag.Shops)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+                        <select name="categoryId" id="categoryFilter" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Категорию</option>
+                            <option value="0">Все</option>
+                            @foreach (var c in ViewBag.Categories)
+                            {
+                                <option value="@c.Id">@c.Title</option>
+                            }
+                        </select>
+                        <input hidden type="checkbox" name="all" />
+                    
+                        <input id="search" type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
+                        <button type="submit" class="btn btn-dark" style="vertical-align: top">Поиск</button>
+                    </form>
+                </div>
+                <div class="portlet-action">
+                    <a href="/Product/Create" class="btn add-button">Новый Товар</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+               <div class="table-responsive">
+                <table id="result" class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Артикул</th>
+                            <th>Название</th>
+                            <th>Количество</th>
+                            <th>Цена</th>
+                            <th>Магазин</th>
+                            <th>Категория</th>
+                            <th>Забронировано</th>
+                            <th>Действие</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr id="@p.Id"> 
+                                    <td>@p.Code</td>
+                                    <td>@p.Title</td>
+                                    <td>@p.Amount</td>
+                                    <td contenteditable>@p.Cost</td>
+                                    <td>@p.Shop.Title</td>
+                                    <td>@p.Category.Title</td>
+                                    <td>@p.BookedCount</td>
+                                    <td>
+                                        <a href="/Product/Detail/@p.Id" class="btn btn-dark">
+                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
+                                        <a href="/Product/Edit/@p.Id" class="btn btn-dark">
+                                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                                        </a>
+                                        <button id="updatePrice" class="btn btn-dark">
+                                            <i class="fa fa fa-check" aria-hidden="true"></i>
+                                        </button>
+                                    </td>
+                            </tr>
+                        }
+                    </tbody>
+                </table>
+               </div>
+             </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    let form = document.getElementById('productFilter');
+    let categoryId = 0;
+    let shopId = 0;
+    let title = "";
+    let userId = @ViewBag.UserId;
+
+    form.addEventListener('submit', filter);
+
+    function filter(event) {
+
+        event.preventDefault();
+
+        shopId = document.getElementById('shopFilter').value;
+        categoryId = document.getElementById('categoryFilter').value;
+        title = document.getElementById('search').value;
+
+        let ProductFilterVM = {
+            ProductFiltrationModel: {
+                categoryId: categoryId,
+                shopId: shopId,
+                title: title
+            },
+            userId: userId
+        }
+
+
+        $('#result').load(
+            "/Product/Filter",
+            ProductFilterVM
+        );
+
+    }
+
+    let price;
+    let productId;
+
+    let table = document.getElementById('result');
+    table.addEventListener('input', function (event) {
+        price = +event.target.innerText.replace(',', '.');
+        productId = +event.srcElement.parentElement.id;
+    });
+
+
+    table.addEventListener('click', function (event) {
+        if (event.srcElement.id == "updatePrice" || event.srcElement.parentElement.id == "updatePrice") {
+            if (isNaN(price))
+                alert('Цена должна быть числом')
+
+            var changeProduct = {
+                price: JSON.stringify(price).replace('.', ','),
+                productId: productId
+            }
+
+            if (!isNaN(price)) {
+                fetch('/Product/ChangePrice', {
+                    method: "POST",
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    credentials: 'include',
+                    body: JSON.stringify(changeProduct)
+                }).then(res => {
+                    if (res.ok == true) {
+                        let change_success = document.getElementById('change_success');
+                        change_success.hidden = false;
+
+                        setTimeout(() => change_success.hidden = true, 1200)
+                    }
+
+
+                })
+            }
+        }
+    });
+
+</script>

@@ -1,0 +1,42 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th colspan="6">
+                <span>Всего расходов на сумму: @Math.Abs(ViewBag.ExpenseSum) рублей</span>
+            </th>
+        </tr>
+        <tr>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Тип расхода</th>
+            <th>Счет</th>
+            <th>Комментарий</th>
+            <th>Категория расхода</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var c in Model)
+        {
+            <tr>
+                <td>@c.InfoMoney.Date</td>
+                <td>@Math.Abs(c.InfoMoney.Sum)</td>
+                @if (c.InfoMoney.PaymentType.ToString() == "Cash")
+                {
+                    <td>Наличный</td>
+                }
+                else
+                {
+                    <td>Безналичный</td>
+                }
+                <td>@c.InfoMoney.MoneyWorker.Title</td>
+                <td>@c.InfoMoney.Comment</td>
+                <td>@c.ExpenseCategory.Title</td>
+            </tr>
+        }
+    </tbody>
+</table>

@@ -1,0 +1,66 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Держатели карт <small>Просмотр и редактирование держателей карт</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список держателей карт
+                </div>
+                <div class="portlet-action">
+                    <a href="/CardKeeper/Create" class="btn add-button">Новый Держатель Карты</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Имя</th>
+                            <th>Номер карты</th>
+                            <th>Баланс</th>
+                            <th>Для Менеджера</th>
+                            <th>Действие</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>@c.Title</td>
+                                <td>@c.CardNumber</td>
+                                <td>@c.Balance</td>
+                                @if (c.ForManager)
+                                {
+                                    <td>Доступен</td>
+                                }
+                                else
+                                {
+                                    <td>Не доступен</td>
+                                }
+                                <td>
+                                    <a href="/CardKeeper/Edit/@c.Id" class="btn btn-dark">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <!--<form style="display: inline-block" action="/Category/Delete/@c.Id" method="post">
+                                        <button class="btn btn-danger">
+                                            <i class="fa fa-trash" aria-hidden="true"></i>
+                                        </button>
+                                    </form>-->
+                                </td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+

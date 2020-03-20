@@ -1,0 +1,42 @@
+﻿@using Data.Enums
+
+<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Артикул</th>
+            <th>Название</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th>Магазин</th>
+            <th>Категория</th>
+            @if (ViewBag.User.Role == Role.Administrator)
+            {
+                <th>Действие</th>
+            }          
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+        <tr>
+            <td>@p.Code</td>
+            <td>@p.Title</td>
+            <td>@p.Amount</td>
+            <td>@p.Cost</td>
+            <td>@p.Shop.Title</td>
+            <td>@p.Category.Title</td>
+            @if (ViewBag.User.Role == Role.Administrator)
+            {
+                <td>
+                    <a href="/Product/Detail/@p.Id" class="btn btn-dark">
+                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                    </a>
+                    <a href="/Product/Edit/@p.Id" class="btn btn-dark">
+                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                    </a>
+                </td>
+            }            
+        </tr>
+        }
+    </tbody>
+</table>

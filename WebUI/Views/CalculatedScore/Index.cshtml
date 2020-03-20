@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewData["Title"] = "Index";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<h3 class="page-title">Рассчетный счет <small>просмотр и редактирование рассчетных счетов</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список рассчетных счетов
+                </div>
+                <div class="portlet-action">
+                    <a href="/CalculatedScore/Create" class="btn add-button">Новый Рассчетный Счет</a>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Номер</th>
+                                <th>Баланс</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var c in Model)
+                            {
+                                <tr>
+                                    <td>@c.Title</td>
+                                    <td>@c.Balance</td>
+                                    <td>
+                                        <a href="/CalculatedScore/Edit/@c.Id" class="btn btn-dark">
+                                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                                        </a>
+                                        <!--<form style="display: inline-block" action="/Category/Delete/@c.Id" method="post">
+                                            <button class="btn btn-danger">
+                                                <i class="fa fa-trash" aria-hidden="true"></i>
+                                            </button>
+                                        </form>-->
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

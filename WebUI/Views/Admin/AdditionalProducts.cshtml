@@ -1,0 +1,105 @@
+﻿
+@{
+    ViewData["Title"] = "AdditionalProducts";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Проданный дополнительный товар</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список проданного доп. товара
+                </div>
+                <div class="portlet-filters">
+                    <form style="display: inline-block" action="/Admin/Filter" method="get" data-ajax-method="get" data-ajax="true" data-ajax-mode="replace" data-ajax-update="#result">
+                        <select name="shopId" id="shopFilter" onchange="filter(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Магазин</option>
+                            <option value="0">Все</option>
+                            @foreach (var s in ViewBag.Shops)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+                        <input hidden type="checkbox" name="all" />
+                    </form>
+                    <form style="display: inline-block; position: relative; top: -1px;">
+                        <input id="searchProduct" type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
+                        <button type="button" onclick="search(event)" class="btn btn-dark" style="vertical-align: top">Поиск</button>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Номер Продажи</th>
+                            <th>Дата</th>
+                            <th>Название</th>
+                            <th>Артикул</th>
+                            <th>Количество</th>
+                            <th>Стоимость</th>
+                            <th>Комментарий</th>
+                            <th>Магазин</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var p in Model)
+                        {
+                            <tr>
+                                <td>@p.SaleNumber</td>
+                                <td>@p.Date</td>
+                                <td>@p.Title</td>
+                                <td>@p.Code</td>
+                                <td>@p.Amount</td>
+                                <td>@p.Cost</td>
+                                <td>@p.AdditionalComment</td>
+                                <td>@p.ShopTitle</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    let shopId = null;
+    let userId = @ViewBag.UserId;
+
+    function filter(value) {
+        
+        shopId = value.srcElement.value
+
+
+        $('#result').load(
+            "/Admin/AdditionalProductFilter",
+            {
+                shopId: shopId,
+                userId: userId
+            }
+        );
+
+    }
+
+    function search() {
+
+        value = $('#searchProduct')[0].value;
+
+        $('#result').load(
+            "/Admin/AdditionalProductSearch",
+            {
+                title: value,
+                userId: userId
+            }
+        );
+    }
+
+
+</script>

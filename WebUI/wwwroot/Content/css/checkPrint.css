@@ -1,0 +1,90 @@
+﻿.title {
+    margin-top: 100px;
+    margin-bottom: 80px;
+    font-size: 22px;
+}
+
+.info {
+    font-weight: bold;
+    position: relative;
+    top: 30px;
+}
+
+.phones {
+    font-weight: bold;
+    border: 5px solid #ccc;
+    text-align: center;
+    position: relative;
+    top: 20px;
+}
+
+    .phones p {
+        margin: 0;
+    }
+
+.bvd-info {
+    margin-top: 20px;
+    background-color: #ededed;
+    border: 5px solid #ccc;
+    padding: 20px 40px;
+    font-weight: bold;
+}
+
+    .bvd-info a {
+        color: #000;
+        text-decoration: underline;
+    }
+
+.separator {
+    color: #d1b684;
+    font-weight: 100;
+    font-size: 18px;
+    position: relative;
+    top: -5px;
+}
+
+h3 {
+    font-size: 46px;
+}
+
+.table-striped tbody tr:nth-of-type(even) {
+    background-color: #ebebeb;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: #e1e0da;
+}
+
+.table-bordered td, .table-bordered th {
+    border: 1px solid #b8b8b8;
+}
+
+.table-bordered {
+    border-color: #b8b8b8 !important;
+}
+
+.table thead th {
+    border-bottom: 1px solid #b8b8b8;
+}
+
+thead {
+    background-color: #ebebeb;
+}
+
+@media print {
+    thead {
+        background-color: #ebebeb;
+    }
+
+    .table-striped tbody tr:nth-of-type(even) {
+        background-color: #ebebeb;
+    }
+
+    .table-striped tbody tr:nth-of-type(odd) {
+        background-color: #e1e0da;
+    }
+
+    .bvd-info {
+        background-color: #ededed;
+    }
+}

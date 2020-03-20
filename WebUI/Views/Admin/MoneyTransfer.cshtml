@@ -1,0 +1,134 @@
+﻿
+@{
+    ViewData["Title"] = "MoneyTransfer";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<form action="/Admin/MoneyTransfer" method="post">
+    <div class="row">
+        <div class="col-md-6">
+            <div class="portlet">
+                <div class="portlet-title">
+                    <div class="portlet-head">
+                        <h4>Перевод средств</h4>
+                    </div>
+                </div>
+                <div class="portlet-body">
+                    <h3 class="title">Перевод с:</h3>
+                    <label for="">Откуда перевести средства:</label>
+                    <select id="choosePrevMoneyWorker" name="prevMoneyWorkerType" class="form-control" onchange="selectPrevMoneyWorkers()">
+                        <option disabled selected>Выбрать откуда списать средства</option>
+                        <option value="1">Держатель карты</option>
+                        <option value="2">Рассчетный счет</option>
+                        <option value="3">Касса магазина</option>
+                    </select><br />
+                    <select id="prevMoneyWorker" name="prevMoneyWorkerId" class="form-control" style="margin-bottom: 126px">
+                        <option disabled selected>Выбрать опцию</option>
+                    </select><br />
+            </div>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Перевод средств</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                    <h3 class="title">Перевод на:</h3>
+                    <label for="">Перевод средств на:</label>
+                    <select id="chooseNextMoneyWorker" name="moneyNextWorkerType" class="form-control" onchange="selectNextMoneyWorkers()">
+                        <option disabled selected>Выбрать куда перевести средства</option>                       
+                    </select><br />
+                    <select id="nextMoneyWorker" name="nextMoneyWorkerId" class="form-control">
+                        <option disabled selected>Выбрать опцию</option>
+                    </select><br />
+                    <label>Введите сумму</label>
+                    <input type="text" class="form-control" name="sum" /><br />
+                    <button type="submit" class="btn btn-submit">Перевод</button>
+                    <a href="/Admin/Index" class="btn btn-dark">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>
+</form>
+<script type="text/javascript">
+
+    function selectPrevMoneyWorkers()
+    {
+        let moneyWorkerSelect = document.getElementById('choosePrevMoneyWorker');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+            {
+                headers: { "Content-Type": "application/json" },
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#prevMoneyWorker').html('');
+
+                json.forEach(json => {
+                    $('#prevMoneyWorker').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+
+
+        if (moneyWorkerValue == 1) {
+            $('#chooseNextMoneyWorker').html('');
+            $('#chooseNextMoneyWorker')
+                .append('<option disabled selected value="null">Выбрать куда перевести средства</option>')
+                .append('<option value="1">Держатель карты</option>')
+                .append('<option value="2">Рассчетный счет</option>')
+                .append('<option value="3">Касса магазина</option>');
+        }
+        else if (moneyWorkerValue == 2) {
+            $('#chooseNextMoneyWorker').html('');
+            $('#chooseNextMoneyWorker')
+                .append('<option disabled selected value="null">Выбрать куда перевести средства</option>')
+                .append('<option value="1">Держатель карты</option>')
+                .append('<option value="2">Рассчетный счет</option>');
+        }
+        else if (moneyWorkerValue == 3) {
+            $('#chooseNextMoneyWorker').html('');
+            $('#chooseNextMoneyWorker')
+                .append('<option disabled selected value="null">Выбрать куда перевести средства</option>')
+                .append('<option value="1">Держатель карты</option>');
+        }
+    }
+    function selectNextMoneyWorkers()
+    {
+        let moneyWorkerSelect = document.getElementById('chooseNextMoneyWorker');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#nextMoneyWorker').html('');
+
+                json.forEach(json => {
+                    $('#nextMoneyWorker').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+    }
+
+</script>

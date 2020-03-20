@@ -1,0 +1,103 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Категория</th>
+            <th>Москва (К-во чеков)</th>
+            <th>Санкт-Петербург (К-во чеков)</th>
+            <th>По РФ (К-во чеков)</th>
+            <th>Оптовые (К-во чеков)</th>
+            <th>Выручка Всего</th>
+            <th>Выручка Москва</th>
+            <th>Выручка Петербург</th>
+            <th>Выручка РФ</th>
+            <th>Выручка Оптовые</th>
+            <th>Маржа</th>
+            <th>Маржа Москва</th>
+            <th>Маржа Петербург</th>
+            <th>Маржа РФ</th>
+            <th>Маржа Оптовые</th>
+        </tr>
+        <tr>
+            <th>Итого:</th>
+            <th>@ViewBag.Totals.SumSalesByMoscow (@ViewBag.Totals.SumChecksByMoscow)</th>
+            <th>@ViewBag.Totals.SumSalesByPetersburg (@ViewBag.Totals.SumChecksByPetersburg)</th>
+            <th>@ViewBag.Totals.SumForRussianFederation (@ViewBag.Totals.SumChecksByRF)</th>
+            <th>@ViewBag.Totals.SumPartnerSales (@ViewBag.Totals.SumChecksByPartners)</th>
+            <th>@ViewBag.Totals.SumTurnOver</th>
+            <th>@ViewBag.Totals.SumTurnOverMoscow</th>
+            <th>@ViewBag.Totals.SumTurnOverPetersburg</th>
+            <th>@ViewBag.Totals.SumTurnOverRF</th>
+            <th>@ViewBag.Totals.SumTurnOverPartner</th>
+            <th>@ViewBag.Totals.SumMargin</th>
+            <th>@ViewBag.Totals.SumMarginMoscow</th>
+            <th>@ViewBag.Totals.SumMarginPetersburg</th>
+            <th>@ViewBag.Totals.SumMarginRF</th>
+            <th>@ViewBag.Totals.SumMarginPartner</th>
+        </tr>
+
+    </thead>
+    <tbody>
+        @foreach (var saleByCategory in Model)
+        {
+        <tr>
+            <td>
+                @saleByCategory.Category.Title
+            </td>
+            <td>
+                <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=1&categoryId=@saleByCategory.Category.Id">
+                    @saleByCategory.SalesByMoscow
+                </a>
+            </td>
+            <td>
+                <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=2&categoryId=@saleByCategory.Category.Id">
+                    @saleByCategory.SalesByPetersburg
+                </a>
+            </td>
+            <td>
+                <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=3&categoryId=@saleByCategory.Category.Id">
+                    @saleByCategory.ForRussianFederation
+                </a>
+            </td>
+            <td>
+                <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=4&categoryId=@saleByCategory.Category.Id">
+                    @saleByCategory.PartnerSales
+                </a>
+            </td>
+            <td>
+                @saleByCategory.TurnOver
+            </td>
+            <td>
+                @saleByCategory.TurnOverMoscow
+            </td>
+            <td>
+                @saleByCategory.TurnOverPetersburg
+            </td>
+            <td>
+                @saleByCategory.TurnOverRF
+            </td>
+            <td>
+                @saleByCategory.TurnOverPartner
+            </td>
+            <td>
+                @saleByCategory.Margin
+            </td>
+            <td>
+                @saleByCategory.MarginMoscow
+            </td>
+            <td>
+                @saleByCategory.MarginPetersburg
+            </td>
+            <td>
+                @saleByCategory.MarginRF
+            </td>
+            <td>
+                @saleByCategory.MarginPartner
+            </td>
+        </tr>
+
+        }
+    </tbody>
+</table>

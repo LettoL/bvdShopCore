@@ -1,0 +1,197 @@
+﻿
+@{
+    ViewData["Title"] = "SaleList";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+<h3 class="page-title">Продажи <small>Просмотр продаж</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список Продаж
+                </div>
+                <div class="portlet-filters">
+                    <form id="filter" style="display: inline-block">
+                        <select name="shopId" id="typeFilter" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Тип Товара</option>
+                            <option value="0">Все</option>
+                            <option value="1">С Доп. Товарами</option>
+                        </select>
+                        <select name="value" id="buyerFilter" class="form-control" style="width: 200px; display: inline-block">
+                            <option disabled selected>Выбрать Партнёра</option>
+                            @foreach (var p in ViewBag.Partners)
+                            {
+                                <option value="@p.Id">@p.Title</option>
+                            }
+                            <option value="0">Все</option>
+                            <option value="-1">Обычный покупатель</option>
+                        </select>
+                        <input placeholder="Дата с:" type="text" name="value" id="dateFilter1"  class="form-control" style="width: 200px; display: inline-block" />
+                        <input placeholder="Дата по:" type="text" name="value" id="dateFilter2"  class="form-control" style="width: 200px; display: inline-block" />
+                        <button class="btn btn-dark" style="position: relative; top: -3px">Поиск</button>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Номер</th>
+                                <th>Дата</th>
+                                <th>Сумма</th>
+                                <th>Магазин</th>
+                                <th>Тип платежа</th>
+                                <th>Доп. Товары</th>
+                                <th>Покупатель</th>
+                                <th>Товар</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var s in Model)
+                            {
+                                <tr>
+                                    <td>@s.Id</td>
+                                    <td>@s.Date</td>
+                                    <td>@s.Sum</td>
+                                    <td>@s.ShopTitle</td>
+                                    @if (s.PaymentType.ToString() == "Cash")
+                                    {
+                                        <td>Наличный</td>
+                                    }
+                                    else if (s.PaymentType.ToString() == "Cashless")
+                                    {
+                                        <td>Безналичный</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Смешанный</td>
+                                    }
+                                    @if (s.HasAdditionalProduct)
+                                    {
+                                        <td>Есть</td>
+                                    }
+                                    else
+                                    {
+                                        <td>Нет</td>
+                                    }
+                                    <td>
+                                        @s.BuyerTitle
+                                    </td>
+                                    <td>
+                                        @s.ProductTitle
+                                    </td>
+                                    <td>
+                                        <a href="/Sale/Detail/@s.Id" class="btn btn-dark">
+                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
+
+
+<script type="text/javascript">
+
+    ( function( factory ) {
+        if ( typeof define === "function" && define.amd ) {
+
+            define( [ "../widgets/datepicker" ], factory );
+        } else {
+
+            factory( jQuery.datepicker );
+        }
+    }( function( datepicker ) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: [ "Январь","Февраль","Март","Апрель","Май","Июнь",
+                "Июль","Август","Сентябрь","Октябрь","Ноябрь","Декабрь" ],
+            monthNamesShort: [ "Янв","Фев","Мар","Апр","Май","Июн",
+                "Июл","Авг","Сен","Окт","Ноя","Дек" ],
+            dayNames: [ "воскресенье","понедельник","вторник","среда","четверг","пятница","суббота" ],
+            dayNamesShort: [ "вск","пнд","втр","срд","чтв","птн","сбт" ],
+            dayNamesMin: [ "Вс","Пн","Вт","Ср","Чт","Пт","Сб" ],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: "" };
+        datepicker.setDefaults( datepicker.regional.ru );
+
+        return datepicker.regional.ru;
+
+    } ) );
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker({
+            onSelect: function (dateText) {
+                date1 = dateText;
+            }
+        });
+        $("#dateFilter2").datepicker({
+            onSelect: function (dateText) {
+                date2 = dateText;
+            }
+        });
+    });
+</script>
+
+<script type="text/javascript">
+
+    let typeOfSales = null;
+    let typeOfBuyers = null;
+    let shopId = null;
+    let date1 = null;
+    let date2 = null;
+    let userId = @ViewBag.UserId;
+
+    let formSubmit = document.getElementById('filter')
+
+    formSubmit.addEventListener('submit', loadData)
+
+
+    function loadData(event) {
+        event.preventDefault();
+
+        typeOfSales = document.getElementById('typeFilter').value;
+        typeOfBuyers = document.getElementById('buyerFilter').value;
+
+        var filterBody = {
+            saleFiltrationModel: {
+                type: +typeOfSales,
+                buyer: +typeOfBuyers,
+                shopId: +shopId,
+                periodStart: date1,
+                periodEnd: date2
+            },
+            userId: userId
+        }
+
+        console.log(filterBody)
+
+        $('#result').load(
+            "/Sale/Filter",
+            filterBody
+        );
+    }
+
+</script>

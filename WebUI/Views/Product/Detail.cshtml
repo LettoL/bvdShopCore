@@ -1,0 +1,112 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="padding:30px 20px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Подробно о: @Model.Title</h3>
+                </div>               
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                <nav class="detail_subnav">
+                    <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                        <a style="color: #333" class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Основное</a>
+                        <a style="color: #333" class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Дополнительно</a>
+                        <a style="color: #333" class="nav-item nav-link" id="nav-detail-tab" data-toggle="tab" href="#nav-detail" role="tab" aria-controls="nav-detail" aria-selected="false">О продукте</a>
+                    </div>
+                </nav>
+                <div class="tab-content" id="nav-tabContent">
+                    <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Id</th>
+                                    <th>Название</th>
+                                    <th>Артикул</th>
+                                    <th>Количество</th>
+                                    <th>Цена</th>
+                                    <th>Магазин</th>
+                                    <th>Категория</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <tr>
+                                    <td>@Model.Id</td>
+                                    <td>@Model.Title</td>
+                                    <td>@Model.Code</td>
+                                    <td>@Model.Amount</td>
+                                    <td>@Model.Cost</td>
+                                    <td>@Model.Shop.Title</td>
+                                    <td>@Model.Category.Title</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Количество</th>
+                                    <th>Количество под реализацию</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var sp in ViewBag.SupplierProducts)
+                                {
+                                <tr>
+                                    <td>@sp.Supplier?.Title</td>
+                                    <td>@sp.TotalAmount</td>
+                                    <td>@sp.RealizationAmount</td>
+                                </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="nav-detail" role="tabpanel" aria-labelledby="nav-home-tab">
+                        <table class="table table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Название</th>
+                                    <th>Количество</th>
+                                    <th>На складе</th>
+                                    <th>Закупочная стоимость</th>
+                                    <th>Дополнительная стоимость</th>
+                                    <th>Общая стоимость</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach(var sp in ViewBag.SupplyProduct)
+                                {
+                                 <tr>
+                                    <td>@sp.Product.Title</td>
+                                    <td>@sp.TotalAmount</td>
+                                     <td>@sp.StockAmount</td>
+                                     <td>@sp.ProcurementCost</td>
+                                    <td>@sp.AdditionalCost</td>
+                                    <td>@sp.FinalCost</td>
+                                </tr>
+                                }
+                                
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            </div>
+            
+            <a href="/Product/Index" class="btn btn-dark button-back">Назад</a>
+        </div>
+        
+    </div>
+</div>
+
+

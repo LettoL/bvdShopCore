@@ -1,0 +1,53 @@
+﻿
+@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Новый товар</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form asp-action="Create" asp-controller="Product" method="post">
+                <h3 class="title">Создание</h3>
+                <input type="hidden" name="id"/>
+                <input type="hidden" name="amount" value="0"/>
+
+                <label asp-for="title">Название</label>
+                <input class="form-control" type="text" name="title">
+
+                <label asp-for="code">Артикул</label>
+                <input class="form-control" type="text" name="code">
+
+                <label asp-for="Cost">Стоимость для продажи</label>
+                <input class="form-control" type="text" name="cost">
+
+                <label asp-for="Category">Категория</label>
+                <select class="form-control" name="categoryId">
+                    @foreach (var c in ViewBag.Categories)
+                    {
+                        <option value="@c.Id">@c.Title</option>
+                    }
+                </select>
+
+                <label asp-for="Shop">Магазин</label>
+                <select class="form-control" name="shopId" style="margin-bottom: 40px;">
+                    @foreach (var s in ViewBag.Shops)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select>
+
+                <button class="btn btn-submit">Сохранить</button>
+                <a href="/Product/Index" class="btn btn-dark">Назад</a>
+            </form>
+            </div>
+            
+        </div>
+    </div>
+</div>

@@ -1,0 +1,50 @@
+﻿
+@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Дата</th>
+            <th>Товар</th>
+            <th>Количество</th>
+            <th>Поставщик</th>
+            <th>Тип</th>
+            <th>Магазин</th>
+            <th>Действие</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var o in Model)
+        {
+            <tr>
+                <td>@o.Date.ToString("dd.MM.yyyy")</td>
+                <td>@o.Product.Title</td>
+                <td>@o.Amount</td>
+                <td>@o.Supplier?.Title</td>
+                @if (o.Type.ToString() == "Supply")
+                {
+                    <td>Поставка</td>
+
+                }
+                else if (o.Type.ToString() == "Writeoff")
+                {
+                    <td>Списание</td>
+                }
+                else
+                {
+                    <td>Перенос</td>
+                }
+                <td>@o.Shop?.Title</td>
+                <td>
+                    <form style="display: inline-block" action="/Admin/SupplyAnnulment/@o.Id" method="post">
+                        <button class="btn btn-danger">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </td>
+            </tr>
+        }
+    </tbody>
+</table>

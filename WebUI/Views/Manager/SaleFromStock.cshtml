@@ -1,0 +1,470 @@
+﻿
+@{
+    ViewData["Title"] = "SaleFromStock";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="min-height: 800px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Продажа <small>со склада поставщика</small></h3>
+                </div>
+                <div class="portlet-search">
+                    <input id="product_search" v-model="query" type="text" class="form-control" placeholder="Поиск товара" />
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div id="form">
+                    <div id="first_step">
+                        <div class="row">
+                            <div class="col-md-3" style="max-height: 520px; overflow: auto;">
+                                <div id="category">
+                                    <ul class="list-group">
+                                        <h5>Категории</h5>
+                                        <li v-for="category in categories">
+                                            <button class="list-group-item list-group-item-action" v-on:click="categoryClick(category.title)">{{category.title}}</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-3" style="max-height: 520px; overflow: auto;">
+                                <div id="products">
+                                    <ul class="list-group">
+                                        <h5>Товары</h5>
+                                        <li v-for="product in productsSort">
+                                            <button class="list-group-item list-group-item-action" v-on:click="productClick(product)">{{product.title}}</button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                            <div class="col-md-6" style="max-height: 520px; overflow: auto;">
+                                <div id="sale_product">
+                                    <ul class="list-group">
+                                        <h5>Выбранные товары</h5>
+                                        <li class="list-group-item" style="text-align: center;" v-for="(product, index) in products">
+                                            <b>{{product.title}}</b>
+                                            <input class="form-control amount" type="number" v-model="product.amount" />
+                                            <span>Дополнительный:</span>
+                                            <input class="check" type="checkbox" v-model="product.additional" />
+                                            <button v-on:click="deleteProduct(index)" style="margin-left: 20px;" class="btn btn-danger">
+                                                <i class="fa fa-times" aria-hidden="true"></i>
+                                            </button>
+                                        </li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        <div id="buyer">
+                            <select class="form-control" v-model="buyer">
+                                <option>Обычный покупатель</option>
+                                @foreach (var p in ViewBag.Partners)
+                                {
+                                    <option>@p.Title</option>
+                                }
+                            </select>
+                        </div>
+                    </div>
+                    <div class="steps">
+                        <button class="nextStep btn btn-dark" onclick="changeStep('second'); saleForm.costInit(); saleForm.initProps();">Далее</button>
+                    </div>
+                </div>
+                <div id="second_step" style="display: none">
+                    <div id="sale_form">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <label>Скидка</label>
+                                <input class="form-control" v-model="discount" />
+
+                                <label>Стоимость</label>
+                                <input class="form-control" v-model="cost" style="margin-bottom: 20px;" />
+
+                                <label>Внесение наличных средств</label>
+                                <input class="form-control" v-model="cash" style="margin-bottom: 20px;" />
+
+                                <label>Внесение безналичных средств</label>
+                                <input class="form-control" v-model="cashless" style="margin-bottom: 20px;" />
+
+                                <label>Комментарий</label>
+                                <input v-model="comment" type="text" class="form-control" /> <br />
+
+                                <label v-if="additionalCommentExist">Комментарий для Доп. Продажи</label>
+                                <input v-model="additionalComment" v-if="additionalCommentExist" type="text" class="form-control" />
+
+                                <label>Перевести безналичные средства после закрытия на</label>
+                                <select id="moneyWorkerTypeForCashlessIncome" class="form-control" onchange="saleForm.getMoneyWorkersForIncome(this.value)">
+                                    <option value="-2">Не отправлять</option>
+                                    <option value="1">Держатель Карты</option>
+                                    <option value="2">Рассчетный Счет</option>
+                                </select> <br />
+
+                                <select id="moneyWorkerIdForCashlessIncome" class="form-control" v-model="moneyWorkerIdForCashlessIncome">
+                                    <option disabled selected value="null">Выбрать</option>
+                                </select> <br />
+
+                                <label>Продажа по России</label>
+                                <select id="forRussian" class="form-control" v-model="forRussian">
+                                    <option value="true">Да</option>
+                                    <option value="false">Нет</option>
+                                </select> <br />
+
+                            </div>
+                            <div v-if="buyer !== 'Обычный покупатель'" class="col-lg-6 col-md-8">
+                                <ul class="list-group">
+                                    <h6>Стоимость товаров за 1 штуку</h6>
+                                    <li class="list-group-item" v-for="product in products">
+                                        <b>Название:</b> {{product.title}} / <b>Стоимость:</b> <input v-model="product.cost"/>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="steps">
+                        <button class="prevStep btn btn-dark" onclick="changeStep('first')">Назад</button>
+                        <button class="nextStep btn btn-dark" onclick="changeStep('third'); saleForm.cashlessCheck(); confirmForm.initProps()">Далее</button>
+                    </div>
+                </div>
+                <div id="third_step" style="display: none">
+                    <div id="confirm_form">
+                        <div class="row">
+                            <div class="col-md-6 col-sm-12">
+                                <ul class="list-group order">
+                                    <li class="list-group-item">Сумма: {{sum}}</li>
+                                    <li class="list-group-item">Скидка: {{discount}}</li>
+                                    <li class="list-group-item">Покупатель: {{buyer}}</li>
+                                    <li class="list-group-item">Продажа по России: {{russianStatus}}</li>
+                                </ul>
+                            </div>
+                            <div class="col-lg-6 col-md-12">
+                                <ul class="list-group">
+                                    <li class="list-group-item" v-for="product in products">
+                                        <b>Название:</b> {{product.title}} / <b>К-во:</b> {{product.amount}} / <b>Дополнительный:</b> <span v-if="product.additional">Да</span><span v-if="!product.additional">Нет</span>
+                                    </li>
+                                </ul>
+                            </div>
+                        </div>
+
+                    </div>
+                    <div class="steps">
+                        <button class="prevStep btn btn-dark" onclick="changeStep('second')">Назад</button>
+                        <button class="btn btn-dark" onclick="send(); this.disabled=true;">Отправить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+    var curStep = "first";
+    var userId = @ViewBag.userId;
+
+    var productSearch = new Vue({
+        el: "#product_search",
+        data: {
+            query: ""
+        },
+        watch: {
+            query: function (val) {
+                product.searchQuery = val;
+            }
+        }
+    });
+
+    var category = new Vue({
+        el: "#category",
+        data: {
+            categories: []
+        },
+        methods: {
+            categoryClick: function(category) {
+                product.curCategory = category;
+            }
+        },
+        created: function() {
+            fetch('/Category/Get', {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json();
+                })
+                .then((json) => {
+                    json.forEach(item => {
+                        this.categories.push({
+                            title: item.title
+                        });
+                    });
+                });
+        }
+    });
+
+    var product = new Vue({
+        el: "#products",
+        data: {
+            curCategory: "",
+            products: [],
+            searchQuery: ""
+        },
+        computed: {
+            productsSort: {
+                get: function () {
+                    if (this.searchQuery == "") {
+                        if (this.curCategory !== "")
+                            return this.products.filter(x => x.category === this.curCategory);
+                        else
+                            return this.products;
+                    }
+                    else {
+                        return this.products.filter(x => x.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                    }
+
+                },
+                set: function(category) {
+                    this.curCategory = category;
+                }
+            },
+            productsSearch: {
+                get: function () {
+                    if (this.searchQuery !== "")
+                        return this.product.filter(product => {
+                            return product.title.toLowerCase().includes(this.searchQuery.toLowerCase())
+                        });
+                },
+                set: function (searchQuery) {
+                    this.searchQuery = searchQuery
+                }
+            }
+        },
+        methods: {
+            productClick: function (product) {
+                var product = { id: product.id, title: product.title, amount: 1, additional: false, cost: product.cost }
+                saleProduct.products.push(product);
+            }
+            
+        },
+        created: function () {
+            fetch('/Product/All', {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json();
+                })
+                .then((json) => {
+                    let used = {};
+                    let filteredItems = json.filter(item => {
+                        return item.title in used ? 0 : (used[item.title] = 1);
+                    });
+
+                    filteredItems.forEach(item => {
+                        if (item.title != null) {
+                            this.products.push({
+                                id: item.id,
+                                title: item.title,
+                                cost: item.cost,
+                                category: item.category.title
+                            });
+                        }                  
+                    });
+                });
+        }
+    });
+
+    var saleProduct = new Vue({
+        el: "#sale_product",
+        data: {
+            products: []
+        },
+        methods: {
+            deleteProduct: function (index) {
+                this.products.splice(index, 1);
+            }
+        }
+    });
+
+    var buyer = new Vue({
+        el: "#buyer",
+        data: {
+            buyer: "Обычный покупатель"
+        }
+    });
+
+    var saleForm = new Vue({
+        el: "#sale_form",
+        data: {
+            discount: 0,
+            cost: 0,
+            cash: 0,
+            cashless: 0,
+            additionalComment: '',
+            comment: '',
+            products: [],
+            buyer: "",
+            moneyWorkerIdForCashlessIncome: null,
+            forRussian: "false", 
+        },
+        methods: {
+            initProps: function() {
+                saleForm.products = saleProduct.products;
+                saleForm.buyer = buyer.buyer;
+            },
+            costInit: function() {
+                saleForm.cost = buyer.buyer !== "Обычный покупатель" ? 0 : sumCost(saleProduct.products);
+            },            
+            getMoneyWorkersForIncome: function (value) {               
+                if (value > 0) {               
+                    $.when(
+                        $.get('/Manager/GetMoneyWorkersForSale/' + value)
+                    ).done(function(data) {      
+                        $.each(data,
+                            function () {
+                                    $('#moneyWorkerIdForCashlessIncome').append('<option value="' +
+                                        this.id +
+                                        '">' +
+                                        this.title +
+                                        '</option>');                      
+                            });
+                    });
+                }                                
+                $('#moneyWorkerIdForCashlessIncome').html('<option disabled selected value="null">Выбрать</option>');
+            },
+            
+            cashlessCheck: function () {
+                if (this.cashlessMoney > 0 && this.moneyWorkerType == null || this.moneyWorkerType == "null") {
+                    alert('Вы не указали получателя для безналичных средств')
+                }
+            }
+        },
+        computed: {
+            additionalCommentExist: function () {
+                let additionalCommentExist;
+                this.products.find(p => p.additional == true) != null
+                    ? additionalCommentExist = true
+                    : additionalCommentExist = false;
+                return additionalCommentExist;
+            }           
+        },
+        watch: {
+            products: {
+                handler(val) {
+                    this.cost = sumCost(this.products);
+                },
+                deep: true
+            }
+        }
+    });
+
+    var confirmForm = new Vue({
+        el: "#confirm_form",
+        data: {
+            products: [],
+            sum: 0,
+            discount: 0,
+            cash: 0,
+            cashless: 0,
+            comment: '',
+            additionalComment: "",
+            buyer: "",
+            moneyWorkerIdForCashlessIncome,
+            forRussian: null,
+            russianStatus: "Да"
+       },
+        methods: {
+            initProps: function() {
+                confirmForm.products = saleProduct.products;
+                confirmForm.sum = saleForm.cost - saleForm.discount;
+                confirmForm.discount = saleForm.discount;
+                confirmForm.cash = saleForm.cash;
+                confirmForm.cashless = saleForm.cashless;
+                confirmForm.buyer = buyer.buyer;
+                confirmForm.additionalComment = saleForm.additionalComment;
+                confirmForm.comment = saleForm.comment;                             
+                confirmForm.moneyWorkerIdForCashlessIncome = saleForm.moneyWorkerIdForCashlessIncome;
+                confirmForm.forRussian = saleForm.forRussian;
+            },
+            sendData: function () {
+                this.products.forEach(product => {
+                    delete product.category;
+                });
+
+
+                var realization = {
+                    products: this.products,
+                    sum: this.sum,
+                    cash: this.cash,
+                    cashless: this.cashless,
+                    discount: this.discount,
+                    buyer: this.buyer,
+                    comment: this.comment,
+                    additionalComment: this.additionalComment,
+                    moneyWorkerIdForCashlessIncome: this.moneyWorkerIdForCashlessIncome,
+                    userId: userId,
+                    forRussian: this.forRussian
+                }
+
+                console.log(realization)
+                /*var xhr = new XMLHttpRequest();
+                xhr.open("Post", "/Manager/SaleFromStock");
+                xhr.setRequestHeader('Content-Type', 'application/json');
+                xhr.send(JSON.stringify(realization));*/
+
+                return fetch("/Manager/SaleFromStock",
+                    {
+                        method: "POST",
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        redirect: "follow",
+                        credentials: 'include',
+                        body: JSON.stringify(realization)
+                    });
+            }
+        },
+        watch: {
+            forRussian: function () {
+                if (this.forRussian == "true")
+                    this.russianStatus = "Да"
+                else
+                    this.russianStatus = "Нет"
+            }
+        }
+    });
+
+     function sumCost (products) {
+        var sum = 0;
+        for (var i = 0; i < products.length; i++) {
+            sum += products[i].cost * products[i].amount;
+        }
+
+        return sum;
+    };
+
+    function changeStep(step) {
+        document.getElementById(curStep + "_step").style.display = "none";
+        this.curStep = step;
+        document.getElementById(step + "_step").style.display = "block";
+    }
+
+    function send() {
+        let productZeroCost = false;
+
+        if (this.confirmForm.products.some(checkZeroProductCost))
+            productZeroCost = true;
+
+        if (productZeroCost == false)
+            this.confirmForm.sendData().then(res => window.location.href = res.url)
+        else
+            alert('В продаже присутствуют товары с нулевой стоимостью')
+    }
+
+    function checkZeroProductCost(product) {
+        return +product.cost == 0
+    }
+
+</script>

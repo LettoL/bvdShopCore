@@ -1,0 +1,44 @@
+﻿
+@{
+    ViewData["Title"] = "Edit";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Изменение держателя карты</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/CardKeeper/Edit" method="post">
+                    <h3 class="title">Редактирование</h3>
+                    <input hidden name="id" type="text" value="@Model.Id">
+                    <label for="">Имя</label>
+                    <input style="margin-bottom: 20px" class="form-control" name="title" type="text" value="@Model.Title">
+                    <label for="">Номер карты</label>
+                    <input style="margin-bottom: 20px" class="form-control" name="cardNumber" type="text" value="@Model.CardNumber">
+                    <label>Для Менеджера</label>
+                    <select class="form-control" name="forManager" style="margin-bottom: 20px;">
+                        @if (@Model.ForManager)
+                        {
+                            <option value="true" disabled selected>Доступен</option>
+                            <option value="false">Не доступен</option>
+                        }
+                        else
+                        {
+                            <option value="false" disabled selected>Не доступен</option>
+                            <option value="true">Доступен</option>
+                        }                                              
+                    </select>
+                    <button class="btn btn-submit">Сохранить</button>
+                    <a href="/CardKeeper/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>            
+        </div>
+    </div>
+</div>
+

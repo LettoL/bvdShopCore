@@ -1,0 +1,189 @@
+﻿
+@{
+    ViewData["Title"] = "Detail";
+
+    if (ViewBag.Role == "Administrator")
+    {
+        Layout = "~/Views/Shared/AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/ManagerLayout.cshtml";
+    }
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" style="padding:30px 20px;">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h3>Подробно о продаже за @Model.Date Номер: @Model.Id</h3>
+                </div>               
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <nav class="detail_subnav">
+                        <div class="nav nav-tabs" id="nav-tab" role="tablist">
+                            <a style="color: #333;" class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Основное</a>
+                            <a style="color: #333;" class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Проданные товары</a>
+                            <a style="color: #333;" class="nav-item nav-link" id="nav-scores-tab" data-toggle="tab" href="#nav-scores" role="tab" aria-controls="nav-scores" aria-selected="false">Информация по счетам</a>
+                        </div>
+                    </nav>
+                    <div class="tab-content" id="nav-tabContent">
+                        <div class="tab-pane fade show active" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Дата</th>
+                                        <th>Сумма</th>
+                                        @if(ViewBag.Role == "Administrator")
+                                        {
+                                            <th>Себестоимость</th>
+                                        }                                       
+                                        @if(ViewBag.Role == "Administrator")
+                                        {
+                                             <th>Маржа</th>
+                                        }                                       
+                                        <th>Скидка</th>
+                                        <th>Платеж</th>
+                                        <th>Магазин</th>
+                                        <th>Партнер</th>
+                                        <th>Тип продажи</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>@Model.Date.ToString("dd.MM.yyyy")</td>
+                                        <td>@Model.Sum</td>
+                                        @if(ViewBag.Role == "Administrator")
+                                        {
+                                            <td>@Model.PrimeCost</td>
+                                        }                                       
+                                        @if (ViewBag.Role == "Administrator")
+                                        {
+                                            <td>@Model.Margin</td>
+                                        }                                      
+                                        <td>@Model.Discount</td>
+                                        @if(ViewBag.PaymentType.ToString() == "Cashless")
+                                        {
+                                            <td>Безналичный</td>
+                                        }
+                                        else if(ViewBag.PaymentType.ToString() == "Cash")
+                                        {
+                                            <td>Наличный</td>
+                                        }
+                                        else
+                                        {
+                                            <td>Смешанный</td>
+                                        }
+                                        <td>@Model.Shop.Title</td>
+                                        <td>@Model.Partner?.Title</td>
+
+                                         @if(Model.SaleType.ToString() == "Sale")
+                                            {
+                                                <td>Продажа</td>
+                                            }
+                                            else if(Model.SaleType.ToString() == "SaleFromStock")
+                                            {
+                                                <td>Продажа со склада поставщика</td>
+                                            }
+                                            else if(Model.SaleType.ToString() == "DefferedSale")
+                                            {
+                                                <td>Продажа с отложенным платежом</td>
+                                            }
+                                            else if(Model.SaleType.ToString() == "DefferedSaleFromStock")
+                                            {
+                                                <td>Отложенная продажа со склада поставщика</td>
+                                            }
+                                            else if(Model.SaleType.ToString() == "Booking")
+                                            {
+                                                 <td>Бронирование</td>
+                                            }                                                                       
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="nav-profile" role="tabpanel" aria-labelledby="nav-profile-tab">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Название</th>
+                                        <th>Артикул</th>
+                                        <th>Количество</th>
+                                        <th>Цена</th>
+                                        <th>Тип Товара</th>
+                                        <th>Изменить Закупочную</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in ViewBag.SalesProducts)
+                                    {
+                                    <tr>
+                                        <td>@p.Product.Title</td>
+                                        <td>@p.Product.Code</td>
+                                        <td>@p.Amount</td>
+                                        <td>@p.Cost</td>
+                                        @if (p.Additional)
+                                        {
+                                            <td>Дополнительный</td>
+                                        }
+                                        else
+                                        {
+                                            <td>Основной</td>
+                                        }
+                                        <td>
+                                            <form action="/Sale/ChangeProcurementCost" method="post">
+                                                <input hidden name="saleId" value="@Model.Id"/>
+                                                <input hidden name="productId" value="@p.Product.Id"/>
+                                                <input name="procurementCost" style="border-color: eee; padding: 8px 10px" placeholder="Новая стоимость"/>
+                                                <button class="btn btn-dark" style="position: relative; top: -3px">Принять</button>
+                                            </form>                                    
+                                        </td>
+                                    </tr>
+                                     }
+                                </tbody>
+                            </table>
+                        </div>
+                        <div class="tab-pane fade" id="nav-scores" role="tabpanel" aria-labelledby="nav-scores-tab">
+                            <table class="table table-striped">
+                                <thead>
+                                    <tr>
+                                        <th>Наличный Счет</th>
+                                        <th>Безналичный Счет(а)</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            @foreach(var score in ViewBag.SaleFinanceDetail.CashScores)
+                                            {
+                                                <p>@score.MoneyWorkerTitle. <b>Сумма: @score.Sum</b></p>
+                                            }
+                                        </td>
+                                        <td>
+                                            @foreach(var score in ViewBag.SaleFinanceDetail.CashlessScores)
+                                            {
+                                                <p>@score.MoneyWorkerTitle. <b>Сумма: @score.Sum</b></p>
+                                            }
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+
+                </div>
+            </div>
+            @if(ViewBag.Role == "Administrator")
+            {
+                <a href="/Sale/Index" class="btn btn-dark button-back">Назад</a>
+            }
+            else
+            {
+                <a href="/Manager/SaleList" class="btn btn-dark button-back">Назад</a>
+            }
+        </div>
+    </div>
+</div>
+

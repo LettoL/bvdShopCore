@@ -1,0 +1,61 @@
+﻿@*
+    For more information on enabling MVC for empty projects, visit http://go.microsoft.com/fwlink/?LinkID=397860
+*@
+
+
+<form  style="margin-top: 40px; padding-bottom: 20px;" method="post" action="/Manager/BookingClose" id="closeBooking">
+    <h5>Номер Заявки: @Model.Id</h5>
+    <input hidden name="id" value="@Model.Id" /><br />
+    <label>Внести наличные средства (<b>Остаток: @Model.Debt</b>)</label>
+    <input class="form-control" type="text" name="cashSum" /><br />
+    <label>Внести безналичные средства</label>
+    <input class="form-control" type="text" name="cashlessSum"/>
+    <br />
+    
+    <label>Перевести безналичные средства на:</label>
+    <select id="moneyWorkerType" class="form-control" onchange="selectMoneyWorkers()">
+        <option value="null">Не отправлять</option>
+        <option value="1">Держатель Карты</option>
+        <option value="2">Рассчетный Счет</option>
+    </select> <br />
+
+    <select id="moneyWorkerId" class="form-control" name="moneyWorkerId">
+        <option disabled selected value="null">Выбрать</option>
+    </select> <br/>
+
+    <button id="closeBookingSubmitForm" type="submit" class="btn btn-submit btn-dark">Подтвердить</button>
+</form>
+
+<script type="text/javascript">
+
+    function selectMoneyWorkers() {
+        let moneyWorkerSelect = document.getElementById('moneyWorkerType');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#moneyWorkerId').html('');
+
+                json.forEach(json => {
+                    $('#moneyWorkerId').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+    }
+
+    $("#closeBooking").submit(() => { 
+        $("#closeBookingSubmitForm").attr("disabled", true)
+        return true;
+    })
+</script>
