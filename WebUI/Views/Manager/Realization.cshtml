@@ -453,8 +453,8 @@
                     userId: userId,
                     products: this.products,
                     sum: this.sum,
-                    cashSum: this.cashSum,
-                    cashlessSum: this.cashlessSum,
+                    cashSum: +this.cashSum,
+                    cashlessSum: +this.cashlessSum,
                     discount: this.discount,
                     cashless: this.cashless,
                     buyer: this.buyer,
@@ -462,7 +462,7 @@
                     moneyWorkerId: this.moneyWorkerId,
                     payment: this.payment,
                     comment: this.comment,
-                    forRussian: this.forRussian
+                    forRussian: Boolean(this.forRussian)
                 }
                 console.log(realization)
                 return fetch("/Manager/RealizationPost",
