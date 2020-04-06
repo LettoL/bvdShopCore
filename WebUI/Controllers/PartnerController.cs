@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Base.Services.Abstract;
+using Data;
 using Data.Entities;
 using Data.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,15 @@ namespace WebUI.Controllers
     {
         private IBaseObjectService<Partner> _partnerService;
         private ISaleService _saleService;
+        private readonly ShopContext _db;
 
         public PartnerController(IBaseObjectService<Partner> partnerService,
-            ISaleService saleService)
+            ISaleService saleService,
+            ShopContext db)
         {
             _partnerService = partnerService;
             _saleService = saleService;
+            _db = db;
         }
 
         public IActionResult Index()

@@ -6,7 +6,7 @@ namespace Data.Services.Abstract
 {
     public interface IMoneyOperationService
     {
-        void SalePayment(decimal cash, decimal cashless, Sale sale,
+        void SalePayment(ShopContext db, decimal cash, decimal cashless, Sale sale,
             int? moneyWorkerIdForCash, int? moneyWorkerIdForCashless);
 
         void Expense(int moneyWorkerId, decimal sum, PaymentType paymentType,

@@ -52,9 +52,9 @@ namespace Data.Services.Concrete
             return id == 1;
         }
 
-        public Sale Create(SaleCreateVM obj, int userId)
+        public Sale Create(ShopContext db, SaleCreateVM obj, int userId)
         {
-            var shop = _shopService.ShopByUserId(userId);
+            var shop = _shopService.ShopByUserId(db, userId);
                 
             if (shop == null)
                 throw new Exception("Текущий пользователь не привязан к магазину");
@@ -66,7 +66,7 @@ namespace Data.Services.Concrete
 
             var sum = obj.CashSum + obj.CashlessSum;
 
-            var sale = base.Create(new Sale()
+            var sale = db.Sales.Add(new Sale()
             {
                 Date = DateTime.Now,
                 AdditionalComment = obj.AdditionalComment,
@@ -80,13 +80,15 @@ namespace Data.Services.Concrete
                 Payment = obj.Payment,
                 SaleType = obj.Payment != true ? SaleType.DefferedSale : SaleType.Sale,
                 ForRussian = obj.ForRussian
-            });
+            }).Entity;
+
+            db.SaveChanges();
 
             if (obj.Payment)
-                _moneyOperationService.SalePayment(obj.CashSum, obj.CashlessSum,
+                _moneyOperationService.SalePayment(db, obj.CashSum, obj.CashlessSum,
                     sale, shop.Id, obj.MoneyWorkerId);
             else
-                _saleInformationService.Create(new SaleInformation()
+                db.SaleInformations.Add(new SaleInformation()
                 {
                     MoneyWorkerForIncomeId = shop.Id == 0 ? null : obj.MoneyWorkerId,
                     SaleId = sale.Id,
@@ -97,7 +99,7 @@ namespace Data.Services.Concrete
 
             foreach (var product in obj.Products)
             {
-                _saleProductService.Create(new SaleProduct()
+                db.SalesProducts.Add(new SaleProduct()
                 {
                     Amount = product.Amount,
                     ProductId = product.Id,
@@ -106,24 +108,27 @@ namespace Data.Services.Concrete
                     Cost = product.Cost
                 });
 
-                primeCost += _productOperationService.RealizationProduct(product.Id, product.Amount, sale.Id);
+                primeCost += _productOperationService.RealizationProduct(db, product.Id, product.Amount, sale.Id);
             }
             
             sale.PrimeCost = primeCost;
             sale.Margin = sale.Sum - sale.PrimeCost;
 
-            _saleInformationService.Create(new SaleInformation
+            db.SaleInformations.Add(new SaleInformation
             {
                 SaleId = sale.Id,
                 SaleType = SaleType.Sale
             });
 
-            return base.Update(sale);
+            db.Entry(sale).State = EntityState.Modified;
+            db.SaveChanges();
+            
+            return sale;
         }
 
-        public Sale CreatePostPayment(SaleCreateVM obj, int userId)
+        public Sale CreatePostPayment(ShopContext db, SaleCreateVM obj, int userId)
         {
-            var shop = _shopService.ShopByUserId(userId);
+            var shop = _shopService.ShopByUserId(db, userId);
 
             if (shop == null)
                 throw new Exception("Текущий пользователь не привязан к магазину");
@@ -138,7 +143,7 @@ namespace Data.Services.Concrete
 
             var sum = obj.Sum;
 
-            var sale = base.Create(new Sale()
+            var sale = db.Sales.Add(new Sale()
             {
                 Date = DateTime.Now,
                 ShopId = shop.Id,
@@ -154,11 +159,11 @@ namespace Data.Services.Concrete
                 Margin = 0, // Так же просчитываем при закрытии продажи
                 SaleType = obj.SaleType,
                 ForRussian = obj.ForRussian
-            });
+            }).Entity;
 
             foreach (var product in obj.Products)
             {
-                _saleProductService.Create(new SaleProduct()
+                db.SalesProducts.Add(new SaleProduct()
                 {
                     Amount = product.Amount,
                     ProductId = product.Id,
@@ -213,20 +218,20 @@ namespace Data.Services.Concrete
             base.Update(sale);
         }
 
-        public IQueryable<Sale> DeferredSalesFromStock()
+        public IQueryable<Sale> DeferredSalesFromStock(ShopContext context)
         {
-            return this.All()
+            return context.Sales
                 .Where(s => s.Payment == false &&
-                            _saleInformationService.All()
+                            context.SaleInformations
                                 .Count(x => x.SaleId == s.Id
                                             && x.SaleType == SaleType.DefferedSaleFromStock) > 0 &&
                             s.Sum <= _infoMoneyService.All().Where(x => x.SaleId == s.Id).Sum(x => x.Sum));
         }
 
-        public IQueryable<Sale> SalesWithOpenPayments()
+        public IQueryable<Sale> SalesWithOpenPayments(ShopContext context)
         {
-            return this.All().Where(s => s.Payment == false &&
-                                         _saleInformationService.All()
+            return context.Sales.Where(s => s.Payment == false &&
+                                         context.SaleInformations
                                              .Count(x => x.SaleId == s.Id &&
                                                          x.SaleType == SaleType.SaleFromStock) > 0);
         }

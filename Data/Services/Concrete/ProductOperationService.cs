@@ -148,28 +148,28 @@ namespace Data.Services.Concrete
             _supplyProductService.Update(supply);
         }
 
-        public decimal RealizationProduct(int productId, int amount, int saleId)
+        public decimal RealizationProduct(ShopContext db, int productId, int amount, int saleId)
         {
             decimal cost = 0;
 
             if (amount <= 0)
                 return cost;
 
-            var supplyProductRealization = _supplyProductService.All()
+            var supplyProductRealization = db.SupplyProducts
                 .FirstOrDefault(x => x.ProductId == productId && x.RealizationAmount > 0);
 
             if (supplyProductRealization != null)//Есть поставки с товаром под реализацию
             {
                 if (supplyProductRealization.RealizationAmount >= amount)
                 {
-                    IncreaseDebtToSupplier((int) supplyProductRealization.SupplierId,
+                    IncreaseDebtToSupplier(db, (int) supplyProductRealization.SupplierId,
                         supplyProductRealization.ProcurementCost * amount);
 
-                    DecreaseRealizationAmountOfSupplyProduct(supplyProductRealization.Id, amount);
+                    DecreaseRealizationAmountOfSupplyProduct(db, supplyProductRealization.Id, amount);
                     
                     cost += PrimeCostCalculate(supplyProductRealization.FinalCost, amount);
 
-                    _productInformationService.Create(new ProductInformation()
+                    db.ProductInformations.Add(new ProductInformation()
                     {
                         SupplyProductId = supplyProductRealization.Id,
                         Amount = amount,
@@ -184,14 +184,14 @@ namespace Data.Services.Concrete
                     var buf = amount - supplyProductRealization.RealizationAmount;
                     var bufAmount = supplyProductRealization.RealizationAmount;
 
-                    IncreaseDebtToSupplier((int) supplyProductRealization.SupplierId,
+                    IncreaseDebtToSupplier(db, (int) supplyProductRealization.SupplierId,
                         supplyProductRealization.ProcurementCost * bufAmount);
 
-                    DecreaseRealizationAmountOfSupplyProduct(supplyProductRealization.Id, bufAmount);
+                    DecreaseRealizationAmountOfSupplyProduct(db, supplyProductRealization.Id, bufAmount);
                     
                     cost += PrimeCostCalculate(supplyProductRealization.FinalCost, bufAmount);
 
-                    _productInformationService.Create(new ProductInformation()
+                    db.ProductInformations.Add(new ProductInformation()
                     {
                         SupplyProductId = supplyProductRealization.Id,
                         Amount = bufAmount,
@@ -201,23 +201,23 @@ namespace Data.Services.Concrete
                         ProductId = productId
                     });
 
-                    cost += RealizationProduct(productId, buf, saleId);
+                    cost += RealizationProduct(db, productId, buf, saleId);
                 }
             }
             else //Нет поставок под реализацию
             {
-                var supplyProduct = _supplyProductService.All()
+                var supplyProduct = db.SupplyProducts
                     .FirstOrDefault(x => x.ProductId == productId && x.StockAmount > 0);
 
                 if (supplyProduct != null)
                 {
                     if (supplyProduct.StockAmount >= amount)
                     {
-                        DecreaseAmountOfSupplyProduct(supplyProduct.Id, amount);
+                        DecreaseAmountOfSupplyProduct(db, supplyProduct.Id, amount);
                         
                         cost += PrimeCostCalculate(supplyProduct.FinalCost, amount);
 
-                        _productInformationService.Create(new ProductInformation()
+                        db.ProductInformations.Add(new ProductInformation()
                         {
                             SupplyProductId = supplyProduct.Id,
                             Amount = amount,
@@ -232,11 +232,11 @@ namespace Data.Services.Concrete
                         var buf = amount - supplyProduct.StockAmount;
                         var bufAmount = supplyProduct.StockAmount;
 
-                        DecreaseAmountOfSupplyProduct(supplyProduct.Id, bufAmount);
+                        DecreaseAmountOfSupplyProduct(db, supplyProduct.Id, bufAmount);
                         
                         cost += PrimeCostCalculate(supplyProduct.FinalCost, bufAmount);
 
-                        _productInformationService.Create(new ProductInformation()
+                        db.ProductInformations.Add(new ProductInformation()
                         {
                             SupplyProductId = supplyProduct.Id,
                             Amount = bufAmount,
@@ -246,7 +246,7 @@ namespace Data.Services.Concrete
                             ProductId = productId
                         });
 
-                        cost += RealizationProduct(productId, buf, saleId);
+                        cost += RealizationProduct(db, productId, buf, saleId);
                     }
                 }
             }
@@ -282,31 +282,33 @@ namespace Data.Services.Concrete
             _infoProductService.Create(obj);
         }
 
-        private void IncreaseDebtToSupplier(int supplierId, decimal sum)
+        private void IncreaseDebtToSupplier(ShopContext db, int supplierId, decimal sum)
         {
-            var supplier = _supplierService.Get(supplierId);
+            var supplier = db.Suppliers.FirstOrDefault(x => x.Id == supplierId);
 
             supplier.Debt += sum;
 
-            _supplierService.Update(supplier);
+            db.Entry(supplier).State = EntityState.Modified;
+            db.SaveChanges();
         }
 
-        private void DecreaseRealizationAmountOfSupplyProduct(int supplyProductId, int amount)
+        private void DecreaseRealizationAmountOfSupplyProduct(ShopContext db,int supplyProductId, int amount)
         {
-            var supplyProduct = _supplyProductService.Get(supplyProductId);
+            var supplyProduct = db.SupplyProducts.FirstOrDefault(x => x.Id == supplyProductId);
 
             supplyProduct.RealizationAmount -= amount;
             
-            DecreaseAmountOfSupplyProduct(supplyProductId, amount);
+            DecreaseAmountOfSupplyProduct(db, supplyProductId, amount);
         }
 
-        private void DecreaseAmountOfSupplyProduct(int supplyProductId, int amount)
+        private void DecreaseAmountOfSupplyProduct(ShopContext db, int supplyProductId, int amount)
         {
-            var supplyProduct = _supplyProductService.Get(supplyProductId);
+            var supplyProduct = db.SupplyProducts.FirstOrDefault(x => x.Id == supplyProductId);
 
             supplyProduct.StockAmount -= amount;
 
-            _supplyProductService.Update(supplyProduct);
+            db.Entry(supplyProduct).State = EntityState.Modified;
+            db.SaveChanges();
         }
 
         private decimal PrimeCostCalculate(decimal cost, int amount)

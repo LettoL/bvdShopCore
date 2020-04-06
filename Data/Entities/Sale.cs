@@ -35,6 +35,6 @@ namespace Data.Entities
         
         public SaleType SaleType { get; set; }
 
-        public ICollection<SaleProduct> SalesProducts { get; set; }
+        public ICollection<SaleProduct> SalesProducts { get; set; } = new HashSet<SaleProduct>();
     }
 }

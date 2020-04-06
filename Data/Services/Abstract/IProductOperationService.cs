@@ -7,7 +7,7 @@ namespace Data.Services.Abstract
         void Supply(SupplyProductVM obj);
         void WriteOff(int productId, int supplyId, int amount);
 
-        decimal RealizationProduct(int productId, int amount, int saleId);
+        decimal RealizationProduct(ShopContext db, int productId, int amount, int saleId);
 
         void ChangePrice(int productId, decimal price);      
     }

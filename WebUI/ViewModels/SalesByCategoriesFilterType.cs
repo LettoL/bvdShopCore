@@ -9,6 +9,9 @@ namespace WebUI.ViewModels
 
         [Description("Магазин в Санкт-Петербурге")]
         Piter = 2,
+        
+        [Description("Магазин в Самаре")]
+        Samara = 27,
 
         [Description("Продажи по России")]
         ForRF = 3,

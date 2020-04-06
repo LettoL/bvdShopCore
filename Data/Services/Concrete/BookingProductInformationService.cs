@@ -21,9 +21,9 @@ namespace Data.Services.Concrete
                 .Where(x => x.Booking.ShopId == shopId && x.Booking.Status == BookingStatus.Open);
         }
 
-        public IQueryable<BookingProduct> GetBookingProductByBooking(int bookingId)
+        public IQueryable<BookingProduct> GetBookingProductByBooking(ShopContext db, int bookingId)
         {
-            return _bookingProductService.All().Where(x => x.BookingId == bookingId);
+            return db.BookingProducts.Where(x => x.BookingId == bookingId);
         }
 
         public int GetAmountOfBookedProductsInShop(int shopId)

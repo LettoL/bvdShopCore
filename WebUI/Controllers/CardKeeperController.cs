@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Base.Services.Abstract;
+using Data;
 using Data.Entities;
 using Data.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
@@ -12,12 +13,15 @@ namespace WebUI.Controllers
         private IBaseObjectService<CardKeeper> _cardKeeperService { get; set; }
         private IInfoMoneyService _infoMoneyService { get; set; }
 
+        private readonly ShopContext _db;
+
         public CardKeeperController(IBaseObjectService<CardKeeper> cardKeeperService,
-                IInfoMoneyService infoMoneyService
-            )
+                IInfoMoneyService infoMoneyService,
+                ShopContext db)
         {
             _cardKeeperService = cardKeeperService;
             _infoMoneyService = infoMoneyService;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -29,7 +33,7 @@ namespace WebUI.Controllers
                     Title =  ck.Title,
                     CardNumber = ck.CardNumber,
                     ForManager = ck.ForManager,
-                    Balance = _infoMoneyService.GetMoneyWorkerBalance(ck.Id)
+                    Balance = _infoMoneyService.GetMoneyWorkerBalance(_db, ck.Id)
                 })
             );
         }

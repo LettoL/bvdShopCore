@@ -90,11 +90,13 @@ namespace WebUI.Controllers
         public IActionResult Index()
         {
             var userName = HttpContext.User.Identity.Name;
-            var user = _userService.All().FirstOrDefault(u => u.Login == userName);
-            var shop = _shopService.All().FirstOrDefault(x => x.Id == user.ShopId);
+            var user = _db.Users.FirstOrDefault(u => u.Login == userName);
+            var shop = _db.Shops.FirstOrDefault(x => x.Id == user.ShopId);
 
-            var salesProductsToday = _saleProductService.All()
-                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear && x.Sale.Date.Year == DateTime.Now.Date.Year && x.Sale.ShopId == user.ShopId)
+            var salesProductsToday = _db.SalesProducts
+                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear
+                            && x.Sale.Date.Year == DateTime.Now.Date.Year 
+                            && x.Sale.ShopId == user.ShopId)
                 .Select(x => new SaleProduct()
                 {
                     Product = x.Product,
@@ -105,14 +107,16 @@ namespace WebUI.Controllers
 
             ViewBag.SalesAmount = salesProductsToday.Sum(sp => sp.Amount);
 
-            ViewBag.Expenses = _moneyStatisticService.ShopExpenses(shop.Id);
+            ViewBag.Expenses = _moneyStatisticService.ShopExpenses(_db, shop.Id);
 
-            ViewBag.Sum = _shopService.CashOnHand(shop.Id);
+            ViewBag.Sum = _shopService.CashOnHand(_db, shop.Id);
 
-            var infoMoneys = _infoMoneyService.All().ToList();
-            var saleProducts = _db.SalesProducts.Include(x => x.Product);
+            var infoMoneys = _db.InfoMonies.ToList();
+            var saleProducts = _db.SalesProducts
+                .Include(x => x.Product)
+                .ToList();
 
-            ViewBag.DefferedSales = _saleService.All()
+            ViewBag.DefferedSales = _db.Sales
                 .Where(s => s.Payment == false && s.ShopId == user.ShopId
                                                && _db.SaleInformations.Count(x =>
                                                    x.SaleId == s.Id && x.SaleType == SaleType.DefferedSaleFromStock) > 0)
@@ -130,7 +134,7 @@ namespace WebUI.Controllers
                     Total = s.Sum
                 }).ToList();
 
-            ViewBag.OpenSales = _saleService.All()
+            ViewBag.OpenSales = _db.Sales
                 .Where(x => x.Payment == false
                             && x.ShopId == user.ShopId
                             && _db.SaleInformations.Count(z =>
@@ -142,11 +146,11 @@ namespace WebUI.Controllers
                     Id = s.Id,
                     Date = s.Date.ToString("dd.MM.yyyy"),
                     Sum = s.Sum,
-                    ProductTitle = _saleProductService.All()
+                    ProductTitle = _db.SalesProducts
                         .FirstOrDefault(x => x.SaleId == s.Id).Product.Title
                 });
 
-            ViewBag.SalePayments = _infoMoneyService.All()
+            ViewBag.SalePayments = _db.InfoMonies
                 .Where(x => (x.SaleId != null || x.BookingId != null)
                             && x.Date.Date == DateTime.Now.Date.Date
                             && (x.Sale.ShopId == shop.Id || x.Booking.ShopId == shop.Id ))
@@ -184,7 +188,8 @@ namespace WebUI.Controllers
                                         : x.Sale.SaleType == SaleType.Booking
                                             ? "Закрытое бронирование"
                                             : "Неопределено"
-                }).ToList()
+                })
+                .ToList()
                 .Select(x => new SalePaymentVM
                 {
                     Date = x.Date,
@@ -196,13 +201,13 @@ namespace WebUI.Controllers
                     Discount = x.Discount,
                     ForRF = x.ForRF,
                     SaleProducts = x.SaleId != null                    
-                        ? _saleInfoService.GetProductsBySaleId(x.SaleId.Value)
+                        ? saleProducts.Where(z => z.SaleId == x.SaleId.Value)//_saleInfoService.GetProductsBySaleId(x.SaleId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
                             })
-                        : _bookingProductInformationService.GetBookingProductByBooking(x.BookingId.Value)
+                        : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
@@ -210,12 +215,12 @@ namespace WebUI.Controllers
                             }),                    
                         
                 }).Concat(
-                _saleService.All()
+                _db.Sales
                     .Where(x => x.SaleType == SaleType.SaleFromStock
                                               && x.Date.DayOfYear == DateTime.Now.DayOfYear
                                               && x.Date.Year == DateTime.Now.Year
                                               && x.ShopId == shop.Id
-                                              && _saleInformationService.All().Where(z => z.SaleId == x.Id).Count() > 0)
+                                              && _db.SaleInformations.Where(z => z.SaleId == x.Id).Count() > 0)
                     .Select(x => new SalePaymentVM
                     {
                         Date = x.Date.ToShortTimeString(),
@@ -240,16 +245,16 @@ namespace WebUI.Controllers
                         Date = x.Date,
                         SaleNumber = x.SaleNumber,
                         MoneyWorker = x.PaymentType == "Смешанный" 
-                            ? x.MoneyWorker + " и " + _saleInformationService.All().Where(z => z.SaleId == x.SaleId).Select(z => z.MoneyWorkerForCashlessIncome.Title).FirstOrDefault()
+                            ? x.MoneyWorker + " и " + _db.SaleInformations.Where(z => z.SaleId == x.SaleId).Select(z => z.MoneyWorkerForCashlessIncome.Title).FirstOrDefault()
                             : x.PaymentType == "Безналичный"
-                                ? _saleInformationService.All().Where(z => z.SaleId == x.SaleId).Select(z => z.MoneyWorkerForCashlessIncome.Title).FirstOrDefault()
+                                ? _db.SaleInformations.Where(z => z.SaleId == x.SaleId).Select(z => z.MoneyWorkerForCashlessIncome.Title).FirstOrDefault()
                                 : x.MoneyWorker,
                         PaymentType = x.PaymentType,
                         Sum = x.Sum,
                         OperationType = x.OperationType,
                         Discount = x.Discount,
                         ForRF = x.ForRF,
-                        SaleProducts = _saleInfoService.GetProductsBySaleId(x.SaleId.Value)
+                        SaleProducts = _saleInfoService.GetProductsBySaleId(_db, x.SaleId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
@@ -290,12 +295,12 @@ namespace WebUI.Controllers
                 Products = json.Products,
                 PartnerId = json.Buyer == "Обычный покупатель"
                     ? null
-                    : _partnerService.All().First(p => p.Title == json.Buyer)?.Id,
+                    : _db.Partners.First(p => p.Title == json.Buyer)?.Id,
                 Payment = json.Payment,
                 ForRussian = json.ForRussian
             };
 
-            var createdSale = _saleService.Create(saleCreate, json.UserId);
+            var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
 
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
@@ -535,7 +540,7 @@ namespace WebUI.Controllers
                         Cost = p.Cost
                     });
 
-                    primeCost += _productOperationService.RealizationProduct(p.ProductId, p.Amount, createdSale.Id);
+                    primeCost += _productOperationService.RealizationProduct(_db, p.ProductId, p.Amount, createdSale.Id);
                 }
 
                 sale.PrimeCost = primeCost;
@@ -586,8 +591,8 @@ namespace WebUI.Controllers
                     Code = x.Code,
                     Amount = _supplyProduct.All()
                         .Where(sp => sp.ProductId == x.Id)
-                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(x.Id, shop.Id),
-                    BookedCount = _productService.BookedProducts(x.Id, x.Shop.Id)
+                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(_db, x.Id, shop.Id),
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
                 }));
         }
 
@@ -624,8 +629,8 @@ namespace WebUI.Controllers
                     Code = x.Code,
                     Amount = _supplyProduct.All()
                         .Where(sp => sp.ProductId == x.Id)
-                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(x.Id, shop.Id),
-                    BookedCount = _productService.BookedProducts(x.Id, x.Shop.Id)
+                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(_db, x.Id, shop.Id),
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
                 }));
         }
 
@@ -703,7 +708,7 @@ namespace WebUI.Controllers
 
             _moneyOperationService.Expense(expense.MoneyWorkerId, expense.Sum,
                 _moneyOperationService.PaymentTypeByMoneyWorker(expense.MoneyWorkerId),
-                expense.ExpenseCategory, expense.Comment, _shopService.ShopByUserId(userId).Id);
+                expense.ExpenseCategory, expense.Comment, _shopService.ShopByUserId(_db, userId).Id);
 
             return RedirectToAction("Index");
         }
@@ -794,8 +799,8 @@ namespace WebUI.Controllers
                 ForRussian = json.ForRussian
             };
 
-            var createdSale = _saleService.CreatePostPayment(saleCreate, json.UserId);
-            var shop = _shopService.ShopByUserId(json.UserId);
+            var createdSale = _saleService.CreatePostPayment(_db, saleCreate, json.UserId);
+            var shop = _shopService.ShopByUserId(_db, json.UserId);
 
             _db.SaleInformations.Add(new SaleInformation()
             {
@@ -885,7 +890,7 @@ namespace WebUI.Controllers
                 ForRussian = sale.ForRussian
             };
 
-            var createdSale = _saleService.CreatePostPayment(saleCreate, sale.UserId);
+            var createdSale = _saleService.CreatePostPayment(_db, saleCreate, sale.UserId);
 
             _db.SaleInformations.Add(new SaleInformation()
             {
@@ -968,7 +973,7 @@ namespace WebUI.Controllers
         public IActionResult SaleList()
         {
             var userName = HttpContext.User.Identity.Name;
-            var user = _userService.All().First(u => u.Login == userName);
+            var user = _db.Users.First(u => u.Login == userName);
 
             ViewBag.UserId = user.Id;
             ViewBag.Partners = _partnerService.All();
@@ -976,20 +981,21 @@ namespace WebUI.Controllers
             return View(_saleService.All()
                 .Where(s => s.Payment == true && s.ShopId == user.ShopId)
                 .OrderByDescending(x => x.Date)
+                .Take(50)
                 .Select(x => new SaleVM()
                 {
                     Id = x.Id,
                     Date = x.Date.ToString("dd.MM.yyyy"),
-                    Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    Sum = _db.InfoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
                     ShopTitle = x.Shop.Title,
                     HasAdditionalProduct = x.SalesProducts
                                                .FirstOrDefault(sp => sp.Additional) != null
                         ? true
                         : false,
-                    BuyerTitle = _partnerService.All().FirstOrDefault(s => x.PartnerId == s.Id) != null
-                        ? _partnerService.All().FirstOrDefault(s => x.PartnerId == s.Id).Title
+                    BuyerTitle = _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id) != null
+                        ? _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id).Title
                         : "Обычный покупатель",
-                    ProductTitle = _saleProductService.All()
+                    ProductTitle = _db.SalesProducts
                         .FirstOrDefault(s => s.SaleId == x.Id).Product.Title
                 }).ToList()
                 .Select(x => new SaleVM
@@ -999,10 +1005,10 @@ namespace WebUI.Controllers
                     Sum = x.Sum,
                     ShopTitle = x.ShopTitle,
                     HasAdditionalProduct = x.HasAdditionalProduct,
-                    PaymentType = _infoMoneyService.All().Count(s => s.SaleId == x.Id) > 1
+                    PaymentType = _db.InfoMonies.Count(s => s.SaleId == x.Id) > 1
                         ? PaymentType.Mixed
-                        : _infoMoneyService.All().FirstOrDefault(s => s.SaleId == x.Id) != null
-                            ? _infoMoneyService.All().FirstOrDefault(s => s.SaleId == x.Id).PaymentType
+                        : _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id) != null
+                            ? _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id).PaymentType
                             : PaymentType.Cash, //Пиздец
                     BuyerTitle = x.BuyerTitle,
                     ProductTitle = x.ProductTitle

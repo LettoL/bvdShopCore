@@ -4,11 +4,13 @@ using Data.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
 using WebUI.ViewModels;
 using Base.Services.Abstract;
+using Data;
 using Data.Enums;
 using Data.FiltrationModels;
 using Data.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.EntityFrameworkCore;
 
 namespace WebUI.Controllers
 {
@@ -22,6 +24,7 @@ namespace WebUI.Controllers
         private readonly IBaseObjectService<User> _userService;
         private readonly IBaseObjectService<BookingProduct> _bookingProductService;
         private readonly IProductOperationService _productOperationService;
+        private readonly ShopContext _db;
 
         public ProductController(IProductService productService,
             IBaseObjectService<Category> categoryService,
@@ -29,7 +32,8 @@ namespace WebUI.Controllers
             IBaseObjectService<SupplyProduct> supplierProductService,
             IBaseObjectService<User> userService,
             IBaseObjectService<BookingProduct> bookingProductService,
-            IProductOperationService productOperationService)
+            IProductOperationService productOperationService,
+            ShopContext db)
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -38,6 +42,7 @@ namespace WebUI.Controllers
             _userService = userService;
             _bookingProductService = bookingProductService;
             _productOperationService = productOperationService;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -67,13 +72,13 @@ namespace WebUI.Controllers
                     Id = x.Id,
                     Title = x.Title,
                     Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(x.Id, x.Shop.Id),
+                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.Shop.Id),
                     Cost = x.Cost,
                     Shop = x.Shop,
                     Category = x.Category,
                     Code = x.Code,
-                    BookedCount = _productService.BookedProducts(x.Id, x.Shop.Id)
-                }));
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
+                }).ToList());
         }
 
         public IActionResult AllProducts()
@@ -83,20 +88,23 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            return View(_productService.All()
+            return View(_db.Products
+                .Include(x => x.Shop)
+                .Include(x => x.Category)
                 .OrderBy(x => x.Title)
+                .ToList()
                 .Select(x => new ProductVM()
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(x.Id, x.ShopId),
+                    Amount = _db.SupplyProducts.Where(s => s.ProductId == x.Id)
+                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.ShopId),
                     Cost = x.Cost,
                     Shop = x.Shop,
                     Category = x.Category,
                     Code = x.Code,
-                    BookedCount = _productService.BookedProducts(x.Id, x.ShopId)
-                }));
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
+                }).ToList());
         }
 
         [HttpGet]
@@ -267,12 +275,12 @@ namespace WebUI.Controllers
                     Title = x.Title,
                     Amount = _supplyProductService.All()
                         .Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(x.Id, x.ShopId),
+                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.ShopId),
                     Cost = x.Cost,
                     Shop = x.Shop,
                     Category = x.Category,
                     Code = x.Code,
-                    BookedCount = _productService.BookedProducts(x.Id, x.ShopId)
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
                 }));
         }
 

@@ -6,6 +6,6 @@ namespace Data.Services.Abstract
     public interface ISaleStatisticService
     {
         IQueryable<SaleByCategoryVM> GetSalesByCategoriesStats();
-        IQueryable<SaleListVM> SaleList();
+        IQueryable<SaleListVM> SaleList(ShopContext db);
     }
 }

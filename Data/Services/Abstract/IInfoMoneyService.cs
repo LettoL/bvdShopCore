@@ -7,7 +7,7 @@ namespace Data.Services.Abstract
 {
     public interface IInfoMoneyService : IBaseObjectService<InfoMoney>
     {
-        decimal GetMoneyWorkerBalance(int id);
+        decimal GetMoneyWorkerBalance(ShopContext db, int id);
 
         decimal Balance();
 

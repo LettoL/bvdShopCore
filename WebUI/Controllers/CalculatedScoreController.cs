@@ -1,5 +1,6 @@
 ﻿using System.Linq;
 using Base.Services.Abstract;
+using Data;
 using Data.Entities;
 using Data.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
@@ -13,12 +14,15 @@ namespace WebUI.Controllers
     {
         private readonly IBaseObjectService<CalculatedScore> _calculatedScoreService;
         private readonly IInfoMoneyService _infoMoneyService;
+        private readonly ShopContext _db;
 
         public CalculatedScoreController(IBaseObjectService<CalculatedScore> calculatedScoreService,
-            IInfoMoneyService infoMoneyService)
+            IInfoMoneyService infoMoneyService,
+            ShopContext db)
         {
             _calculatedScoreService = calculatedScoreService;
             _infoMoneyService = infoMoneyService;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -28,7 +32,7 @@ namespace WebUI.Controllers
                 {
                     Id = cs.Id,
                     Title = cs.Title,
-                    Balance = _infoMoneyService.GetMoneyWorkerBalance(cs.Id)
+                    Balance = _infoMoneyService.GetMoneyWorkerBalance(_db, cs.Id)
                 })
             );
         }

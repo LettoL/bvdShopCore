@@ -10,13 +10,13 @@ namespace Data.Services.Abstract
 {
     public interface ISaleService : IBaseObjectService<Sale>
     {
-        Sale Create(SaleCreateVM obj, int userId);
+        Sale Create(ShopContext db, SaleCreateVM obj, int userId);
 
-        Sale CreatePostPayment(SaleCreateVM obj, int userId);
+        Sale CreatePostPayment(ShopContext db, SaleCreateVM obj, int userId);
 
-        IQueryable<Sale> DeferredSalesFromStock();
+        IQueryable<Sale> DeferredSalesFromStock(ShopContext context);
 
-        IQueryable<Sale> SalesWithOpenPayments();
+        IQueryable<Sale> SalesWithOpenPayments(ShopContext context);
 
         IQueryable<Sale> GetSalesByShop(int id);
 

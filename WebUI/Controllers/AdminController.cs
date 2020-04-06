@@ -122,21 +122,21 @@ namespace WebUI.Controllers
         {
             var saleProductsToday = new List<SaleProductsTodayVM>();
 
-            foreach (var shop in _shopService.All())
+            foreach (var shop in _db.Shops.ToList())
             {
-                var salesProductsToday = _saleProductService.All()
+                var salesProductsToday = _db.SalesProducts
                         .Where(x => x.Sale.ShopId == shop.Id && x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear && x.Sale.Date.Year == DateTime.Now.Year)
                         .Select(sp => new SaleProduct()
                         {
                             Product = sp.Product,
                             Amount = sp.Amount
-                        });
+                        }).ToList();
 
                 saleProductsToday.Add(new SaleProductsTodayVM()
                 {
                     ShopTitle = shop.Title,
                     SalesProducts = salesProductsToday.ToList(),
-                    Sum = _infoMoneyService.All()
+                    Sum = _db.InfoMonies
                         .Where(im => im.Sale.ShopId == shop.Id && im.Date.DayOfYear == DateTime.Now.DayOfYear && im.Sale.Date.Year == DateTime.Now.Year)
                         .Sum(im => im.Sum)
                 });
@@ -144,21 +144,21 @@ namespace WebUI.Controllers
 
             ViewBag.SalesToday = saleProductsToday;
             
-            ViewBag.Sum = _moneyStatisticService.DailyProfit();
+            ViewBag.Sum = _moneyStatisticService.DailyProfit(_db);
 
-            ViewBag.Expenses = _moneyStatisticService.Expenses();
+            ViewBag.Expenses = _moneyStatisticService.Expenses(_db).ToList();
 
-            ViewBag.DefferedSalesFromStock = _saleService.DeferredSalesFromStock()
+            ViewBag.DefferedSalesFromStock = _saleService.DeferredSalesFromStock(_db).ToList()
                 .Select(s => new SaleVM()
                 {
                     Id = s.Id,
                     Date = s.Date.ToString("dd.MM.yyyy"),
-                    Sum = _infoMoneyService.All().Where(x => x.SaleId == s.Id).Sum(x => x.Sum),
+                    Sum = _db.InfoMonies.Where(x => x.SaleId == s.Id).Sum(x => x.Sum),
                     ShopTitle = s.Shop.Title,
                     ProductTitle = _saleService.ProductTitle(s.Id)
                 }).ToList();
 
-            ViewBag.SalesWithOpenPayments = _saleService.SalesWithOpenPayments()
+            ViewBag.SalesWithOpenPayments = _saleService.SalesWithOpenPayments(_db)
                 .Select(s => new SaleVM()
                 {
                     Id = s.Id,
@@ -228,13 +228,13 @@ namespace WebUI.Controllers
                     Discount = x.Discount,
                     ForRF = x.ForRF,
                     SaleProducts = x.SaleId != null
-                        ? _saleInfoService.GetProductsBySaleId(x.SaleId.Value)
+                        ? _saleInfoService.GetProductsBySaleId(_db, x.SaleId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
                             })
-                        : _bookingProductInformationService.GetBookingProductByBooking(x.BookingId.Value)
+                        : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
@@ -292,13 +292,13 @@ namespace WebUI.Controllers
                     Discount = x.Discount,
                     ForRF = x.ForRF,
                     SaleProducts = x.SaleId != null
-                        ? _saleInfoService.GetProductsBySaleId(x.SaleId.Value)
+                        ? _saleInfoService.GetProductsBySaleId(_db, x.SaleId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
                             })
-                        : _bookingProductInformationService.GetBookingProductByBooking(x.BookingId.Value)
+                        : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
@@ -594,7 +594,7 @@ namespace WebUI.Controllers
             {
                 Id = s.Id,
                 Title = s.Title,
-                CashOnHand = _shopService.CashOnHand(s.Id)
+                CashOnHand = _shopService.CashOnHand(_db, s.Id)
             }));
         }
 
@@ -1019,15 +1019,15 @@ namespace WebUI.Controllers
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Shops = _shopService.All();
 
-            return View(_saleProductService.All()
+            return View(_db.SalesProducts
                 .Where(sp => sp.Additional == true)
                 .OrderByDescending(sp => sp.Id)
                 .Select(sp => new SaleProductVM()
                 {
                     Title = sp.Product.Title,
                     Code = sp.Product.Code,
-                    AdditionalComment = _saleService.All().FirstOrDefault(x => x.Id == sp.SaleId).AdditionalComment,
-                    Date = _saleService.All().FirstOrDefault(x => x.Id == sp.SaleId).Date.ToString("dd.MM.yyyy"),
+                    AdditionalComment = _db.Sales.FirstOrDefault(x => x.Id == sp.SaleId).AdditionalComment,
+                    Date = _db.Sales.FirstOrDefault(x => x.Id == sp.SaleId).Date.ToString("dd.MM.yyyy"),
                     Amount = sp.Amount,
                     Cost = sp.Product.Cost,
                     ShopTitle = sp.Sale.Shop.Title,
@@ -1354,6 +1354,12 @@ namespace WebUI.Controllers
                 shopId = 2, //Id магизина Санкт-Петербурга
                 periodStart = fromDate
             };
+            
+            var filtrationModelForSamara = new SaleFiltrationModel()
+            {
+                shopId = 27,
+                periodStart = fromDate
+            };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
@@ -1367,29 +1373,35 @@ namespace WebUI.Controllers
                 forRF = true
             };
 
-            var saleProducts = _saleProductService.All()
+            var saleProducts = _db.SalesProducts
                 .Include(x => x.Product.Category)
                 .Include(x => x.Sale)
                 .Where(x => x.Sale.Payment == true
-                            && x.Sale.Date.Date >= fromDate);
+                            && x.Sale.Date.Date >= fromDate)
+                .ToList();
 
             var productInfromations = _db.ProductInformations
                 .Include(x => x.Product)
                 .Include(x => x.Sale)
                 .Where(x => x.Product != null && x.Sale != null
                             && x.Sale.Date.Date >= fromDate
-                            && x.Sale.Payment == true);
+                            && x.Sale.Payment == true)
+                .ToList();
 
             var result = _salesByCategoryService.SaleByCategory(
-                saleProducts.ToList().AsQueryable(),
-                productInfromations.ToList().AsQueryable());
+                _db,
+                saleProducts,
+                productInfromations)
+                .ToList();
 
             ViewBag.Totals = new SalesByCategoriesTotalsVM
             {
                 SumSalesByMoscow = result.Sum(x => x.SalesByMoscow),
                 SumSalesByPetersburg = result.Sum(x => x.SalesByPetersburg),
+                SumSalesBySamara = result.Sum(x => x.SalesBySamara),
                 SumChecksByMoscow = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByPetersburg = _saleService.Filtration(filtrationModelForPetersburg).Count(),
+                SumChecksBySamara = _saleService.Filtration(filtrationModelForSamara).Count(),
                 SumChecksByPartners = _saleService.Filtration(filtrationModelForPartners).Count(),
                 SumChecksByRF = _saleService.Filtration(filtrationModelForRF).Count(),
                 SumMargin = result.Sum(x => x.Margin),
@@ -1398,10 +1410,12 @@ namespace WebUI.Controllers
                 SumTurnOver = result.Sum(x => x.TurnOver),
                 SumTurnOverMoscow = result.Sum(x => x.TurnOverMoscow),
                 SumTurnOverPetersburg = result.Sum(x => x.TurnOverPetersburg),
+                SumTurnOverSamara = result.Sum(x => x.TurnOverSamara),
                 SumTurnOverRF = result.Sum(x => x.TurnOverRF),
                 SumTurnOverPartner = result.Sum(x => x.TurnOverPartner),
                 SumMarginMoscow = result.Sum(x => x.MarginMoscow),
                 SumMarginPetersburg = result.Sum(x => x.MarginPetersburg),
+                SumMarginSamara = result.Sum(x => x.MarginSamara),
                 SumMarginPartner = result.Sum(x => x.MarginPartner),
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
@@ -1412,8 +1426,34 @@ namespace WebUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult SalesByCategoriesFilter(DateTime? fromDate, DateTime? forDate)
+        public IActionResult SalesByCategoriesFilter(string fromDate, string forDate)
         {
+            DateTime? fromD = null;
+            DateTime? forD = null;
+
+            if (fromDate != null)
+            {
+                var buf = fromDate.Split('.');
+                fromD = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+            }
+
+            if (forDate != null)
+            {
+                var buf = forDate.Split('.');
+                forD = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+            }
+            
+            Console.WriteLine(fromD.ToString());
+            Console.WriteLine("---------");
+            Console.WriteLine(forD.ToString());
+            Console.WriteLine("---------");
+            
             var saleProducts = _saleProductService.All()
                 .Include(x => x.Product.Category)
                 .Include(x => x.Sale)
@@ -1428,53 +1468,63 @@ namespace WebUI.Controllers
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {
                 shopId = 1, //Id магазина Москвы
-                periodStart = fromDate,
-                periodEnd = forDate,
+                periodStart = fromD,
+                periodEnd = forD,
             };
 
             var filtrationModelForPetersburg = new SaleFiltrationModel()
             {
                 shopId = 2, //Id магизина Санкт-Петербурга
-                periodStart = fromDate,
-                periodEnd = forDate
+                periodStart = fromD,
+                periodEnd = forD
+            };
+            
+            var filtrationModelForSamara = new SaleFiltrationModel()
+            {
+                shopId = 27,
+                periodStart = fromD,
+                periodEnd = forD
             };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
-                periodStart = fromDate,
-                periodEnd = forDate,
+                periodStart = fromD,
+                periodEnd = forD,
                 buyer = -1
             };
 
             var filtrationModelForRF = new SaleFiltrationModel()
             {
-                periodStart = fromDate,
-                periodEnd = forDate,
+                periodStart = fromD,
+                periodEnd = forD,
                 forRF = true
             };
 
             if (fromDate != null)
             {
-                saleProducts = saleProducts.Where(x => x.Sale.Date.Date >= fromDate);
-                productInfromations = productInfromations.Where(x => x.Sale.Date.Date >= fromDate);
+                saleProducts = saleProducts.Where(x => x.Sale.Date.Date >= fromD);
+                productInfromations = productInfromations.Where(x => x.Sale.Date.Date >= fromD);
             }
 
             if (forDate != null)
             {
-                saleProducts = saleProducts.Where(x => x.Sale.Date.Date <= forDate);
-                productInfromations = productInfromations.Where(x => x.Sale.Date.Date <= forDate);
+                saleProducts = saleProducts.Where(x => x.Sale.Date.Date <= forD);
+                productInfromations = productInfromations.Where(x => x.Sale.Date.Date <= forD);
             }
 
             var result = _salesByCategoryService.SaleByCategory(
-                saleProducts.ToList().AsQueryable(),
-                productInfromations.ToList().AsQueryable());
+                _db,
+                saleProducts.ToList(),
+                productInfromations.ToList());
 
             ViewBag.Totals = new SalesByCategoriesTotalsVM
             {
                 SumSalesByMoscow = result.Sum(x => x.SalesByMoscow),
                 SumSalesByPetersburg = result.Sum(x => x.SalesByPetersburg),
+                SumSalesBySamara = result.Sum(x => x.SalesBySamara),
                 SumChecksByMoscow = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByPetersburg = _saleService.Filtration(filtrationModelForPetersburg).Count(),
+                SumChecksBySamara = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByPartners = _saleService.Filtration(filtrationModelForPartners).Count(),
                 SumChecksByRF = _saleService.Filtration(filtrationModelForRF).Count(),
                 SumMargin = result.Sum(x => x.Margin),
@@ -1483,10 +1533,12 @@ namespace WebUI.Controllers
                 SumTurnOver = result.Sum(x => x.TurnOver),
                 SumTurnOverMoscow = result.Sum(x => x.TurnOverMoscow),
                 SumTurnOverPetersburg = result.Sum(x => x.TurnOverPetersburg),
+                SumTurnOverSamara = result.Sum(x => x.TurnOverSamara),
                 SumTurnOverRF = result.Sum(x => x.TurnOverRF),
                 SumTurnOverPartner = result.Sum(x => x.TurnOverPartner),
                 SumMarginMoscow = result.Sum(x => x.MarginMoscow),
                 SumMarginPetersburg = result.Sum(x => x.MarginPetersburg),
+                SumMarginSamara = result.Sum(x => x.MarginSamara),
                 SumMarginPartner = result.Sum(x => x.MarginPartner),
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
@@ -1525,6 +1577,9 @@ namespace WebUI.Controllers
 
             if (type == SalesByCategoriesFilterType.Piter)
                 sales = sales.Where(x => x.ShopId == 2 && x.PartnerId == null && x.ForRussian == false);
+
+            if (type == SalesByCategoriesFilterType.Samara)
+                sales = sales.Where(x => x.ShopId == 27 && x.PartnerId == null && x.ForRussian == false);
 
             if (type == SalesByCategoriesFilterType.ForRF)
                 sales = sales.Where(x => x.ForRussian == true);

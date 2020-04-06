@@ -8,7 +8,7 @@ namespace Data.Services.Abstract
     {
         decimal Turnover(int id);
 
-        decimal CashOnHand(int id);
+        decimal CashOnHand(ShopContext db, int id);
 
         decimal Margin(int id);
 
@@ -20,6 +20,6 @@ namespace Data.Services.Abstract
 
         decimal DateAverageCheck(int id, DateTime dateStart, DateTime dateEnd);
 
-        Shop ShopByUserId(int id);
+        Shop ShopByUserId(ShopContext db, int id);
     }
 }

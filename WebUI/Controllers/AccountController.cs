@@ -1,4 +1,5 @@
-﻿using System.Collections.Generic;
+﻿using System;
+using System.Collections.Generic;
 using System.Security.Claims;
 using System.Threading.Tasks;
 using Data;
@@ -29,14 +30,29 @@ namespace WebUI.Controllers
         //[ValidateAntiForgeryToken]
         public async Task<IActionResult> Login(string login, string password)
         {
-            User user = await _db.Users
-                .FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
-
-            if (user != null)
+            Console.WriteLine(1);
+            
+            try
             {
-                await Authenticate(login); // аутентификация
+                User user = await _db.Users
+                    .FirstOrDefaultAsync(u => u.Login == login && u.Password == password);
 
-                return RedirectToAction("Index", "Home");
+                Console.WriteLine(2);
+                
+                if (user != null)
+                {
+                    Console.WriteLine(3);
+                    
+                    await Authenticate(login); // аутентификация
+
+                    Console.WriteLine(4);
+                    
+                    return RedirectToAction("Index", "Home");
+                }
+            }
+            catch (Exception exception)
+            {
+                Console.WriteLine(exception.Message);
             }
 
             return RedirectToAction("Index", "Account");

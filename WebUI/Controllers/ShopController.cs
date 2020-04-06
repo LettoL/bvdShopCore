@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Linq;
+using Data;
 using Data.Entities;
 using Data.Services.Abstract;
 using Microsoft.AspNetCore.Authorization;
@@ -13,11 +14,13 @@ namespace WebUI.Controllers
     {
         private readonly IShopService _shopService;
         private readonly ISaleService _saleService;
+        private readonly ShopContext _db;
 
-        public ShopController(IShopService shopService, ISaleService saleService)
+        public ShopController(IShopService shopService, ISaleService saleService, ShopContext db)
         {
             _shopService = shopService;
             _saleService = saleService;
+            _db = db;
         }
 
         public IActionResult Index()
@@ -26,7 +29,7 @@ namespace WebUI.Controllers
             {
                 Id = x.Id,
                 Title = x.Title,
-                CashOnHand = _shopService.CashOnHand(x.Id),
+                CashOnHand = _shopService.CashOnHand(_db, x.Id),
                 Margin = _shopService.Margin(x.Id),
                 Sales = _saleService.All()
                     .Where(s => s.Date.Month == DateTime.Now.Month && s.Payment == true)

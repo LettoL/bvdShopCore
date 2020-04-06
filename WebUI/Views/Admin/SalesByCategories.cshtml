@@ -28,16 +28,19 @@
                                 <th>Категория</th>
                                 <th>Москва (К-во чеков)</th>
                                 <th>Санкт-Петербург (К-во чеков)</th>
+                                <th>Самара (К-во чеков)</th>
                                 <th>По РФ (К-во чеков)</th>
                                 <th>Оптовые (К-во чеков)</th>
                                 <th>Выручка Всего</th>
                                 <th>Выручка Москва</th>
                                 <th>Выручка Петербург</th>
+                                <th>Выручка Самара</th>
                                 <th>Выручка РФ</th>
                                 <th>Выручка Оптовые</th>
                                 <th>Маржа</th>
                                 <th>Маржа Москва</th>
                                 <th>Маржа Петербург</th>
+                                <th>Маржа Самара</th>
                                 <th>Маржа РФ</th>
                                 <th>Маржа Оптовые</th>
                             </tr>
@@ -45,16 +48,19 @@
                                 <th><b>Итого:</b></th>
                                 <th>@ViewBag.Totals.SumSalesByMoscow (@ViewBag.Totals.SumChecksByMoscow)</th>
                                 <th>@ViewBag.Totals.SumSalesByPetersburg (@ViewBag.Totals.SumChecksByPetersburg)</th>
+                                <th>@ViewBag.Totals.SumSalesBySamara (@ViewBag.Totals.SumChecksBySamara)</th>
                                 <th>@ViewBag.Totals.SumForRussianFederation (@ViewBag.Totals.SumChecksByRF)</th>
                                 <th>@ViewBag.Totals.SumPartnerSales (@ViewBag.Totals.SumChecksByPartners)</th>
                                 <th>@ViewBag.Totals.SumTurnOver</th>
                                 <th>@ViewBag.Totals.SumTurnOverMoscow</th>
                                 <th>@ViewBag.Totals.SumTurnOverPetersburg</th>
+                                <th>@ViewBag.Totals.SumTurnOverSamara</th>
                                 <th>@ViewBag.Totals.SumTurnOverRF</th>
                                 <th>@ViewBag.Totals.SumTurnOverPartner</th>
                                 <th>@ViewBag.Totals.SumMargin</th>
                                 <th>@ViewBag.Totals.SumMarginMoscow</th>
                                 <th>@ViewBag.Totals.SumMarginPetersburg</th>
+                                <th>@ViewBag.Totals.SumMarginSamara</th>
                                 <th>@ViewBag.Totals.SumMarginRF</th>
                                 <th>@ViewBag.Totals.SumMarginPartner</th>
                             </tr>
@@ -77,6 +83,11 @@
                                         </a>                                     
                                     </td>
                                     <td>
+                                        <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=27&categoryId=@saleByCategory.Category.Id">
+                                            @saleByCategory.SalesBySamara
+                                        </a>                                     
+                                    </td>
+                                    <td>
                                         <a href="/Admin/SalesByCategoriesDetail?fromDate=@ViewBag.fromDate&forDate=@ViewBag.forDate&type=3&categoryId=@saleByCategory.Category.Id">
                                             @saleByCategory.ForRussianFederation
                                         </a>                                      
@@ -96,6 +107,9 @@
                                         @saleByCategory.TurnOverPetersburg
                                     </td>
                                     <td>
+                                        @saleByCategory.TurnOverSamara
+                                    </td>
+                                    <td>
                                         @saleByCategory.TurnOverRF
                                     </td>
                                     <td>
@@ -109,6 +123,9 @@
                                     </td>
                                     <td>
                                         @saleByCategory.MarginPetersburg
+                                    </td>
+                                    <td>
+                                        @saleByCategory.MarginSamara
                                     </td>
                                     <td>
                                         @saleByCategory.MarginRF

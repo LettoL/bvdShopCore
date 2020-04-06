@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using Microsoft.EntityFrameworkCore;
 
 namespace Data.Services.Concrete
 {
@@ -73,18 +74,22 @@ namespace Data.Services.Concrete
             return saleCategories;
         }
 
-        public IQueryable<SaleListVM> SaleList()
+        public IQueryable<SaleListVM> SaleList(ShopContext db)
         {
             //TODO: Убрать Лист и соответственно второй селект, пофиксить двойное обращение к контексту, при вытягивании тайпа
-            var query = _saleService.All().Where(x => x.Payment).OrderByDescending(x => x.Date).Take(100)
+            var query = db.Sales
+                .Where(x => x.Payment)
+                .Include(x => x.SalesProducts).ThenInclude(x => x.Product)
+                .OrderByDescending(x => x.Date)
+                .Take(100)
                 .Select(x => new SaleListVM()
                 {
                     Id = x.Id,
                     Date = x.Date.ToString("dd.MM.yyyy"),
-                    Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    Sum = db.InfoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
                     ShopTitle = x.Shop.Title,
                     PrimeCost = x.PrimeCost,
-                    ProductTitle = _saleInfoService.FirstProductTitle(x.Id),
+                    ProductTitle = x.SalesProducts.FirstOrDefault().Product.Title,
                 })
                 .ToList()
                 .Select(x => new SaleListVM()

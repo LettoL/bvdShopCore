@@ -8,6 +8,6 @@ namespace Data.Services.Abstract
         IQueryable<BookingProduct> GetBookedProductsInShop(int shopId);
         int GetAmountOfBookedProductsInShop(int shopId);
 
-        IQueryable<BookingProduct> GetBookingProductByBooking(int bookingId);
+        IQueryable<BookingProduct> GetBookingProductByBooking(ShopContext db, int bookingId);
     }
 }

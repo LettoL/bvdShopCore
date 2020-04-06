@@ -27,7 +27,7 @@
                         <h4>Войти в систему</h4>
                     </div>
                     <div class="sign-up-form">
-                        <form asp-action="Login" asp-controller="Account" method="post">
+                        <form action="/Account/Login" method="post">
                             <label asp-for="login">Введите имя</label>
                             <input type="text" name="login" class="form-control">
                             <label asp-for="Password">Введите пароль</label>

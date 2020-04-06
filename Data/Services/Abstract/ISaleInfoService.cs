@@ -11,6 +11,6 @@ namespace Data.Services.Abstract
         string FirstProductTitle(int id);
         PaymentType PaymentType(int id);
 
-        IQueryable<SaleProduct> GetProductsBySaleId(int saleId);
+        IQueryable<SaleProduct> GetProductsBySaleId(ShopContext db, int saleId);
     }
 }

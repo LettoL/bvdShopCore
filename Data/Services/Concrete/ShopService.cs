@@ -95,17 +95,17 @@ namespace Data.Services.Concrete
             return Math.Round(res, 2);
         }
         
-        public decimal CashOnHand(int id)
+        public decimal CashOnHand(ShopContext db, int id)
         {
-            var res = _infoMoneyService.GetMoneyWorkerBalance(id);
+            var res = _infoMoneyService.GetMoneyWorkerBalance(db, id);
 
             return res;
         }
 
-        public Shop ShopByUserId(int id)
+        public Shop ShopByUserId(ShopContext db, int id)
         {
-            var shopId = _userService.All().First(x => x.Id == id).ShopId;
-            var shop = All().FirstOrDefault(x => x.Id == shopId);
+            var shopId = db.Users.First(x => x.Id == id).ShopId;
+            var shop = db.Shops.FirstOrDefault(x => x.Id == shopId);
 
             return shop;
         }

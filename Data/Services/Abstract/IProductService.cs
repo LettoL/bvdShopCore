@@ -16,7 +16,7 @@ namespace Data.Services.Abstract
 
         void SupplyAnnulment(int id);
 
-        int BookedProducts(int id, int shopId);
+        int BookedProducts(ShopContext db, int id, int shopId);
 
         IQueryable<Product> Filtration(ProductFiltrationModel model);
     }

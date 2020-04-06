@@ -21,9 +21,9 @@ namespace Data.Services.Concrete
             _infoMoneyService = infoMoneyService;
         }
 
-        public IQueryable<ExpenseListVM> Expenses()
+        public IQueryable<ExpenseListVM> Expenses(ShopContext context)
         {
-            return _expenseService.All()
+            return context.Expenses
                 .Where(x => x.InfoMoney.Date.Date == DateTime.Now.Date.Date)
                 .Select(x => new ExpenseListVM()
                 {
@@ -34,9 +34,9 @@ namespace Data.Services.Concrete
                 });
         }
 
-        public IQueryable<ExpenseListVM> ShopExpenses(int shopId)
+        public IQueryable<ExpenseListVM> ShopExpenses(ShopContext db, int shopId)
         {
-            return _expenseService.All()
+            return db.Expenses
                 .Where(x => x.ShopId == shopId && x.InfoMoney.Date.Date == DateTime.Now.Date)
                 .Select(x => new ExpenseListVM()
                 {
@@ -47,9 +47,9 @@ namespace Data.Services.Concrete
                 });
         }
 
-        public decimal DailyProfit()
+        public decimal DailyProfit(ShopContext context)
         {
-            return _infoMoneyService.All()
+            return context.InfoMonies
                 .Where(im => im.Date.DayOfYear == DateTime.Now.DayOfYear
                              && im.Date.Year == DateTime.Now.Year
                              && im.Sum > 0

@@ -76,7 +76,7 @@ namespace WebUI.Controllers
             ViewBag.Partners = _partnerService.All();
             ViewBag.Shops = _shopService.All();
 
-            return View(_saleStatisticService.SaleList());
+            return View(_saleStatisticService.SaleList(_db).ToList());
         }
 
         [HttpGet]
@@ -147,27 +147,31 @@ namespace WebUI.Controllers
             if (user.Role != Role.Administrator)
                 getAllSales = getAllSales.Where(x => x.ShopId == user.ShopId);
 
-            return PartialView(getAllSales.OrderByDescending(s => s.Id).Select(s => new SaleVM()
+            var response = getAllSales
+                .OrderByDescending(s => s.Id)
+                .Select(s => new SaleVM()
             {
                 Id = s.Id,
                 Date = s.Date.ToString("dd.MM.yyyy"),
                 Sum = s.Sum,
                 ShopTitle = s.Shop.Title,
-                PaymentType = _infoMoneyService.All().Count(x => x.SaleId == s.Id) > 1
+                PaymentType = _db.InfoMonies.Count(x => x.SaleId == s.Id) > 1
                     ? PaymentType.Mixed
-                    : _infoMoneyService.All().FirstOrDefault(x => x.SaleId == s.Id) != null
-                        ? _infoMoneyService.All().FirstOrDefault(x => x.SaleId == s.Id).PaymentType
+                    : _db.InfoMonies.FirstOrDefault(x => x.SaleId == s.Id) != null
+                        ? _db.InfoMonies.FirstOrDefault(x => x.SaleId == s.Id).PaymentType
                         : PaymentType.Cash, //Пиздец
                 HasAdditionalProduct = s.SalesProducts.FirstOrDefault(sp => sp.Additional) != null
                     ? true
                     : false,
-                BuyerTitle = _partnerService.All().FirstOrDefault(x => x.Id == s.PartnerId) != null
-                ? _partnerService.All().FirstOrDefault(x => s.PartnerId == x.Id).Title
-                : "Обычный покупатель",
-                ProductTitle = _saleProductService.All()
-                        .FirstOrDefault(z => z.SaleId == s.Id).Product.Title,
+                BuyerTitle = _db.Partners.FirstOrDefault(x => x.Id == s.PartnerId) != null
+                    ? _db.Partners.FirstOrDefault(x => s.PartnerId == x.Id).Title
+                    : "Обычный покупатель",
+                ProductTitle = _db.SalesProducts
+                    .FirstOrDefault(z => z.SaleId == s.Id).Product.Title,
                 PrimeCost = s.PrimeCost
-            }));
+            }).ToList();
+
+            return PartialView(response);
         }
 
         [HttpPost]
@@ -308,9 +312,9 @@ namespace WebUI.Controllers
 
         public IActionResult SalesWithPartners()
         {
-            ViewBag.Partners = _partnerService.All();
+            ViewBag.Partners = _db.Partners.ToList();
 
-            return View(_saleService.All()
+            return View(_db.Sales
                 .Where(s => s.Payment == true && s.PartnerId != null)
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SaleVM()
@@ -323,8 +327,8 @@ namespace WebUI.Controllers
                                                .FirstOrDefault(sp => sp.Additional) != null
                         ? true
                         : false,
-                    BuyerTitle = _partnerService.All().FirstOrDefault(s => x.PartnerId == s.Id) != null
-                        ? _partnerService.All().FirstOrDefault(s => x.PartnerId == s.Id).Title
+                    BuyerTitle = _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id) != null
+                        ? _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id).Title
                         : "Обычный покупатель",
                     Comment = x.Comment
                 }).ToList()
@@ -428,13 +432,13 @@ namespace WebUI.Controllers
                     ShopId = x.ShopId,
                     ShopTitle = x.ShopTitle,
                     SaleProducts = x.SaleId != null
-                        ? _saleInfoService.GetProductsBySaleId(x.SaleId.Value)
+                        ? _saleInfoService.GetProductsBySaleId(_db, x.SaleId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
                             })
-                        : _bookingProductInformationService.GetBookingProductByBooking(x.BookingId.Value)
+                        : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,

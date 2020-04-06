@@ -45,9 +45,9 @@ namespace Data.Services.Concrete
                 .Include(x => x.Product).FirstOrDefault(x => x.SaleId == id)?.Product?.Title ?? "";
         }
 
-        public IQueryable<SaleProduct> GetProductsBySaleId(int saleId)
+        public IQueryable<SaleProduct> GetProductsBySaleId(ShopContext db, int saleId)
         {
-            return _saleProductService.All().Where(x => x.SaleId == saleId);
+            return db.SalesProducts.Where(x => x.SaleId == saleId);
         }
 
         public PaymentType PaymentType(int id)

@@ -5,9 +5,9 @@ namespace Data.Services.Abstract
 {
     public interface IMoneyStatisticService
     {
-        IQueryable<ExpenseListVM> Expenses();
-        IQueryable<ExpenseListVM> ShopExpenses(int shopId);
+        IQueryable<ExpenseListVM> Expenses(ShopContext context);
+        IQueryable<ExpenseListVM> ShopExpenses(ShopContext db, int shopId);
 
-        decimal DailyProfit();
+        decimal DailyProfit(ShopContext context);
     }
 }

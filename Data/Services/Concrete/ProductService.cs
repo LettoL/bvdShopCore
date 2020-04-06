@@ -104,10 +104,12 @@ namespace Data.Services.Concrete
             return createdBooking;
         }
 
-        public int BookedProducts(int id, int shopId)
+        public int BookedProducts(ShopContext db, int id, int shopId)
         {
-            return _bookingProductService.All()
-                .Where(x => x.ProductId == id && x.Product.ShopId == shopId && x.Booking.Status == BookingStatus.Open)
+            return db.BookingProducts
+                .Where(x => x.ProductId == id 
+                            && x.Product.ShopId == shopId 
+                            && x.Booking.Status == BookingStatus.Open)
                 .Sum(x => x.Amount);
         }
 

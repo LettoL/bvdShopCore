@@ -1,4 +1,5 @@
 ﻿using System;
+using System.Collections.Generic;
 using System.Linq;
 using Data.Entities;
 using Data.ModernServices.Abstract;
@@ -8,17 +9,11 @@ namespace Data.ModernServices.Concrete
 {
     public class SalesByCategoryService : ISalesByCategoryService
     {
-        private readonly ShopContext _context;
-
-        public SalesByCategoryService(ShopContext context)
+        public ICollection<SaleByCategoryVM> SaleByCategory(ShopContext db,
+            ICollection<SaleProduct> saleProducts,
+            ICollection<ProductInformation> productInformations)
         {
-            _context = context;
-        }
-
-        public IQueryable<SaleByCategoryVM> SaleByCategory(IQueryable<SaleProduct> saleProducts,
-            IQueryable<ProductInformation> productInformations)
-        {
-            return _context.Categories
+            return db.Categories
                 .Select(x => new SaleByCategoryVM()
                 {
                     Category = x,
@@ -26,6 +21,8 @@ namespace Data.ModernServices.Concrete
                         SaleProductsByCategory(saleProducts, x.Id), 1),
                     SalesByPetersburg = ProductSalesByShop(
                         SaleProductsByCategory(saleProducts, x.Id), 2),
+                    SalesBySamara = ProductSalesByShop(
+                        SaleProductsByCategory(saleProducts, x.Id), 27),
                     Margin = Math.Round(
                         IncomeBySales(
                             SaleProductsByCategory(saleProducts, x.Id))
@@ -49,6 +46,11 @@ namespace Data.ModernServices.Concrete
                         IncomeBySales(
                             SaleProductsByShop(
                                 SaleProductsByCategory(saleProducts, x.Id), 2)),
+                        2),
+                    TurnOverSamara = Math.Round(
+                        IncomeBySales(
+                            SaleProductsByShop(
+                                SaleProductsByCategory(saleProducts, x.Id),27)),
                         2),
                     TurnOverRF = Math.Round(
                         IncomeBySales(
@@ -76,6 +78,14 @@ namespace Data.ModernServices.Concrete
                             ProductInformationsByShop(
                                 ProductInformationsByCategory(productInformations, x.Id), 2)),
                         2),
+                    MarginSamara = Math.Round(
+                        IncomeBySales(
+                            SaleProductsByShop(
+                                SaleProductsByCategory(saleProducts, x.Id), 27))
+                        - PurchaseProductPrice(
+                            ProductInformationsByShop(
+                                ProductInformationsByCategory(productInformations, x.Id), 27)),
+                        2),
                     MarginPartner = Math.Round(
                         IncomeBySales(
                             SaleProductsForPartner(
@@ -92,92 +102,92 @@ namespace Data.ModernServices.Concrete
                             ProductInformationsInRussia(
                                 ProductInformationsByCategory(productInformations, x.Id))),
                         2)
-                });
+                }).ToList();
         }
 
-        private IQueryable<SaleProduct> SaleProductsByCategory(IQueryable<SaleProduct> saleProducts,
+        private static ICollection<SaleProduct> SaleProductsByCategory(ICollection<SaleProduct> saleProducts,
             int categoryId)
         {
-            return saleProducts.Where(x => x.Product.CategoryId == categoryId);
+            return saleProducts.Where(x => x.Product.CategoryId == categoryId).ToList();
         }
 
-        private IQueryable<SaleProduct> SaleProductsByShop(IQueryable<SaleProduct> saleProducts,
+        private static ICollection<SaleProduct> SaleProductsByShop(ICollection<SaleProduct> saleProducts,
             int shopId)
         {
             return saleProducts.Where(x => x.Sale.ShopId == shopId
                                            && x.Sale.PartnerId == null
-                                           && x.Sale.ForRussian == false);
+                                           && x.Sale.ForRussian == false).ToList();
         }
 
-        private IQueryable<SaleProduct> SaleProductsForPartner(IQueryable<SaleProduct> saleProducts)
+        private static ICollection<SaleProduct> SaleProductsForPartner(ICollection<SaleProduct> saleProducts)
         {
-            return saleProducts.Where(x => x.Sale.PartnerId != null);
+            return saleProducts.Where(x => x.Sale.PartnerId != null).ToList();
         }
 
-        private IQueryable<SaleProduct> SaleProductsInRussia(IQueryable<SaleProduct> saleProducts)
+        private static ICollection<SaleProduct> SaleProductsInRussia(ICollection<SaleProduct> saleProducts)
         {
             return saleProducts.Where(x => x.Sale.ForRussian
-                                           && x.Sale.PartnerId == null);
+                                           && x.Sale.PartnerId == null).ToList();
         }
 
-        private IQueryable<ProductInformation> ProductInformationsByCategory(
-            IQueryable<ProductInformation> productInformations,
+        private static ICollection<ProductInformation> ProductInformationsByCategory(
+            ICollection<ProductInformation> productInformations,
             int categoryId)
         {
-            return productInformations.Where(x => x.Product.CategoryId == categoryId);
+            return productInformations.Where(x => x.Product.CategoryId == categoryId).ToList();
         }
 
-        private IQueryable<ProductInformation> ProductInformationsByShop(
-            IQueryable<ProductInformation> productInformations,
+        private static ICollection<ProductInformation> ProductInformationsByShop(
+            ICollection<ProductInformation> productInformations,
             int shopId)
         {
             return productInformations.Where(x => x.Sale.ShopId == shopId
                                                   && x.Sale.PartnerId == null
-                                                  && x.Sale.ForRussian == false);
+                                                  && x.Sale.ForRussian == false).ToList();
         }
 
-        private IQueryable<ProductInformation> ProductInformationsForPartner(
-            IQueryable<ProductInformation> productInformations)
+        private static ICollection<ProductInformation> ProductInformationsForPartner(
+            ICollection<ProductInformation> productInformations)
         {
-            return productInformations.Where(x => x.Sale.PartnerId != null);
+            return productInformations.Where(x => x.Sale.PartnerId != null).ToList();
         }
 
-        private IQueryable<ProductInformation> ProductInformationsInRussia(
-            IQueryable<ProductInformation> productInformations)
+        private static ICollection<ProductInformation> ProductInformationsInRussia(
+            ICollection<ProductInformation> productInformations)
         {
             return productInformations.Where(x => x.Sale.ForRussian
-                                                  && x.Sale.PartnerId == null);
+                                                  && x.Sale.PartnerId == null).ToList();
         }
 
-        private int ProductSalesByShop(IQueryable<SaleProduct> saleProducts, int shopId)
+        private static int ProductSalesByShop(ICollection<SaleProduct> saleProducts, int shopId)
         {
             return SaleProductsByShop(saleProducts, shopId)
                 .Sum(x => x.Amount);
         }
 
-        private int ProductSalesInRussia(IQueryable<SaleProduct> saleProducts)
+        private static int ProductSalesInRussia(ICollection<SaleProduct> saleProducts)
         {
             return SaleProductsInRussia(saleProducts)
                 .Sum(x => x.Amount);
         }
 
-        private int ProductSalesForPartner(IQueryable<SaleProduct> saleProducts)
+        private static int ProductSalesForPartner(ICollection<SaleProduct> saleProducts)
         {
             return SaleProductsForPartner(saleProducts)
                 .Sum(x => x.Amount);
         }
 
-        private decimal IncomeBySales(IQueryable<SaleProduct> saleProducts)
+        private static decimal IncomeBySales(ICollection<SaleProduct> saleProducts)
         {
             return saleProducts.Sum(x => x.Cost * x.Amount - UnitProductDiscount(x.Sale));
         }
 
-        private decimal UnitProductDiscount(Sale sale)
+        private static decimal UnitProductDiscount(Sale sale)
         {
             return sale.Discount / sale.SalesProducts.Count;
         }
 
-        private decimal PurchaseProductPrice(IQueryable<ProductInformation> productInformations)
+        private static decimal PurchaseProductPrice(ICollection<ProductInformation> productInformations)
         {
             return productInformations.Sum(x => x.FinalCost);
         }

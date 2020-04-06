@@ -27,9 +27,9 @@ namespace Data.Services.Concrete
             return base.Create(obj);
         }
 
-        public decimal GetMoneyWorkerBalance(int moneyWorkerId)
+        public decimal GetMoneyWorkerBalance(ShopContext db, int moneyWorkerId)
         {
-            var balance = All().Where(im => im.MoneyWorkerId == moneyWorkerId)
+            var balance = db.InfoMonies.Where(im => im.MoneyWorkerId == moneyWorkerId)
                 .Sum(im => im.Sum);
 
             return balance;

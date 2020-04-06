@@ -23,11 +23,11 @@ namespace Data.Services.Concrete
             _moneyWorkerService = moneyWorkerService;
         }
 
-        public void SalePayment(decimal cash, decimal cashless, Sale sale,
+        public void SalePayment(ShopContext db, decimal cash, decimal cashless, Sale sale,
             int? moneyWorkerIdForCash, int? moneyWorkerIdForCashless)
         {
             if (cash > 0)
-                _infoMoneyService.Create(new InfoMoney()
+                db.InfoMonies.Add(new InfoMoney()
                 {
                     MoneyWorkerId = moneyWorkerIdForCash,
                     SaleId = sale.Id,
@@ -36,7 +36,7 @@ namespace Data.Services.Concrete
                     MoneyOperationType = MoneyOperationType.Sale
                 });
             if (cashless > 0)
-                _infoMoneyService.Create(new InfoMoney()
+                db.InfoMonies.Add(new InfoMoney()
                 {
                     MoneyWorkerId = moneyWorkerIdForCashless,
                     SaleId = sale.Id,

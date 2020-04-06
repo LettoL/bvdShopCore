@@ -5,14 +5,7 @@ namespace Base
 {
     public class EfRepository<T> where T : BaseObject
     {
-        private readonly DbContext _context;
-
-        public EfRepository(DbContext context)
-        {
-            _context = context;
-        }
-
-        public virtual IQueryable<T> GetAll()
+        public virtual IQueryable<T> GetAll(DbContext _context)
         {
             var a = _context.Set<T>().ToList();
 
