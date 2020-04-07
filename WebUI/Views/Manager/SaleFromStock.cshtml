@@ -397,15 +397,15 @@
                 var realization = {
                     products: this.products,
                     sum: this.sum,
-                    cash: this.cash,
-                    cashless: this.cashless,
-                    discount: this.discount,
+                    cash: +this.cash,
+                    cashless: +this.cashless,
+                    discount: +this.discount,
                     buyer: this.buyer,
                     comment: this.comment,
                     additionalComment: this.additionalComment,
-                    moneyWorkerIdForCashlessIncome: this.moneyWorkerIdForCashlessIncome,
+                    moneyWorkerIdForCashlessIncome: +this.moneyWorkerIdForCashlessIncome,
                     userId: userId,
-                    forRussian: this.forRussian
+                    forRussian: Boolean(this.forRussian)
                 }
 
                 console.log(realization)

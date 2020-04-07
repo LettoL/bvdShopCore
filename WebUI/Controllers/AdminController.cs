@@ -233,13 +233,13 @@ namespace WebUI.Controllers
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            })
+                            }).ToList()
                         : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            }),
+                            }).ToList(),
                 }); 
 
             ViewBag.PetersburgSalePayments = _infoMoneyService.All()
@@ -297,13 +297,13 @@ namespace WebUI.Controllers
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            })
+                            }).ToList()
                         : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            }),
+                            }).ToList(),
                 });
 
             return View();
@@ -1346,30 +1346,30 @@ namespace WebUI.Controllers
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {
                 shopId = 1, //Id магазина Москвы
-                periodStart = fromDate
+                startDate = fromDate
             };
 
             var filtrationModelForPetersburg = new SaleFiltrationModel()
             {
                 shopId = 2, //Id магизина Санкт-Петербурга
-                periodStart = fromDate
+                startDate = fromDate
             };
             
             var filtrationModelForSamara = new SaleFiltrationModel()
             {
                 shopId = 27,
-                periodStart = fromDate
+                startDate = fromDate
             };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
-                periodStart = fromDate,
+                startDate = fromDate,
                 buyer = -1
             };
 
             var filtrationModelForRF = new SaleFiltrationModel()
             {
-                periodStart = fromDate,
+                startDate = fromDate,
                 forRF = true
             };
 
@@ -1468,35 +1468,35 @@ namespace WebUI.Controllers
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {
                 shopId = 1, //Id магазина Москвы
-                periodStart = fromD,
-                periodEnd = forD,
+                startDate = fromD,
+                endDate = forD,
             };
 
             var filtrationModelForPetersburg = new SaleFiltrationModel()
             {
                 shopId = 2, //Id магизина Санкт-Петербурга
-                periodStart = fromD,
-                periodEnd = forD
+                startDate = fromD,
+                endDate = forD
             };
             
             var filtrationModelForSamara = new SaleFiltrationModel()
             {
                 shopId = 27,
-                periodStart = fromD,
-                periodEnd = forD
+                startDate = fromD,
+                endDate = forD
             };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
-                periodStart = fromD,
-                periodEnd = forD,
+                startDate = fromD,
+                endDate = forD,
                 buyer = -1
             };
 
             var filtrationModelForRF = new SaleFiltrationModel()
             {
-                periodStart = fromD,
-                periodEnd = forD,
+                startDate = fromD,
+                endDate = forD,
                 forRF = true
             };
 

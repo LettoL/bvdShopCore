@@ -68,7 +68,7 @@ namespace Data.Services.Concrete
 
             var sale = db.Sales.Add(new Sale()
             {
-                Date = DateTime.Now,
+                Date = DateTime.Now.AddHours(3),
                 AdditionalComment = obj.AdditionalComment,
                 Comment = obj.Comment,
                 ShopId = shop.Id,
@@ -145,7 +145,7 @@ namespace Data.Services.Concrete
 
             var sale = db.Sales.Add(new Sale()
             {
-                Date = DateTime.Now,
+                Date = DateTime.Now.AddHours(3),
                 ShopId = shop.Id,
                 AdditionalComment = obj.AdditionalComment,
                 PartnerId = obj.PartnerId,
@@ -167,7 +167,7 @@ namespace Data.Services.Concrete
                 {
                     Amount = product.Amount,
                     ProductId = product.Id,
-                    SaleId = sale.Id,
+                    Sale = sale,
                     Additional = product.Additional,
                     Cost = product.Cost
                 });

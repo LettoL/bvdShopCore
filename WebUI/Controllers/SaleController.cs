@@ -1,4 +1,5 @@
-﻿using System;
+using System;
+using System.Collections.Generic;
 using System.Linq;
 using System.Runtime.InteropServices.ComTypes;
 using Base.Services.Abstract;
@@ -137,6 +138,24 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult Filter(SaleFilterVM saleFilterVM)
         {
+            if (saleFilterVM.SaleFiltrationModel.periodStart != null)
+            {
+                var buf = saleFilterVM.SaleFiltrationModel.periodStart.Split('.');
+                saleFilterVM.SaleFiltrationModel.startDate = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+            }
+            
+            if (saleFilterVM.SaleFiltrationModel.periodEnd != null)
+            {
+                var buf = saleFilterVM.SaleFiltrationModel.periodEnd.Split('.');
+                saleFilterVM.SaleFiltrationModel.endDate = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+            }
+
             var user = _userService.All().First(u => u.Id == saleFilterVM.UserId);
             ViewBag.User = user;
             if (user == null)

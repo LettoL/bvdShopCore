@@ -400,15 +400,15 @@
                 var realization = {
                     products: this.products,
                     sum: this.sum,
-                    cashSum: this.cashSum,
-                    cashlessSum: this.cashlessSum,
-                    discount: this.discount,
+                    cashSum: +this.cashSum,
+                    cashlessSum: +this.cashlessSum,
+                    discount: +this.discount,
                     buyer: this.buyer,
                     comment: this.comment,
                     additionalComment: this.additionalComment,  
-                    moneyWorkerId: this.moneyWorkerId,
+                    moneyWorkerId: +this.moneyWorkerId,
                     userId: userId,
-                    forRussian: this.forRussian
+                    forRussian: Boolean(this.forRussian)
             }
 
                 /*var xhr = new XMLHttpRequest();

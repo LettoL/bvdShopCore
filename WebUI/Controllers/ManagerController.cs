@@ -206,13 +206,13 @@ namespace WebUI.Controllers
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            })
+                            }).ToList()
                         : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
                             .Select(z => new SaleProductItemVM
                             {
                                 Title = z.Product.Title,
                                 Amount = z.Amount.ToString()
-                            }),                    
+                            }).ToList(),                    
                         
                 }).Concat(
                 _db.Sales

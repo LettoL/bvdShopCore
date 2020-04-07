@@ -13,7 +13,7 @@ namespace Data.Services.Concrete.Filtration
             query = query.IsShopId(model.shopId)
                 .IsType(model.type)
                 .IsBuyer(model.buyer)
-                .IsPeriod(model.periodStart, model.periodEnd)
+                .IsPeriod(model.startDate, model.endDate)
                 .IsForRF(model.forRF);
             
             return query;

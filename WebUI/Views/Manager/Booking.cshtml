@@ -411,16 +411,16 @@
                 });
 
                 var realization = {
-                    discount: this.discount,
+                    discount: +this.discount,
                     products: this.products,
                     sum: this.sum - this.discount,
-                    cashSum: this.cashSum,
-                    cashlessSum: this.cashlessSum,
-                    moneyWorkerId: this.moneyWorkerId,
+                    cashSum: +this.cashSum,
+                    cashlessSum: +this.cashlessSum,
+                    moneyWorkerId: +this.moneyWorkerId,
                     userId: userId,
                     bookingType: 0,
                     buyer: this.buyer,
-                    forRussian: this.forRussian
+                    forRussian: Boolean(this.forRussian)
                 }
 
                 /*var xhr = new XMLHttpRequest();
