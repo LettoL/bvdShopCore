@@ -22,7 +22,7 @@ namespace Data.Services.Concrete
 
         public override InfoMoney Create(InfoMoney obj)
         {
-            obj.Date = DateTime.Now;
+            obj.Date = DateTime.Now.AddHours(3);
 
             return base.Create(obj);
         }

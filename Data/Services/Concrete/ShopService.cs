@@ -26,7 +26,7 @@ namespace Data.Services.Concrete
         public decimal Turnover(int id)
         {
             var infoMonies = this.infoMonies(id)
-                .Where(x => x.Sale.Date.Month == DateTime.Now.Month);
+                .Where(x => x.Sale.Date.Month == DateTime.Now.AddHours(3).Month);
             if (!infoMonies.Any())
                 return 0;
 
@@ -40,7 +40,7 @@ namespace Data.Services.Concrete
         public decimal Margin(int id)
         {
             var sales = this.sales(id)
-                .Where(x => x.Payment == true && x.Date.Month == DateTime.Now.Month);
+                .Where(x => x.Payment == true && x.Date.Month == DateTime.Now.AddHours(3).Month);
             if (!sales.Any())
                 return 0;
 

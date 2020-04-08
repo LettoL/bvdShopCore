@@ -125,7 +125,7 @@ namespace WebUI.Controllers
             foreach (var shop in _db.Shops.ToList())
             {
                 var salesProductsToday = _db.SalesProducts
-                        .Where(x => x.Sale.ShopId == shop.Id && x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear && x.Sale.Date.Year == DateTime.Now.Year)
+                        .Where(x => x.Sale.ShopId == shop.Id && x.Sale.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear && x.Sale.Date.Year == DateTime.Now.AddHours(3).Year)
                         .Select(sp => new SaleProduct()
                         {
                             Product = sp.Product,
@@ -137,7 +137,7 @@ namespace WebUI.Controllers
                     ShopTitle = shop.Title,
                     SalesProducts = salesProductsToday.ToList(),
                     Sum = _db.InfoMonies
-                        .Where(im => im.Sale.ShopId == shop.Id && im.Date.DayOfYear == DateTime.Now.DayOfYear && im.Sale.Date.Year == DateTime.Now.Year)
+                        .Where(im => im.Sale.ShopId == shop.Id && im.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear && im.Sale.Date.Year == DateTime.Now.AddHours(3).Year)
                         .Sum(im => im.Sum)
                 });
             }
@@ -180,7 +180,7 @@ namespace WebUI.Controllers
 
             ViewBag.MoscowSalePayments = _infoMoneyService.All()
                 .Where(x => (x.SaleId != null || x.BookingId != null) 
-                            && x.Date.Date == DateTime.Now.Date.Date
+                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date
                             && (x.Sale.ShopId == 1 || x.Booking.ShopId == 1))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -244,7 +244,7 @@ namespace WebUI.Controllers
 
             ViewBag.PetersburgSalePayments = _infoMoneyService.All()
                 .Where(x => (x.SaleId != null || x.BookingId != null) 
-                            && x.Date.Date == DateTime.Now.Date.Date 
+                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date 
                             && (x.Sale.ShopId == 2 || x.Booking.ShopId == 2))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -380,7 +380,7 @@ namespace WebUI.Controllers
                         _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = p.Amount,
-                            Date = DateTime.Now,
+                            Date = DateTime.Now.AddHours(3),
                             Product = createProduct,
                             SupplierId = supplierId,
                             Type = InfoProductType.Supply,
@@ -427,7 +427,7 @@ namespace WebUI.Controllers
                          _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = p.Amount,
-                            Date = DateTime.Now,
+                            Date = DateTime.Now.AddHours(3),
                             Product = createProduct,
                             Type = InfoProductType.Supply,
                             ShopId = shopId,
@@ -451,7 +451,7 @@ namespace WebUI.Controllers
                         _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = p.Amount,
-                            Date = DateTime.Now,
+                            Date = DateTime.Now.AddHours(3),
                             ProductId = product.Id,
                             SupplierId = supplierId,
                             Type = InfoProductType.Supply,
@@ -487,7 +487,7 @@ namespace WebUI.Controllers
                         _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = p.Amount,
-                            Date = DateTime.Now,
+                            Date = DateTime.Now.AddHours(3),
                             ProductId = product.Id,
                             Type = InfoProductType.Supply,
                             ShopId = shopId,
@@ -856,7 +856,7 @@ namespace WebUI.Controllers
             _infoProductService.Create(new InfoProduct()
             {
                 Amount = amount,
-                Date = DateTime.Now,
+                Date = DateTime.Now.AddHours(3),
                 ProductId = nextProduct.Id,
                 ShopId = prevProduct.ShopId,
                 Type = InfoProductType.Transfer
@@ -1276,7 +1276,7 @@ namespace WebUI.Controllers
         [HttpPost]
         public FileResult ExportProduct(int id)
         {
-            var fileName = "ExportProducts_" + id + "_" + DateTime.Now.ToString("dd/MM/yyyy_hh/mm/ss");
+            var fileName = "ExportProducts_" + id + "_" + DateTime.Now.AddHours(3).ToString("dd/MM/yyyy_hh/mm/ss");
 
             _fileService.ExportProducts(id, fileName);
 
@@ -1291,7 +1291,7 @@ namespace WebUI.Controllers
         public IActionResult MoneyWorkerBalanceInfo()
         {
             var moneyWorkers = _moneyWorkerService.All();
-            var today = DateTime.Now.Date;
+            var today = DateTime.Now.AddHours(3).Date;
             var result = new List<MoneyWorkerInfoVM>();
 
             foreach (var worker in moneyWorkers)
@@ -1378,7 +1378,7 @@ namespace WebUI.Controllers
 
         public IActionResult SalesByCategories()
         {
-            var fromDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, 1);
+            var fromDate = new DateTime(DateTime.Now.AddHours(3).Year, DateTime.Now.AddHours(3).Month, 1);
 
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {

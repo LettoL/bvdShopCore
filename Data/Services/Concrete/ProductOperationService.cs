@@ -66,7 +66,7 @@ namespace Data.Services.Concrete
                 info = new InfoProduct()
                 {
                     Amount = obj.Amount,
-                    Date = DateTime.Now,
+                    Date = DateTime.Now.AddHours(3),
                     ProductId = product.Id,
                     ShopId = product.ShopId,
                     SupplierId = obj.SupplierId,
@@ -116,7 +116,7 @@ namespace Data.Services.Concrete
                 info = new InfoProduct()
                 {
                     Amount = obj.Amount,
-                    Date = DateTime.Now,
+                    Date = DateTime.Now.AddHours(3),
                     ProductId = product.Id,
                     ShopId = product.ShopId,
                     Type = InfoProductType.Supply,
@@ -139,7 +139,7 @@ namespace Data.Services.Concrete
             {
                 Amount = amount,
                 ProductId = product.Id,
-                Date = DateTime.Now,
+                Date = DateTime.Now.AddHours(3),
                 ShopId = product.ShopId,
                 Type = InfoProductType.Writeoff,
                 SupplyProductId = supply.Id

@@ -32,7 +32,7 @@ namespace WebUI.Controllers
                 CashOnHand = _shopService.CashOnHand(_db, x.Id),
                 Margin = _shopService.Margin(x.Id),
                 Sales = _saleService.All()
-                    .Where(s => s.Date.Month == DateTime.Now.Month && s.Payment == true)
+                    .Where(s => s.Date.Month == DateTime.Now.AddHours(3).Month && s.Payment == true)
                     .Count(s => s.ShopId == x.Id),
                 Turnover = _shopService.Turnover(x.Id)
             }));

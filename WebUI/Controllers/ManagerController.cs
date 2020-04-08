@@ -94,8 +94,8 @@ namespace WebUI.Controllers
             var shop = _db.Shops.FirstOrDefault(x => x.Id == user.ShopId);
 
             var salesProductsToday = _db.SalesProducts
-                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear
-                            && x.Sale.Date.Year == DateTime.Now.Date.Year 
+                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear
+                            && x.Sale.Date.Year == DateTime.Now.AddHours(3).Date.Year 
                             && x.Sale.ShopId == user.ShopId)
                 .Select(x => new SaleProduct()
                 {
@@ -152,7 +152,7 @@ namespace WebUI.Controllers
 
             ViewBag.SalePayments = _db.InfoMonies
                 .Where(x => (x.SaleId != null || x.BookingId != null)
-                            && x.Date.Date == DateTime.Now.Date.Date
+                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date
                             && (x.Sale.ShopId == shop.Id || x.Booking.ShopId == shop.Id ))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -217,8 +217,8 @@ namespace WebUI.Controllers
                 }).Concat(
                 _db.Sales
                     .Where(x => x.SaleType == SaleType.SaleFromStock
-                                              && x.Date.DayOfYear == DateTime.Now.DayOfYear
-                                              && x.Date.Year == DateTime.Now.Year
+                                              && x.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear
+                                              && x.Date.Year == DateTime.Now.AddHours(3).Year
                                               && x.ShopId == shop.Id
                                               && _db.SaleInformations.Where(z => z.SaleId == x.Id).Count() > 0)
                     .Select(x => new SalePaymentVM
@@ -497,7 +497,7 @@ namespace WebUI.Controllers
 
                 var sale = new Sale()
                 {
-                    Date = DateTime.Now,
+                    Date = DateTime.Now.AddHours(3),
                     ShopId = user.ShopId.Value,
                     PartnerId = booking.PartnerId,
                     Sum = booking.Sum,

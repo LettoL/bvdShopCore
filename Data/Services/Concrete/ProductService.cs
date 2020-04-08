@@ -47,7 +47,7 @@ namespace Data.Services.Concrete
 
             Booking newBooking = new Booking()
             {
-                Date = DateTime.Now,
+                Date = DateTime.Now.AddHours(3),
                 ShopId = shopId,
                 UserId = userId,
                 CashSum = booking.CashSum,
@@ -143,7 +143,7 @@ namespace Data.Services.Concrete
                 info = new InfoProduct()
                 {
                     Amount = obj.Amount,
-                    Date = DateTime.Now,
+                    Date = DateTime.Now.AddHours(3),
                     ProductId = product.Id,
                     ShopId = product.ShopId,
                     SupplierId = obj.SupplierId,
@@ -181,7 +181,7 @@ namespace Data.Services.Concrete
                 info = new InfoProduct()
                 {
                     Amount = obj.Amount,
-                    Date = DateTime.Now,
+                    Date = DateTime.Now.AddHours(3),
                     ProductId = product.Id,
                     ShopId = product.ShopId,
                     Type = InfoProductType.Supply,
