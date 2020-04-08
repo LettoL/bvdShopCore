@@ -395,7 +395,24 @@ namespace WebUI.Controllers
 
                 ViewBag.Layout = "~/Views/Shared/ManagerLayout.cshtml";
             }
-                
+
+            var saleProducts = _db.SalesProducts
+                .Select(x => new
+                {
+                    SaleId = x.SaleId,
+                    Title = x.Product.Title,
+                    Amount = x.Amount
+                })
+                .ToList();
+
+            var bookingProducts = _db.BookingProducts
+                .Select(x => new
+                {
+                    BookingId = x.BookingId,
+                    Title = x.Product.Title,
+                    Amount = x.Amount
+                })
+                .ToList();
 
             var response = infoMoneyQuery
                 .Select(x => new SalePaymentVM
@@ -451,16 +468,16 @@ namespace WebUI.Controllers
                     ShopId = x.ShopId,
                     ShopTitle = x.ShopTitle,
                     SaleProducts = x.SaleId != null
-                        ? _saleInfoService.GetProductsBySaleId(_db, x.SaleId.Value)
+                        ? saleProducts.Where(z => z.SaleId == x.SaleId)
                             .Select(z => new SaleProductItemVM
                             {
-                                Title = z.Product.Title,
+                                Title = z.Title,
                                 Amount = z.Amount.ToString()
                             })
-                        : _bookingProductInformationService.GetBookingProductByBooking(_db, x.BookingId.Value)
+                        : bookingProducts.Where(z => z.BookingId == x.BookingId)
                             .Select(z => new SaleProductItemVM
                             {
-                                Title = z.Product.Title,
+                                Title = z.Title,
                                 Amount = z.Amount.ToString()
                             }),
                 });
