@@ -63,7 +63,7 @@
                             @foreach (var c in Model)
                             {
                                 <tr>
-                                    <td>@c.InfoMoney.Date</td>
+                                    <td>@c.InfoMoney.Date.ToString("dd.MM.yyyy")</td>
                                     <td>@Math.Abs(c.InfoMoney.Sum)</td>
                                     @if (c.InfoMoney.PaymentType.ToString() == "Cash")
                                     {

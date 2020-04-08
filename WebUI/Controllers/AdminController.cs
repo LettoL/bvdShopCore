@@ -620,21 +620,24 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.Scores = _db.MoneyWorkers;
 
-            return View(_infoMoneyService.All().Select(im => new MoneyHistoryVM() {
-                Id = im.Id,
-                Sum = im.Sum,
-                Date = im.Date.ToString("dd.MM.yyyy"),
-                Comment = im.Comment,
-                PaymentType = im.PaymentType,
-                Sale = im.Sale,
-                MoneyWorker = im.MoneyWorker,
-                MoneyOperationType = im.MoneyOperationType,
-                ShopTitle = im.Sale.Shop.Title
-            }).OrderByDescending(im => im.Id));
+            return View(_infoMoneyService.All()
+                .OrderByDescending(im => im.Id)
+                .Take(200)
+                .Select(im => new MoneyHistoryVM() {
+                    Id = im.Id,
+                    Sum = im.Sum,
+                    Date = im.Date.ToString("dd.MM.yyyy"),
+                    Comment = im.Comment,
+                    PaymentType = im.PaymentType,
+                    Sale = im.Sale,
+                    MoneyWorker = im.MoneyWorker,
+                    MoneyOperationType = im.MoneyOperationType,
+                    ShopTitle = im.Sale.Shop.Title
+            }));
         }
 
         [HttpPost]
-        public IActionResult MoneyHistoryFilter(DateTime? date1, DateTime? date2, int shopId, int userId, int score, int type)
+        public IActionResult MoneyHistoryFilter(string date1, string date2, int shopId, int userId, int score, int type)
         {
             var user = _userService.All().FirstOrDefault(u => u.Id == userId);
 
@@ -644,10 +647,26 @@ namespace WebUI.Controllers
             var getAllInfoMoneys = _infoMoneyService.All();
 
             if (date1 != null)
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date >= date1);
+            {
+                var buf = date1.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date >= date);
+            }
 
             if (date2 != null)
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date <= date2);
+            {
+                var buf = date2.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date <= date);
+            }
 
             if (shopId != 0)
                 getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Sale.ShopId == shopId);
@@ -1194,11 +1213,11 @@ namespace WebUI.Controllers
             ViewBag.Scores = _moneyWorkerService.All();
             ViewBag.ExpenseSum = expenses.Sum(x => x.InfoMoney.Sum);
 
-            return View(expenses);
+            return View(expenses.Take(300));
         }
 
         [HttpPost]
-        public IActionResult ExpenseListFilter(int category, DateTime? date1, DateTime? date2, int userId, int score)
+        public IActionResult ExpenseListFilter(int category, string date1, string date2, int userId, int score)
         {
             var user = _userService.All().FirstOrDefault(u => u.Id == userId);
             ViewBag.User = user;
@@ -1212,10 +1231,28 @@ namespace WebUI.Controllers
                 result = result.Where(x => x.ExpenseCategoryId == category);
 
             if (date1 != null)
-                result = result.Where(x => x.InfoMoney.Date >= date1.Value);
+            {
+                Console.WriteLine(date1);
+                var buf = date1.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                result = result.Where(x => x.InfoMoney.Date >= date);
+            }
 
             if (date2 != null)
-                result = result.Where(x => x.InfoMoney.Date <= date2.Value.AddDays(1));
+            {
+                Console.WriteLine(date1);
+                var buf = date2.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                result = result.Where(x => x.InfoMoney.Date <= date.AddDays(1));
+            }
 
             if (score > 0)
                 result = result.Where(x => x.InfoMoney.MoneyWorkerId == score);

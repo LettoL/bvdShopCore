@@ -76,10 +76,10 @@ namespace Data.Services.Concrete
 
         public IQueryable<SaleListVM> SaleList(ShopContext db)
         {
-            //TODO: Убрать Лист и соответственно второй селект, пофиксить двойное обращение к контексту, при вытягивании тайпа
             var query = db.Sales
                 .Where(x => x.Payment)
                 .Include(x => x.SalesProducts).ThenInclude(x => x.Product)
+                .Include(x => x.Partner)
                 .OrderByDescending(x => x.Date)
                 .Take(100)
                 .Select(x => new SaleListVM()
@@ -90,6 +90,10 @@ namespace Data.Services.Concrete
                     ShopTitle = x.Shop.Title,
                     PrimeCost = x.PrimeCost,
                     ProductTitle = x.SalesProducts.FirstOrDefault().Product.Title,
+                    BuyerTitle = x.PartnerId != null
+                        ? x.Partner.Title
+                        : "Обычный покупатель",
+                    HasAdditionalProduct = x.SalesProducts.Any(x => x.Additional)
                 })
                 .ToList()
                 .Select(x => new SaleListVM()
@@ -99,8 +103,8 @@ namespace Data.Services.Concrete
                     Sum = x.Sum,
                     PrimeCost = x.PrimeCost,
                     ShopTitle = x.ShopTitle,
-                    HasAdditionalProduct = _saleInfoService.HasAdditionalProduct(x.Id),
-                    BuyerTitle = _saleInfoService.BuyerTitle(x.Id),
+                    HasAdditionalProduct = x.HasAdditionalProduct,
+                    BuyerTitle = x.BuyerTitle,
                     ProductTitle = x.ProductTitle,
                     PaymentType = _saleInfoService.PaymentType(x.Id),
                 }).AsQueryable();
