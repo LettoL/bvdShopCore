@@ -309,6 +309,21 @@ namespace WebUI.Controllers
             if (user == null)
                 RedirectToAction("Index", "Home");
             
+            var bookingProductsAmount = _db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                }).ToList();
+
+            var productsInStock = _db.SupplyProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.StockAmount
+                }).ToList();
+            
             return PartialView(_productService.All()
                 .Include(x => x.Shop)
                 .Include(x => x.Category)
@@ -333,20 +348,25 @@ namespace WebUI.Controllers
                     Code = x.Code,
                 })
                 .ToList()
-                .Where(x => _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                                .Sum(s => s.StockAmount) > 0)
+                .Where(x => productsInStock.Where(s => s.ProductId == x.Id)
+                                .Sum(s => s.Amount) > 0)
                 .OrderBy(x => x.Title)
                 .Select(x => new ProductVM()
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                                 .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.Shop.Id),
+                    Amount = productsInStock.Where(s => s.ProductId == x.Id)
+                                 .Sum(s => s.Amount) 
+                             - bookingProductsAmount
+                                 .Where(z => z.ProductId == x.Id)
+                                 .Sum(z => z.Amount),
                     Cost = x.Cost,
                     Shop = x.Shop,
                     Category = x.Category,
                     Code = x.Code,
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
+                    BookedCount = bookingProductsAmount
+                        .Where(z => z.ProductId == x.Id)
+                        .Sum(z => z.Amount)
                 }).ToList());
         }
 
