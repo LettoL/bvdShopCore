@@ -53,7 +53,53 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            return View(_productService.All()
+            var bookedProducts = _db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
+
+            var productsInStock = _db.SupplyProducts
+                .Where(x => x.StockAmount > 0)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Title = x.Product.Title,
+                    Cost = x.Product.Cost,
+                    Shop = x.Product.Shop,
+                    Category = x.Product.Category,
+                    Code = x.Product.Code,
+                    StockAmount = x.StockAmount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new ProductVM
+                {
+                    Id = x.Key,
+                    Amount = x.Sum(z => z.StockAmount)
+                        - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
+                    Title = x.FirstOrDefault().Title,
+                    Cost = x.FirstOrDefault().Cost,
+                    Shop = x.FirstOrDefault().Shop,
+                    Category = x.FirstOrDefault().Category,
+                    Code = x.FirstOrDefault().Code,
+                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
+                })
+                .ToList();
+
+            return View(productsInStock);
+
+            /*return View(_productService.All()
                 .Select(x => new ProductVM()
                 {
                     Id = x.Id,
@@ -78,7 +124,7 @@ namespace WebUI.Controllers
                     Category = x.Category,
                     Code = x.Code,
                     BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
-                }).ToList());
+                }).ToList());*/
         }
 
         public IActionResult AllProducts()
@@ -111,8 +157,54 @@ namespace WebUI.Controllers
         public IActionResult Get(int id)
         {
             User user = _userService.All().FirstOrDefault(u => u.Id == id);
+            
+            var bookedProducts = _db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
 
-            return Ok(_productService.All()
+            var productsInStock = _db.SupplyProducts
+                .Where(x => x.StockAmount > 0)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Title = x.Product.Title,
+                    Cost = x.Product.Cost,
+                    Shop = x.Product.Shop,
+                    Category = x.Product.Category,
+                    Code = x.Product.Code,
+                    StockAmount = x.StockAmount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new ProductVM
+                {
+                    Id = x.Key,
+                    Amount = x.Sum(z => z.StockAmount)
+                             - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
+                    Title = x.FirstOrDefault().Title,
+                    Cost = x.FirstOrDefault().Cost,
+                    Shop = x.FirstOrDefault().Shop,
+                    Category = x.FirstOrDefault().Category,
+                    Code = x.FirstOrDefault().Code,
+                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
+                })
+                .ToList();
+
+            return Ok(productsInStock);
+
+            /*return Ok(_productService.All()
                 .Select(x => new Product()
                 {
                     Id = x.Id,
@@ -144,7 +236,7 @@ namespace WebUI.Controllers
                                 .Where(z => z.ProductId == x.Id 
                                             && z.Booking.Status == BookingStatus.Open)
                                 .Sum(z => z.Amount)
-                }));
+                }));*/
         }
 
         public IActionResult All()
@@ -265,15 +357,15 @@ namespace WebUI.Controllers
             if (user == null)
                 RedirectToAction("Index", "Home");
 
-            var getAllProducts = _productService.Filtration(ProductFilterVM.ProductFiltrationModel);
+            //var getAllProducts = _productService.Filtration(_db, ProductFilterVM.ProductFiltrationModel);
                      
-            return PartialView(getAllProducts
+            /*return PartialView(getAllProducts
                 .OrderBy(x => x.Title)
                 .Select(x => new ProductVM
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    Amount = _supplyProductService.All()
+                    Amount = _db.SupplyProducts
                         .Where(s => s.ProductId == x.Id)
                         .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.ShopId),
                     Cost = x.Cost,
@@ -281,7 +373,47 @@ namespace WebUI.Controllers
                     Category = x.Category,
                     Code = x.Code,
                     BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
-                }));
+                })
+                .ToList());*/
+            return PartialView(_productService.All()
+                .Include(x => x.Shop)
+                .Include(x => x.Category)
+                .Where(x => ProductFilterVM.ProductFiltrationModel.categoryId == 0 
+                            || x.CategoryId == ProductFilterVM.ProductFiltrationModel.categoryId)
+                .Where(x => ProductFilterVM.ProductFiltrationModel.shopId == 0 
+                            || x.ShopId == ProductFilterVM.ProductFiltrationModel.shopId)
+                .ToList()
+                .Where(x => ProductFilterVM.ProductFiltrationModel.all == "true" 
+                            || _db.SupplyProducts
+                                .Where(s => s.ProductId == x.Id)
+                                .Sum(s => s.StockAmount) > 0)
+                .Where(x => ProductFilterVM.ProductFiltrationModel.title == null 
+                            || x.Title.Contains(ProductFilterVM.ProductFiltrationModel.title))
+                .Select(x => new ProductVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Cost = x.Cost,
+                    Shop = x.Shop,
+                    Category = x.Category,
+                    Code = x.Code,
+                })
+                .ToList()
+                .Where(x => _supplyProductService.All().Where(s => s.ProductId == x.Id)
+                                .Sum(s => s.StockAmount) > 0)
+                .OrderBy(x => x.Title)
+                .Select(x => new ProductVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
+                                 .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.Shop.Id),
+                    Cost = x.Cost,
+                    Shop = x.Shop,
+                    Category = x.Category,
+                    Code = x.Code,
+                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
+                }).ToList());
         }
 
         [HttpPost]

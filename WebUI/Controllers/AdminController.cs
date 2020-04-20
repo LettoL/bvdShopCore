@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.IO;
 using System.Linq;
 using System.Security.Cryptography.X509Certificates;
@@ -338,8 +339,9 @@ namespace WebUI.Controllers
             for (var i = 0; i < lines.Length; i++)
             {
                 string[] prop = lines[i].Split(';');
-                int amount = Convert.ToInt32(prop[3]);
-                var c = prop[5];//.Replace(',', '.');
+                var buf = prop[3].Replace(',', '.');
+                int amount = Convert.ToInt32(Convert.ToDecimal(buf));
+                var c = prop[5].Replace(',', '.');
                 var d = System.Text.RegularExpressions.Regex.Replace(c, @"\s+", "");//c.Replace(" ", string.Empty);
                 decimal a;
                 if (Decimal.TryParse(d, out a))
@@ -772,11 +774,12 @@ namespace WebUI.Controllers
         [Route("/Admin/GetProductsByShop/{id}")]
         public async Task<IActionResult> GetProductsByShop(int id)
         {
-            var products = await _productService.All()
+            var products = _db.Products
                 .Where(x => x.ShopId == id)
+                .ToList()
                 .GroupBy(x => x.Title)
                 .Select(x => x.FirstOrDefault())
-                .ToListAsync();
+                .ToList();
 
             return Ok(new
             {
@@ -1594,12 +1597,12 @@ namespace WebUI.Controllers
             DateTime? fromDateFilter = null;
 
             if (fromDate != null)
-                fromDateFilter = DateTime.Parse(fromDate);
+                fromDateFilter = DateTime.Parse(fromDate, CultureInfo.CreateSpecificCulture("ru-RU"));
 
             DateTime? forDateFilter = null;
 
             if (forDate != null)
-                forDateFilter = DateTime.Parse(forDate);
+                forDateFilter = DateTime.Parse(forDate, CultureInfo.CreateSpecificCulture("ru-RU"));
 
             var sales = _saleService.All().Where(x => x.Payment == true);
 

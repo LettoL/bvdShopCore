@@ -482,9 +482,6 @@ namespace WebUI.Controllers
                             }),
                 });
 
-
-
-
             return View(response);
         }
     }

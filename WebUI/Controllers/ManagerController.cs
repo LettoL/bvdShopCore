@@ -319,9 +319,13 @@ namespace WebUI.Controllers
 
                 ViewBag.Sale = true;
                 ViewBag.OperationSum = operationSum;
-                ViewBag.TotalOperationSum = _infoMoneyService.All()
-                    .Where(x => x.SaleId == sale.Id)
-                    .Sum(x => x.Sum);
+
+                if (sale.SaleType != SaleType.SaleFromStock)
+                    ViewBag.TotalOperationSum = _infoMoneyService.All()
+                        .Where(x => x.SaleId == sale.Id)
+                        .Sum(x => x.Sum);
+                else
+                    ViewBag.TotalOperationSum = operationSum;
 
                 return View(sale);
             }
@@ -565,8 +569,54 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
+            
+            var bookedProducts = _db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
 
-            return View(_productService.All()
+            var productsInStock = _db.SupplyProducts
+                .Where(x => x.StockAmount > 0)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Title = x.Product.Title,
+                    Cost = x.Product.Cost,
+                    Shop = x.Product.Shop,
+                    Category = x.Product.Category,
+                    Code = x.Product.Code,
+                    StockAmount = x.StockAmount
+                })
+                .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new ProductVM
+                {
+                    Id = x.Key,
+                    Amount = x.Sum(z => z.StockAmount)
+                             - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
+                    Title = x.FirstOrDefault().Title,
+                    Cost = x.FirstOrDefault().Cost,
+                    Shop = x.FirstOrDefault().Shop,
+                    Category = x.FirstOrDefault().Category,
+                    Code = x.FirstOrDefault().Code,
+                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
+                })
+                .ToList();
+
+            return View(productsInStock);
+
+            /*return View(_productService.All()
                 .Select(x => new Product()
                 {
                     Id = x.Id,
@@ -593,7 +643,7 @@ namespace WebUI.Controllers
                         .Where(sp => sp.ProductId == x.Id)
                         .Sum(sp => sp.StockAmount) - _productService.BookedProducts(_db, x.Id, shop.Id),
                     BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
-                }));
+                }));*/
         }
 
         [HttpGet]
@@ -812,7 +862,7 @@ namespace WebUI.Controllers
 
             _db.SaveChanges();
 
-            return RedirectToAction("CheckPrint", new { saleId = createdSale.Id });
+            return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
         }
 
         //TODO: В сервис
@@ -996,23 +1046,13 @@ namespace WebUI.Controllers
                         ? _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id).Title
                         : "Обычный покупатель",
                     ProductTitle = _db.SalesProducts
-                        .FirstOrDefault(s => s.SaleId == x.Id).Product.Title
-                }).ToList()
-                .Select(x => new SaleVM
-                {
-                    Id = x.Id,
-                    Date = x.Date,
-                    Sum = x.Sum,
-                    ShopTitle = x.ShopTitle,
-                    HasAdditionalProduct = x.HasAdditionalProduct,
+                        .FirstOrDefault(s => s.SaleId == x.Id).Product.Title,
                     PaymentType = _db.InfoMonies.Count(s => s.SaleId == x.Id) > 1
                         ? PaymentType.Mixed
                         : _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id) != null
                             ? _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id).PaymentType
-                            : PaymentType.Cash, //Пиздец
-                    BuyerTitle = x.BuyerTitle,
-                    ProductTitle = x.ProductTitle
-                }));
+                            : PaymentType.Cash,
+                }).ToList());
         }
     }
 }

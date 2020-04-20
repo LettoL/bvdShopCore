@@ -18,6 +18,6 @@ namespace Data.Services.Abstract
 
         int BookedProducts(ShopContext db, int id, int shopId);
 
-        IQueryable<Product> Filtration(ProductFiltrationModel model);
+        IQueryable<Product> Filtration(ShopContext db, ProductFiltrationModel model);
     }
 }

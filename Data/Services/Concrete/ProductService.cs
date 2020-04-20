@@ -238,15 +238,19 @@ namespace Data.Services.Concrete
             _context.SaveChanges();
         }
 
-        public IQueryable<Product> Filtration(ProductFiltrationModel model)
+        public IQueryable<Product> Filtration(ShopContext db, ProductFiltrationModel model)
         {
-            var query = All()
+            var supplyProducts = db.SupplyProducts.ToList();
+            
+            var query = db.Products
                 .Where(x => model.categoryId == 0 || x.CategoryId == model.categoryId)
                 .Where(x => model.shopId == 0 || x.ShopId == model.shopId)
-                .Where(x => model.all == "true" || _supplyProductService.All()
+                .ToList()
+                .Where(x => model.all == "true" || supplyProducts
                                 .Where(s => s.ProductId == x.Id)
                                 .Sum(s => s.StockAmount) > 0)
-                .Where(x => model.title == null || x.Title.Contains(model.title));
+                .Where(x => model.title == null || x.Title.Contains(model.title))
+                .AsQueryable();
 
             return query;
         }

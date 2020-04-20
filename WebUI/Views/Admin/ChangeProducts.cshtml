@@ -80,7 +80,10 @@
 
                 json.products.forEach(json => {
                     $('#liveSearch').append('<option value="' + json.id + '">' + json.title + '</option>');
-                });
+                });   
+            })
+            .then(() => {
+                $("#liveSearch").chosen();
             });       
     }
 
