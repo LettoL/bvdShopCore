@@ -9,6 +9,7 @@ using WebUI.ViewModels;
 using System;
 using System.Threading.Tasks;
 using Data;
+using Data.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 
@@ -615,35 +616,6 @@ namespace WebUI.Controllers
                 .ToList();
 
             return View(productsInStock);
-
-            /*return View(_productService.All()
-                .Select(x => new Product()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    ShopId = x.ShopId,
-                    Category = x.Category,
-                    Code = x.Code
-                }).ToList()
-                .Where(x => _supplyProduct.All()
-                                .Where(sp => sp.ProductId == x.Id)
-                                .Sum(sp => sp.StockAmount) > 0
-                            && shop.Id == x.ShopId)
-                .Select(x => new ProductVM
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    Amount = _supplyProduct.All()
-                        .Where(sp => sp.ProductId == x.Id)
-                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(_db, x.Id, shop.Id),
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
-                }));*/
         }
 
         [HttpGet]
@@ -657,31 +629,7 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
 
-            return View(_productService.All()
-                .Select(x => new Product()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    ShopId = x.ShopId,
-                    Category = x.Category,
-                    Code = x.Code
-                }).ToList()
-                .Where(x => x.ShopId == shop.Id)
-                .Select(x => new ProductVM
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    Amount = _supplyProduct.All()
-                        .Where(sp => sp.ProductId == x.Id)
-                        .Sum(sp => sp.StockAmount) - _productService.BookedProducts(_db, x.Id, shop.Id),
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
-                }));
+            return View(ProductService.GetAllProducts(_db));
         }
 
         [HttpGet]
