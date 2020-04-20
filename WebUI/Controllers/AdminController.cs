@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using WebUI.ViewModels;
+using ProductVM = WebUI.ViewModels.ProductVM;
 
 namespace WebUI.Controllers
 {

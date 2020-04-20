@@ -7,10 +7,12 @@ using Base.Services.Abstract;
 using Data;
 using Data.Enums;
 using Data.FiltrationModels;
+using Data.Services;
 using Data.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
+using ProductVM = WebUI.ViewModels.ProductVM;
 
 namespace WebUI.Controllers
 {
@@ -134,7 +136,9 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            return View(_db.Products
+            return View(ProductService.GetAllProducts(_db));
+
+            /*return View(_db.Products
                 .Include(x => x.Shop)
                 .Include(x => x.Category)
                 .OrderBy(x => x.Title)
@@ -150,7 +154,7 @@ namespace WebUI.Controllers
                     Category = x.Category,
                     Code = x.Code,
                     BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
-                }).ToList());
+                }).ToList())*/;
         }
 
         [HttpGet]
