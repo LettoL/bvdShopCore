@@ -1,5 +1,6 @@
 ﻿using System.Collections.Generic;
 using System.Linq;
+using Data.Entities;
 using Data.Enums;
 using Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
@@ -18,7 +19,7 @@ namespace Data.Services
                     Amount = x.Amount
                 }).ToList();
 
-            var productInStock = db.SupplyProducts
+            var productsInStock = db.SupplyProducts
                 .Select(x => new
                 {
                     ProductId = x.ProductId,
@@ -34,7 +35,7 @@ namespace Data.Services
                 {
                     Id = x.Id,
                     Title = x.Title,
-                    Amount = productInStock.Where(s => s.ProductId == x.Id)
+                    Amount = productsInStock.Where(s => s.ProductId == x.Id)
                                  .Sum(s => s.Amount) 
                              - bookingProductsAmount
                                  .Where(z => z.ProductId == x.Id)
@@ -49,6 +50,41 @@ namespace Data.Services
                 }).ToList();
 
             return result;
+        }
+
+        public static ProductDetailVM GetProductDetail(ShopContext db, int productId)
+        {
+            var productsInStock = db.SupplyProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.StockAmount
+                }).ToList();
+            
+            var product = db.Products
+                .Select(x => new Product()
+                {
+                    Id = x.Id,
+                    Category = x.Category,
+                    Code = x.Code,
+                    Cost = x.Cost,
+                    Title = x.Title,
+                    Shop = x.Shop
+                }).ToList()
+                .Select(x => new ProductDetailVM()
+                {
+                    Id = x.Id,
+                    Category = x.Category,
+                    Code = x.Code,
+                    Cost = x.Cost,
+                    Title = x.Title,
+                    Shop = x.Shop,
+                    Amount = productsInStock.Where(s => s.ProductId == x.Id)
+                        .Sum(s => s.Amount)
+                })
+                .First(p => p.Id == productId);
+
+            return product;
         }
     }
 }

@@ -137,24 +137,6 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
 
             return View(ProductService.GetAllProducts(_db));
-
-            /*return View(_db.Products
-                .Include(x => x.Shop)
-                .Include(x => x.Category)
-                .OrderBy(x => x.Title)
-                .ToList()
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Amount = _db.SupplyProducts.Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.ShopId),
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
-                }).ToList())*/;
         }
 
         [HttpGet]
@@ -207,40 +189,6 @@ namespace WebUI.Controllers
                 .ToList();
 
             return Ok(productsInStock);
-
-            /*return Ok(_productService.All()
-                .Select(x => new Product()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Category = x.Category,
-                    ShopId = x.ShopId
-                })
-                .ToList()
-                .Where(x => x.ShopId == user.ShopId
-                            && (_supplyProductService.All()
-                                    .Where(s => s.ProductId == x.Id)
-                                    .Sum(s => s.StockAmount) -
-                                _bookingProductService.All()
-                                    .Where(y => y.ProductId == x.Id
-                                                && y.Booking.Status == BookingStatus.Open)
-                                    .Sum(y => y.Amount)) > 0)
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Category = x.Category,
-                    Amount = _supplyProductService.All()
-                        .Where(z => z.ProductId == x.Id)
-                        .Where(s => s.Product.ShopId == x.ShopId)
-                        .Sum(s => s.StockAmount) - 
-                            _bookingProductService.All()
-                                .Where(z => z.ProductId == x.Id 
-                                            && z.Booking.Status == BookingStatus.Open)
-                                .Sum(z => z.Amount)
-                }));*/
         }
 
         public IActionResult All()
@@ -299,7 +247,7 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Detail(int id)
         {
-            ProductVM product = _productService.All()
+            /*ProductVM product = _productService.All()
                 .Select(x => new Product()
                 {
                     Id = x.Id,
@@ -319,7 +267,7 @@ namespace WebUI.Controllers
                     Shop = x.Shop,
                     Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
                         .Sum(s => s.StockAmount)
-                }).First(p => p.Id == id);
+                }).First(p => p.Id == id);*/
 
 
             //TODO: Сделать Join один поставщик - один SupplyProduct на отображение
@@ -349,7 +297,7 @@ namespace WebUI.Controllers
                     FinalCost = x.FinalCost
                 });
 
-            return View(product);
+            return View(ProductService.GetProductDetail(_db, id));
         }
 
         [HttpPost]
@@ -360,25 +308,7 @@ namespace WebUI.Controllers
 
             if (user == null)
                 RedirectToAction("Index", "Home");
-
-            //var getAllProducts = _productService.Filtration(_db, ProductFilterVM.ProductFiltrationModel);
-                     
-            /*return PartialView(getAllProducts
-                .OrderBy(x => x.Title)
-                .Select(x => new ProductVM
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Amount = _db.SupplyProducts
-                        .Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.ShopId),
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.ShopId)
-                })
-                .ToList());*/
+            
             return PartialView(_productService.All()
                 .Include(x => x.Shop)
                 .Include(x => x.Category)
