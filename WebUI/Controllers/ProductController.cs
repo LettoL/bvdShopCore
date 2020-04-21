@@ -1,4 +1,6 @@
-﻿using System.Linq;
+﻿using System;
+using System.Globalization;
+using System.Linq;
 using Data.Entities;
 using Data.Services.Abstract;
 using Microsoft.AspNetCore.Mvc;
@@ -348,7 +350,9 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult ChangePrice([FromBody]ChangePrice changePrice)
         {
-            _productOperationService.ChangePrice(changePrice.ProductId, changePrice.Price);
+            var price = Convert.ToDecimal(changePrice.Price, CultureInfo.CreateSpecificCulture("ru-RU"));
+            
+            _productOperationService.ChangePrice(changePrice.ProductId, price);
 
             return Ok();
         }

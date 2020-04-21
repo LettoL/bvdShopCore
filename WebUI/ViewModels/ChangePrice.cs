@@ -2,7 +2,7 @@
 {
     public class ChangePrice
     {
-        public decimal Price { get; set; }
+        public string Price { get; set; }
         public int ProductId { get; set; }
     }
 }
