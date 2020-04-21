@@ -247,29 +247,6 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Detail(int id)
         {
-            /*ProductVM product = _productService.All()
-                .Select(x => new Product()
-                {
-                    Id = x.Id,
-                    Category = x.Category,
-                    Code = x.Code,
-                    Cost = x.Cost,
-                    Title = x.Title,
-                    Shop = x.Shop
-                }).ToList()
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Category = x.Category,
-                    Code = x.Code,
-                    Cost = x.Cost,
-                    Title = x.Title,
-                    Shop = x.Shop,
-                    Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount)
-                }).First(p => p.Id == id);*/
-
-
             //TODO: Сделать Join один поставщик - один SupplyProduct на отображение
             //Для таба с поставщиками
             ViewBag.SupplierProducts = _supplyProductService.All()
@@ -301,16 +278,20 @@ namespace WebUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Filter(ProductFilterVM ProductFilterVM)
+        public IActionResult Filter(ProductFilterVM productFilterVM)
         {
-            var user = _userService.All().First(u => u.Id == ProductFilterVM.UserId);
+            var user = _userService.All().First(u => u.Id == productFilterVM.UserId);
             ViewBag.User = user;
 
             if (user == null)
                 RedirectToAction("Index", "Home");
             
+            var filter = productFilterVM.ProductFiltrationModel;
+            
             var bookingProductsAmount = _db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Where(x => filter.categoryId == 0 || x.Product.Category.Id == filter.categoryId)
+                .Where(x => filter.shopId == 0 || x.Product.Shop.Id == filter.shopId)
                 .Select(x => new
                 {
                     ProductId = x.ProductId,
@@ -318,26 +299,15 @@ namespace WebUI.Controllers
                 }).ToList();
 
             var productsInStock = _db.SupplyProducts
+                .Where(x => filter.categoryId == 0 || x.Product.Category.Id == filter.categoryId)
+                .Where(x => filter.shopId == 0 || x.Product.Shop.Id == filter.shopId)
                 .Select(x => new
                 {
                     ProductId = x.ProductId,
                     Amount = x.StockAmount
                 }).ToList();
-            
-            return PartialView(_productService.All()
-                .Include(x => x.Shop)
-                .Include(x => x.Category)
-                .Where(x => ProductFilterVM.ProductFiltrationModel.categoryId == 0 
-                            || x.CategoryId == ProductFilterVM.ProductFiltrationModel.categoryId)
-                .Where(x => ProductFilterVM.ProductFiltrationModel.shopId == 0 
-                            || x.ShopId == ProductFilterVM.ProductFiltrationModel.shopId)
-                .ToList()
-                .Where(x => ProductFilterVM.ProductFiltrationModel.all == "true" 
-                            || _db.SupplyProducts
-                                .Where(s => s.ProductId == x.Id)
-                                .Sum(s => s.StockAmount) > 0)
-                .Where(x => ProductFilterVM.ProductFiltrationModel.title == null 
-                            || x.Title.Contains(ProductFilterVM.ProductFiltrationModel.title))
+
+            var result = _db.Products
                 .Select(x => new ProductVM()
                 {
                     Id = x.Id,
@@ -347,6 +317,9 @@ namespace WebUI.Controllers
                     Category = x.Category,
                     Code = x.Code,
                 })
+                .Where(x => filter.title == null || x.Title.Contains(filter.title))
+                .Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
+                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)
                 .ToList()
                 .Where(x => productsInStock.Where(s => s.ProductId == x.Id)
                                 .Sum(s => s.Amount) > 0)
@@ -367,7 +340,9 @@ namespace WebUI.Controllers
                     BookedCount = bookingProductsAmount
                         .Where(z => z.ProductId == x.Id)
                         .Sum(z => z.Amount)
-                }).ToList());
+                }).ToList();
+            
+            return PartialView(result);
         }
 
         [HttpPost]
