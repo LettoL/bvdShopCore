@@ -27,16 +27,26 @@ namespace WebUI.Controllers
 
         public IActionResult Index()
         {
-            return View(_partnerService.All().Select(x => new PartnerVM()
+            var saleProductsAmount = _db.SalesProducts
+                .Where(x => x.Sale.PartnerId != null && x.Sale.PartnerId != 0)
+                .Select(x => new
+                {
+                    PartnerId = x.Sale.PartnerId,
+                    Amount = x.Amount
+                });
+
+            var result = _db.Partners.Select(x => new PartnerVM()
             {
                 Id = x.Id,
-                BuyProductsAmount = _saleService.All()
-                    .Where(s => s.PartnerId == x.Id).Sum(s => s.SalesProducts
-                        .Sum(sp => sp.Amount)),
+                BuyProductsAmount = saleProductsAmount
+                    .Where(s => s.PartnerId == x.Id)
+                    .Sum(s => s.Amount),
                 Email = x.Email,
                 Phone = x.Phone,
                 Title = x.Title
-            }));
+            }).ToList();
+            
+            return View(result);
         }
 
         [HttpGet]

@@ -678,7 +678,21 @@ namespace WebUI.Controllers
                 getAllInfoMoneys = getAllInfoMoneys.Where(x => x.MoneyWorkerId == score);
 
             if (type != 0)
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => (int)x.MoneyOperationType == type);
+                return PartialView(getAllInfoMoneys
+                    .Select(x => new MoneyHistoryVM()
+                    {
+                        Id = x.Id,
+                        Sum = x.Sum,
+                        Date = x.Date.ToString("dd.MM.yyyy"),
+                        Comment = x.Comment,
+                        PaymentType = x.PaymentType,
+                        Sale = x.Sale,
+                        MoneyWorker = x.MoneyWorker,
+                        MoneyOperationType = x.MoneyOperationType,
+                        ShopTitle = x.Sale.Shop.Title
+                    }).ToList()
+                    .Where(x => (int)x.MoneyOperationType == type)
+                    .OrderByDescending(x => x.Id));
 
             return PartialView(getAllInfoMoneys.Select(x => new MoneyHistoryVM()
             {
