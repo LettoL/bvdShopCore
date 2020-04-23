@@ -18,6 +18,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 using WebUI.ViewModels;
 using ProductVM = WebUI.ViewModels.ProductVM;
 
@@ -120,6 +121,40 @@ namespace WebUI.Controllers
             _salesByCategoryService = salesByCategoryService;
         }
 
+        public async Task<IActionResult> Managers()
+        {
+            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            var db = client.GetDatabase("bvdShop");
+            
+            var result = await db.GetCollection<Manager>("managers")
+                .Find(manager => true)
+                .ToListAsync();
+            
+            return View(result);
+        }
+
+        [HttpGet]
+        public IActionResult CreateManager()
+        {
+            return View();
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> CreateManager(string name)
+        {
+            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            var db = client.GetDatabase("bvdShop");
+            
+            await db.GetCollection<Manager>("managers")
+                .InsertOneAsync(new Manager()
+                {
+                    Name = name,
+                    CreationDate = DateTime.UtcNow
+                });
+            
+            return RedirectToAction("Managers");
+        }
+        
         public IActionResult Index()
         {
             var saleProductsToday = new List<SaleProductsTodayVM>();
@@ -1667,8 +1702,6 @@ namespace WebUI.Controllers
                 PaymentType = _saleInfoService.PaymentType(x.Id),
             }).OrderByDescending(x => x.Id));
         }
-
-
     }
 }
 

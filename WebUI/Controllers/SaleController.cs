@@ -245,7 +245,7 @@ namespace WebUI.Controllers
                 }
 
                 if(supplyProduct != null)
-                _supplyProductService.Update(supplyProduct);
+                    _supplyProductService.Update(supplyProduct);
             }
 
             var infoMoneys = _infoMoneyService.All().Where(x => x.SaleId == sale.Id).ToList();
