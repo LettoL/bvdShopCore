@@ -145,6 +145,7 @@ namespace WebUI.Controllers
         public IActionResult Get(int id)
         {
             User user = _userService.All().FirstOrDefault(u => u.Id == id);
+            var shopId = user.ShopId;
             
             var bookedProducts = _db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
@@ -163,6 +164,7 @@ namespace WebUI.Controllers
                 .ToList();
 
             var productsInStock = _db.SupplyProducts
+                .Where(x => x.Product.ShopId == shopId)
                 .Where(x => x.StockAmount > 0)
                 .Select(x => new
                 {
@@ -320,8 +322,10 @@ namespace WebUI.Controllers
                     Code = x.Code,
                 })
                 .Where(x => filter.title == null || x.Title.Contains(filter.title))
-                .Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
-                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)
+                .Where(x => productsInStock.Select(z => z.ProductId).Contains(x.Id)
+                    || bookingProductsAmount.Select(z => z.ProductId).Contains(x.Id))
+                /*.Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
+                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)*/
                 .ToList()
                 .Where(x => productsInStock.Where(s => s.ProductId == x.Id)
                                 .Sum(s => s.Amount) > 0)

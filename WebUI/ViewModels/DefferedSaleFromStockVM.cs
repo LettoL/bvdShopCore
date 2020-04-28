@@ -20,5 +20,6 @@ namespace WebUI.ViewModels
         public int? MoneyWorkerIdForIncome { get; set; }
         public int? MoneyWorkerIdForExpense { get; set; }
         public bool ForRussian { get; set; }
+        public string Manager { get; set; }
     }
 }

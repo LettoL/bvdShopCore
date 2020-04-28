@@ -33,7 +33,8 @@ namespace Data.Services.Concrete
                     SaleId = sale.Id,
                     Sum = cash,
                     PaymentType = PaymentType.Cash,
-                    MoneyOperationType = MoneyOperationType.Sale
+                    MoneyOperationType = MoneyOperationType.Sale,
+                    Date = DateTime.Now.AddHours(3)
                 });
             if (cashless > 0)
                 db.InfoMonies.Add(new InfoMoney()
@@ -42,7 +43,8 @@ namespace Data.Services.Concrete
                     SaleId = sale.Id,
                     Sum = cashless,
                     PaymentType = PaymentType.Cashless,
-                    MoneyOperationType = MoneyOperationType.Sale
+                    MoneyOperationType = MoneyOperationType.Sale,
+                    Date = DateTime.Now.AddHours(3)
                 });
         }
 

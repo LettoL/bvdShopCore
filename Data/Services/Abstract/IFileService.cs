@@ -2,6 +2,6 @@
 {
     public interface IFileService
     {
-        void ExportProducts(int shopId, string fileName);
+        void ExportProducts(ShopContext db, int shopId, string fileName);
     }
 }

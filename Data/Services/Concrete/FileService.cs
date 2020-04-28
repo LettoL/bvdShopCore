@@ -20,18 +20,23 @@ namespace Data.Services.Concrete
             _supplyProductService = supplyProductService;
         }
 
-        public void ExportProducts(int shopId, string fileName)
+        public void ExportProducts(ShopContext db, int shopId, string fileName)
         {
-            var products = _productService.All().Where(x => x.ShopId == shopId)
+            var productsInStock = db.SupplyProducts
+                .Where(x => x.StockAmount > 0)
+                .ToList();
+            
+            var products = db.Products
+                .Where(x => x.ShopId == shopId)
                 .ToList()
-                .Where(x => _supplyProductService.All()
+                .Where(x => productsInStock
                     .Where(s => s.ProductId == x.Id)
                     .Sum(s => s.StockAmount) > 0)
                 .OrderBy(x => x.Title).Select(x => new
                 {
                     Title = x.Title,
                     Code = x.Code,
-                    Amount = _supplyProductService.All()
+                    Amount = productsInStock
                         .Where(s => s.ProductId == x.Id)
                         .Sum(s => s.StockAmount)
                 }).ToList();

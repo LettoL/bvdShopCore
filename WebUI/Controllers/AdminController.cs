@@ -1331,7 +1331,14 @@ namespace WebUI.Controllers
         {
             var fileName = "ExportProducts_" + id + "_" + DateTime.Now.AddHours(3).ToString("dd/MM/yyyy_hh/mm/ss");
 
-            _fileService.ExportProducts(id, fileName);
+            try
+            {
+                _fileService.ExportProducts(_db, id, fileName);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e.Message);
+            }
 
             string path = "wwwroot/ExportFiles/" + fileName + ".csv";
             // Объект Stream
@@ -1657,10 +1664,10 @@ namespace WebUI.Controllers
             var sales = _saleService.All().Where(x => x.Payment == true);
 
             if (fromDateFilter != null)
-                sales = _saleService.All().Where(x => x.Date >= fromDateFilter);
+                sales = _saleService.All().Where(x => x.Date.Date >= fromDateFilter);
 
             if (forDateFilter != null)
-                sales = sales.Where(x => x.Date <= forDateFilter);
+                sales = sales.Where(x => x.Date.Date <= forDateFilter);
 
             if (type == SalesByCategoriesFilterType.Moscow)
                 sales = sales.Where(x => x.ShopId == 1 && x.PartnerId == null && x.ForRussian == false);
@@ -1677,30 +1684,34 @@ namespace WebUI.Controllers
             if (type == SalesByCategoriesFilterType.Partner)
                 sales = sales.Where(x => x.PartnerId != null && x.ForRussian == false);
 
-            sales = sales.Include(x => x.SalesProducts).Where(x => x.SalesProducts.Any(z => z.Product.CategoryId == categoryId));
+            sales = sales.Include(x => x.SalesProducts)
+                .Where(x => x.SalesProducts.Any(z => z.Product.CategoryId == categoryId));
 
-            return View(sales.Select(x => new SaleListVM()
-            {
-                Id = x.Id,
-                Date = x.Date.ToString("dd.MM.yyyy"),
-                Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
-                ShopTitle = x.Shop.Title,
-                PrimeCost = x.PrimeCost,
-                ProductTitle = _saleInfoService.FirstProductTitle(x.Id),
-            })
-            .ToList()
-            .Select(x => new SaleListVM()
-            {
-                Id = x.Id,
-                Date = x.Date,
-                Sum = x.Sum,
-                PrimeCost = x.PrimeCost,
-                ShopTitle = x.ShopTitle,
-                HasAdditionalProduct = _saleInfoService.HasAdditionalProduct(x.Id),
-                BuyerTitle = _saleInfoService.BuyerTitle(x.Id),
-                ProductTitle = x.ProductTitle,
-                PaymentType = _saleInfoService.PaymentType(x.Id),
-            }).OrderByDescending(x => x.Id));
+            var result = sales.Select(x => new SaleListVM()
+                {
+                    Id = x.Id,
+                    Date = x.Date.ToString("dd.MM.yyyy"),
+                    Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    ShopTitle = x.Shop.Title,
+                    PrimeCost = x.PrimeCost,
+                    ProductTitle = _saleInfoService.FirstProductTitle(x.Id),
+                })
+                .ToList()
+                .Select(x => new SaleListVM()
+                {
+                    Id = x.Id,
+                    Date = x.Date,
+                    Sum = x.Sum,
+                    PrimeCost = x.PrimeCost,
+                    ShopTitle = x.ShopTitle,
+                    HasAdditionalProduct = _saleInfoService.HasAdditionalProduct(x.Id),
+                    BuyerTitle = _saleInfoService.BuyerTitle(x.Id),
+                    ProductTitle = x.ProductTitle,
+                    PaymentType = _saleInfoService.PaymentType(x.Id),
+                }).OrderByDescending(x => x.Id)
+                .ToList();
+            
+            return View(result);
         }
     }
 }

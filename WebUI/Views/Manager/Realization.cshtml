@@ -72,18 +72,23 @@
                     <div id="sale_form">
                         <div class="row">
                             <div class="col-md-4">
+                                <label>Выберите менеджера</label>
+                                <select id="manager_select" class="form-control" v-model="manager">
+                                    <option disabled value="">Выберите один из вариантов</option>
+                                </select>
+
                                 <label>Скидка</label>
-                                <input class="form-control" v-model="discount" />
+                                <input class="form-control" v-model="discount"/>
 
                                 <label>Стоимость</label>
-                                <input v-if="buyer == 'Обычный покупатель'" readonly class="form-control" v-model="cost" style="margin-bottom: 20px;" />
-                                <input v-if="buyer != 'Обычный покупатель'" class="form-control" v-model="cost" style="margin-bottom: 20px;" />
+                                <input v-if="buyer == 'Обычный покупатель'" readonly class="form-control" v-model="cost" style="margin-bottom: 20px;"/>
+                                <input v-if="buyer != 'Обычный покупатель'" class="form-control" v-model="cost" style="margin-bottom: 20px;"/>
 
                                 <label>Внесение наличных средств</label>
-                                <input class="form-control" v-model="cashMoney" />
+                                <input class="form-control" v-model="cashMoney"/>
 
                                 <label>Внесение безналичных средств</label>
-                                <input class="form-control" v-model="cashlessMoney" />
+                                <input class="form-control" v-model="cashlessMoney"/>
 
                                 <div class="error" v-if="error">
                                     <span>Введенная сумма наличных и безналичных средств не равна стоимости выбранных продуктов</span>
@@ -94,29 +99,29 @@
                                     <option value="null">Не отправлять</option>
                                     <option value="1">Держатель Карты</option>
                                     <option value="2">Рассчетный Счет</option>
-                                </select> <br />
+                                </select> <br/>
 
                                 <select id="moneyWorkerId" class="form-control" v-model="moneyWorkerId">
                                     <option disabled selected value="null">Выбрать</option>
-                                </select><br />
+                                </select><br/>
 
                                 <label>Отложенная продажа</label>
                                 <select id="payment" class="form-control" v-model="payment">
                                     <option value="true">Нет</option>
                                     <option value="false">Да</option>
-                                </select> <br />
+                                </select> <br/>
 
                                 <label>Продажа по России</label>
                                 <select id="forRussian" class="form-control" v-model="forRussian">
                                     <option value="true">Да</option>
                                     <option value="false">Нет</option>
-                                </select> <br />
+                                </select> <br/>
 
                                 <label v-if="additionalCommentExist">Комментарий для Доп. Продажи</label>
-                                <input v-model="additionalComment" v-if="additionalCommentExist" type="text" class="form-control" />
+                                <input v-model="additionalComment" v-if="additionalCommentExist" type="text" class="form-control"/>
 
                                 <label v-if="supplierCommentExist">Комментарий для продажи Партнеру</label>
-                                <input v-model="supplierComment" v-if="supplierCommentExist" type="text" class="form-control" />
+                                <input v-model="supplierComment" v-if="supplierCommentExist" type="text" class="form-control"/>
 
                             </div>
                             <div v-if="buyer !== 'Обычный покупатель'" class="col-lg-6 col-md-8">
@@ -319,9 +324,9 @@
     var buyer = new Vue({
         el: "#buyer",
         data: {
-            buyer: "Обычный покупатель",
+            buyer: "Обычный покупатель"
         }
-    });
+    });  
 
     var saleForm = new Vue({
         el: "#sale_form",
@@ -339,7 +344,8 @@
             moneyWorkerId: null,
             error: null,
             payment: true,
-            forRussian: "false",            
+            forRussian: "false",
+            manager: ""      
         },
         methods: {
             initProps: function() {
@@ -389,8 +395,7 @@
                 },
                 deep: true
             },
-        },
-        
+        },        
         computed: {
             pay: function() {
                 return +this.cashMoney + +this.cashlessMoney;
@@ -409,7 +414,24 @@
                     : supplierCommentExist = false;
                 return supplierCommentExist;
             }
-        }
+        },
+        created: 
+            function() {
+                fetch('/api/managers', {
+                    headers: { 'Content-Type': 'application/json'},
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json()
+                })
+                .then((res) => {
+                    console.log(res, $('#manager_select'))
+                    res.forEach(x => {
+                        $('#manager_select')
+                            .append('<option>' + x.name + '</option>');
+                        })
+                })                    
+            }        
     });
 
     var confirmForm = new Vue({
@@ -427,7 +449,8 @@
             moneyWorkerId: null,
             payment: false,
             forRussian: null,
-            russianStatus: "Да"
+            russianStatus: "Да",
+            manager: ""
         },
         methods: {
             initProps: function() {
@@ -443,6 +466,7 @@
                 confirmForm.payment = saleForm.payment;
                 confirmForm.comment = saleForm.supplierComment;
                 confirmForm.forRussian = saleForm.forRussian;
+                confirmForm.manager = saleForm.manager
             },
             sendData: function () {
                 this.products.forEach(product => {
@@ -462,7 +486,8 @@
                     moneyWorkerId: +this.moneyWorkerId,
                     payment: Boolean(this.payment),
                     comment: this.comment,
-                    forRussian: Boolean(this.forRussian)
+                    forRussian: Boolean(this.forRussian),
+                    manager: this.manager
                 }
                 console.log(realization)
                 return fetch("/Manager/RealizationPost",

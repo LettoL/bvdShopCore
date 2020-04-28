@@ -12,6 +12,7 @@ using Data;
 using Data.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using MongoDB.Driver;
 
 namespace WebUI.Controllers
 {
@@ -95,8 +96,8 @@ namespace WebUI.Controllers
             var shop = _db.Shops.FirstOrDefault(x => x.Id == user.ShopId);
 
             var salesProductsToday = _db.SalesProducts
-                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear
-                            && x.Sale.Date.Year == DateTime.Now.AddHours(3).Date.Year 
+                .Where(x => x.Sale.Date.DayOfYear == DateTime.Now/*.AddHours(3)*/.DayOfYear
+                            && x.Sale.Date.Year == DateTime.Now/*.AddHours(3)*/.Date.Year 
                             && x.Sale.ShopId == user.ShopId)
                 .Select(x => new SaleProduct()
                 {
@@ -218,8 +219,8 @@ namespace WebUI.Controllers
                 }).Concat(
                 _db.Sales
                     .Where(x => x.SaleType == SaleType.SaleFromStock
-                                              && x.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear
-                                              && x.Date.Year == DateTime.Now.AddHours(3).Year
+                                              && x.Date.DayOfYear == DateTime.Now/*.AddHours(3)*/.DayOfYear
+                                              && x.Date.Year == DateTime.Now/*.AddHours(3)*/.Year
                                               && x.ShopId == shop.Id
                                               && _db.SaleInformations.Where(z => z.SaleId == x.Id).Count() > 0)
                     .Select(x => new SalePaymentVM
@@ -302,7 +303,22 @@ namespace WebUI.Controllers
             };
 
             var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
+            
+            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            var db = client.GetDatabase("bvdShop");
 
+            var managers = db.GetCollection<Manager>("managers")
+                .Find(manager => true)
+                .ToList();
+
+            var managerId = managers.FirstOrDefault(x => x.Name == json.Manager)?.Id;
+            
+            db.GetCollection<SaleManager>("saleManagers")
+                .InsertOne(new SaleManager()
+                {
+                    ManagerId = managerId,
+                    SaleId = createdSale.Id
+                });
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
         }
@@ -809,6 +825,22 @@ namespace WebUI.Controllers
             });
 
             _db.SaveChanges();
+            
+            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            var db = client.GetDatabase("bvdShop");
+
+            var managers = db.GetCollection<Manager>("managers")
+                .Find(manager => true)
+                .ToList();
+
+            var managerId = managers.FirstOrDefault(x => x.Name == json.Manager)?.Id;
+            
+            db.GetCollection<SaleManager>("saleManagers")
+                .InsertOne(new SaleManager()
+                {
+                    ManagerId = managerId,
+                    SaleId = createdSale.Id
+                });
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
         }
@@ -917,6 +949,22 @@ namespace WebUI.Controllers
                 });
 
             _db.SaveChanges();
+            
+            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            var db = client.GetDatabase("bvdShop");
+
+            var managers = db.GetCollection<Manager>("managers")
+                .Find(manager => true)
+                .ToList();
+
+            var managerId = managers.FirstOrDefault(x => x.Name == sale.Manager)?.Id;
+            
+            db.GetCollection<SaleManager>("saleManagers")
+                .InsertOne(new SaleManager()
+                {
+                    ManagerId = managerId,
+                    SaleId = createdSale.Id
+                });
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = sale.CashSum + sale.CashlessSum });
         }

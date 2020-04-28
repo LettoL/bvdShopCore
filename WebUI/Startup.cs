@@ -1,10 +1,7 @@
 using System;
 using System.Collections.Generic;
-using System.Configuration;
 using System.Globalization;
-using System.Linq;
 using System.Net;
-using System.Threading.Tasks;
 using Base.Services.Abstract;
 using Base.Services.Concrete;
 using Data;
@@ -19,12 +16,9 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.HttpOverrides;
-using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.Extensions.Configuration;
-using Microsoft.Extensions.Options;
 
 namespace WebUI
 {
