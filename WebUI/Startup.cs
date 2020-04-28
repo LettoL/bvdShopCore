@@ -93,9 +93,24 @@ namespace WebUI
             });
             
             app.UseDeveloperExceptionPage();
-
-            app.UseStaticFiles();
             
+            app.Use(async (context, next) =>
+            {
+                await next();
+                var path = context.Request.Path.Value;
+
+                if (path.ToLower().StartsWith("/spa"))
+                {
+                    context.Request.Path = "/index.html";
+                    
+                    app.UseDefaultFiles();
+                    
+                    await next();
+                }
+            });
+            
+            app.UseStaticFiles();
+
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
                 ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto
