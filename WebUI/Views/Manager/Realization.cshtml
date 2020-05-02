@@ -113,8 +113,8 @@
 
                                 <label>Продажа по России</label>
                                 <select id="forRussian" class="form-control" v-model="forRussian">
-                                    <option value="true">Да</option>
                                     <option value="false">Нет</option>
+                                    <option value="true">Да</option>
                                 </select> <br/>
 
                                 <label v-if="additionalCommentExist">Комментарий для Доп. Продажи</label>
@@ -343,7 +343,7 @@
             moneyWorkerType: null,
             moneyWorkerId: null,
             error: null,
-            payment: true,
+            payment: "true",
             forRussian: "false",
             manager: ""      
         },
@@ -473,6 +473,8 @@
                     delete product.category;
                 });
 
+                console.log(this.forRussian)
+                console.log(this.payment)
                 var realization = {
                     userId: userId,
                     products: this.products,
@@ -484,9 +486,9 @@
                     buyer: this.buyer,
                     additionalComment: this.additionalComment,
                     moneyWorkerId: +this.moneyWorkerId,
-                    payment: Boolean(this.payment),
+                    payment: JSON.parse(this.payment.toLowerCase()),
                     comment: this.comment,
-                    forRussian: Boolean(this.forRussian),
+                    forRussian: JSON.parse(this.forRussian.toLowerCase()),
                     manager: this.manager
                 }
                 console.log(realization)

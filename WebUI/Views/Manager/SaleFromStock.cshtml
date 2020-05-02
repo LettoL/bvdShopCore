@@ -430,7 +430,7 @@
                     additionalComment: this.additionalComment,
                     moneyWorkerIdForCashlessIncome: +this.moneyWorkerIdForCashlessIncome,
                     userId: userId,
-                    forRussian: Boolean(this.forRussian),
+                    forRussian: JSON.parse(this.forRussian.toLowerCase()),
                     manager: this.manager
                 }
 

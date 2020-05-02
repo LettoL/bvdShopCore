@@ -68,7 +68,7 @@ namespace WebUI.Controllers
         {
             _categoryService.Delete(id);
 
-            return RedirectToAction("Index", "Category");
+            return RedirectToAction("Index", "Categories");
         }
     }
 }

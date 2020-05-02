@@ -121,11 +121,6 @@ namespace WebUI.Controllers
             _salesByCategoryService = salesByCategoryService;
         }
 
-        public IActionResult UI()
-        {
-            return View("../client-app/build/index.html");
-        }
-
         public async Task<IActionResult> Managers()
         {
             var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");

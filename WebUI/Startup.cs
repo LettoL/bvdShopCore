@@ -97,6 +97,7 @@ namespace WebUI
             app.Use(async (context, next) =>
             {
                 await next();
+                Console.WriteLine(context.Request.Path.Value);
                 var path = context.Request.Path.Value;
 
                 if (path.ToLower().StartsWith("/spa"))
@@ -120,7 +121,7 @@ namespace WebUI
 
             app.UseRouting();
 
-            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod());
+            app.UseCors(x => x.AllowAnyOrigin().AllowAnyMethod().AllowAnyHeader());
             
             app.UseAuthorization();
 

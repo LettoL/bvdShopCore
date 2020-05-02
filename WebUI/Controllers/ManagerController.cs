@@ -820,7 +820,9 @@ namespace WebUI.Controllers
             {
                 Sale = createdSale,
                 MoneyWorkerForIncomeId = shop.Id,
-                MoneyWorkerForCashlessIncomeId = json.MoneyWorkerIdForCashlessIncome,
+                MoneyWorkerForCashlessIncomeId = json.MoneyWorkerIdForCashlessIncome == 0
+                    ? null
+                    : json.MoneyWorkerIdForCashlessIncome,
                 SaleType = SaleType.SaleFromStock
             });
 

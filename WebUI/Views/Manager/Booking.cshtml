@@ -420,7 +420,7 @@
                     userId: userId,
                     bookingType: 0,
                     buyer: this.buyer,
-                    forRussian: Boolean(this.forRussian)
+                    forRussian: JSON.parse(this.forRussian.toLowerCase())
                 }
 
                 /*var xhr = new XMLHttpRequest();
