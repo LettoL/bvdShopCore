@@ -1,8 +1,7 @@
 ﻿import React, {useState} from "react";
-import TextField from "@material-ui/core/TextField";
-import Button from "@material-ui/core/Button";
 import {useHttp} from "../../hooks/http.hook";
 import {Constants} from "../../const";
+import {Form} from "../../components/import-form/form";
 
 const API = Constants.API
 
@@ -39,42 +38,13 @@ export const ImportPage = () => {
       products: products
     })*/
   }
-
-  console.log(products)
   
   return (
-    <div>
-      <br/>
-      <TextField
-        label="Внесите товары"
-        multiline
-        rows={10}
-        variant="outlined"
-        value={form.products}
-        onChange={changeHandler}
-        name="products"
-        fullWidth
-      />
-      <br/>
-      <Button 
-        variant="contained" 
-        color="primary"
-        onClick={productsTextHandle}
-      >
-        Обработать
-      </Button>
-      <ul>
-        {products.map(product => (
-          <li key={product.number}>
-            {product.number}
-            {product.code}
-            {product.title}
-            {product.amount}
-            {product.price}
-            {product.sum}
-          </li>
-        ))}
-      </ul>
-    </div>
+    <Form
+      products={products}
+      productsText={form.products}
+      productsTextChange={changeHandler}
+      productsTextHandle={productsTextHandle}
+    />
   )
 }
