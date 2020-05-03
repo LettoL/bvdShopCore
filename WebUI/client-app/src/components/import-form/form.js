@@ -24,6 +24,15 @@ export const Form = (props) => {
             <ListItem button>
               <ListItemText primary={'Импорт'}/>
             </ListItem>
+            <ListItem button>
+              <ListItemText primary={'Менеджеры'}/>
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={'Все товары'}/>
+            </ListItem>
+            <ListItem button>
+              <ListItemText primary={'История товаров'}/>
+            </ListItem>
           </List>
         </Grid>
         <Grid container item xs={11}>
