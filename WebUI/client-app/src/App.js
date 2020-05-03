@@ -1,11 +1,14 @@
 import React from 'react';
-import {ImportPage} from "./pages/admin/import.page";
+import {BrowserRouter} from 'react-router-dom'
+import {useRoutes} from "./routes";
 
 function App() {
+  const routes = useRoutes()
+
   return (
-    <div>
-      <ImportPage/>
-    </div>
+    <BrowserRouter>
+      {routes}
+    </BrowserRouter>
   );
 }
 
