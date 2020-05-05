@@ -9,19 +9,19 @@ export const useRoutes = () => {
 
   return (
     <Switch>
-      <Route path='/import' exact>
+      <Route path='/admin/import' exact>
         <ImportPage/>
       </Route>
-      <Route path='/products' exact>
+      <Route path='/admin/products' exact>
         <ProductsPage/>
       </Route>
-      <Route path='/productsHistory' exact>
+      <Route path='/admin/productsHistory' exact>
         <ProductsHistory/>
       </Route>
-      <Route path='/managers' exact>
+      <Route path='/admin/managers' exact>
         <ManagersPage/>
       </Route>
-      <Redirect to='/import'/>
+      <Redirect to='/admin/import'/>
     </Switch>
   )
 }

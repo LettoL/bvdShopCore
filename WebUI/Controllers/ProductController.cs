@@ -322,13 +322,13 @@ namespace WebUI.Controllers
                     Code = x.Code,
                 })
                 .Where(x => filter.title == null || x.Title.Contains(filter.title))
-                .Where(x => productsInStock.Select(z => z.ProductId).Contains(x.Id)
-                    || bookingProductsAmount.Select(z => z.ProductId).Contains(x.Id))
-                /*.Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
-                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)*/
+                //.Where(x => productsInStock.Select(z => z.ProductId).Contains(x.Id)
+                //    || bookingProductsAmount.Select(z => z.ProductId).Contains(x.Id))
+                .Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
+                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)
                 .ToList()
-                .Where(x => productsInStock.Where(s => s.ProductId == x.Id)
-                                .Sum(s => s.Amount) > 0)
+                //.Where(x => productsInStock.Where(s => s.ProductId == x.Id)
+                //                .Sum(s => s.Amount) > 0)
                 .OrderBy(x => x.Title)
                 .Select(x => new ProductVM()
                 {

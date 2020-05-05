@@ -66,7 +66,7 @@ export const ProductsHistory = () => {
   }, [getProducts, getShops])
 
   return(
-    <Paper>
+    <>
       <FormControl className={classes.formControl}>
         <InputLabel id="demo-simple-select-label">Магазин</InputLabel>
         <Select
@@ -161,7 +161,7 @@ export const ProductsHistory = () => {
         onChangePage={handleChangePage}
         onChangeRowsPerPage={handleChangeRowsPerPage}
       />
-    </Paper>
+    </>
   )
 }
 
