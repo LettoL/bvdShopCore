@@ -9,7 +9,7 @@ import TableContainer from "@material-ui/core/TableContainer";
 
 export const ProductsTable = props => {
   const {products, shop, category,
-    title, page, rowsPerPage} = props
+    title, page, rowsPerPage, handleOpenDialog} = props
 
   return (
     <TableContainer>
@@ -46,7 +46,7 @@ export const ProductsTable = props => {
               <TableCell>{row.shop}</TableCell>
               <TableCell>{row.category}</TableCell>
               <TableCell>
-                <Button variant="contained">
+                <Button variant="contained" onClick={handleOpenDialog.bind(this, row)}>
                   Detail
                 </Button>
               </TableCell>
