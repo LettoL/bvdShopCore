@@ -280,9 +280,11 @@ namespace Data.Services.Concrete
             }
             
 
-            sale.Margin = sale.Sum - totalCost;
+            
             sale.PrimeCost = totalCost;
             sale.Sum = paymentsCash + paymentsCashless;
+            
+            sale.Margin = sale.Sum - totalCost;
 
             sale.Payment = true;
 

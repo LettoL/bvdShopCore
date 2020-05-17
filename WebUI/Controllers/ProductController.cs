@@ -8,12 +8,10 @@ using WebUI.ViewModels;
 using Base.Services.Abstract;
 using Data;
 using Data.Enums;
-using Data.FiltrationModels;
 using Data.Services;
 using Data.ViewModels;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.EntityFrameworkCore;
+using ProductFilterVM = WebUI.ViewModels.ProductFilterVM;
 using ProductVM = WebUI.ViewModels.ProductVM;
 
 namespace WebUI.Controllers
@@ -57,78 +55,9 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            var bookedProducts = _db.BookingProducts
-                .Where(x => x.Booking.Status == BookingStatus.Open)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Amount = x.Amount
-                })
-                .ToList()
-                .GroupBy(x => x.ProductId)
-                .Select(x => new
-                {
-                    ProductId = x.Key,
-                    Amount = x.Sum(z => z.Amount)
-                })
-                .ToList();
+            var result = ProductService.GetProductsInStock(_db);
 
-            var productsInStock = _db.SupplyProducts
-                .Where(x => x.StockAmount > 0)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Title = x.Product.Title,
-                    Cost = x.Product.Cost,
-                    Shop = x.Product.Shop,
-                    Category = x.Product.Category,
-                    Code = x.Product.Code,
-                    StockAmount = x.StockAmount
-                })
-                .ToList()
-                .GroupBy(x => x.ProductId)
-                .Select(x => new ProductVM
-                {
-                    Id = x.Key,
-                    Amount = x.Sum(z => z.StockAmount)
-                        - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
-                    Title = x.FirstOrDefault().Title,
-                    Cost = x.FirstOrDefault().Cost,
-                    Shop = x.FirstOrDefault().Shop,
-                    Category = x.FirstOrDefault().Category,
-                    Code = x.FirstOrDefault().Code,
-                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
-                })
-                .ToList();
-
-            return View(productsInStock);
-
-            /*return View(_productService.All()
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                })
-                .ToList()
-                .Where(x => _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                    .Sum(s => s.StockAmount) > 0)
-                .OrderBy(x => x.Title)
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Amount = _supplyProductService.All().Where(s => s.ProductId == x.Id)
-                        .Sum(s => s.StockAmount) - _productService.BookedProducts(_db, x.Id, x.Shop.Id),
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    BookedCount = _productService.BookedProducts(_db, x.Id, x.Shop.Id)
-                }).ToList());*/
+            return View(result);
         }
 
         public IActionResult AllProducts()
@@ -138,7 +67,9 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            return View(ProductService.GetAllProducts(_db));
+            var result = ProductService.GetAllProducts(_db);
+
+            return View(result);
         }
 
         [HttpGet]
@@ -291,62 +222,38 @@ namespace WebUI.Controllers
                 RedirectToAction("Index", "Home");
             
             var filter = productFilterVM.ProductFiltrationModel;
+
+            var result = ProductService.GetAllProductsFilter(_db,
+                new Data.ViewModels.ProductFilterVM()
+                {
+                    All = filter.all,
+                    CategoryId = filter.categoryId,
+                    ShopId = filter.shopId,
+                    Title = filter.title
+                });
             
-            var bookingProductsAmount = _db.BookingProducts
-                .Where(x => x.Booking.Status == BookingStatus.Open)
-                .Where(x => filter.categoryId == 0 || x.Product.Category.Id == filter.categoryId)
-                .Where(x => filter.shopId == 0 || x.Product.Shop.Id == filter.shopId)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Amount = x.Amount
-                }).ToList();
+            return PartialView(result);
+        }
 
-            var productsInStock = _db.SupplyProducts
-                .Where(x => filter.categoryId == 0 || x.Product.Category.Id == filter.categoryId)
-                .Where(x => filter.shopId == 0 || x.Product.Shop.Id == filter.shopId)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Amount = x.StockAmount
-                }).ToList();
+        [HttpPost]
+        public IActionResult ProductsInStockFilter(ProductFilterVM productFilterVm)
+        {
+            var user = _userService.All().First(u => u.Id == productFilterVm.UserId);
+            ViewBag.User = user;
 
-            var result = _db.Products
-                .Select(x => new ProductVM()
+            if (user == null)
+                RedirectToAction("Index", "Home");
+            
+            var filter = productFilterVm.ProductFiltrationModel;
+
+            var result = ProductService.GetProductsInStockFilter(_db,
+                new Data.ViewModels.ProductFilterVM()
                 {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                })
-                .Where(x => filter.title == null || x.Title.Contains(filter.title))
-                //.Where(x => productsInStock.Select(z => z.ProductId).Contains(x.Id)
-                //    || bookingProductsAmount.Select(z => z.ProductId).Contains(x.Id))
-                .Where(x => filter.categoryId == 0 || x.Category.Id == filter.categoryId)
-                .Where(x => filter.shopId == 0 || x.Shop.Id == filter.shopId)
-                .ToList()
-                //.Where(x => productsInStock.Where(s => s.ProductId == x.Id)
-                //                .Sum(s => s.Amount) > 0)
-                .OrderBy(x => x.Title)
-                .Select(x => new ProductVM()
-                {
-                    Id = x.Id,
-                    Title = x.Title,
-                    Amount = productsInStock.Where(s => s.ProductId == x.Id)
-                                 .Sum(s => s.Amount) 
-                             - bookingProductsAmount
-                                 .Where(z => z.ProductId == x.Id)
-                                 .Sum(z => z.Amount),
-                    Cost = x.Cost,
-                    Shop = x.Shop,
-                    Category = x.Category,
-                    Code = x.Code,
-                    BookedCount = bookingProductsAmount
-                        .Where(z => z.ProductId == x.Id)
-                        .Sum(z => z.Amount)
-                }).ToList();
+                    All = filter.all,
+                    CategoryId = filter.categoryId,
+                    ShopId = filter.shopId,
+                    Title = filter.title
+                });
             
             return PartialView(result);
         }

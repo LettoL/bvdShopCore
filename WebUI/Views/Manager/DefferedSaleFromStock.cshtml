@@ -418,6 +418,7 @@
             },
             sendData: function () {
                 this.products.forEach(product => {
+                    product.amount = +(product.amount)
                     delete product.category;
                 });
 

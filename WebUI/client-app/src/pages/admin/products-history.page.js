@@ -10,11 +10,12 @@ import TableRow from "@material-ui/core/TableRow";
 import TableCell from "@material-ui/core/TableCell";
 import TableBody from "@material-ui/core/TableBody";
 import TablePagination from "@material-ui/core/TablePagination";
-import Paper from "@material-ui/core/Paper";
 import {makeStyles} from "@material-ui/core/styles";
 import {useHttp} from "../../hooks/http.hook";
 import TextField from "@material-ui/core/TextField";
 import {Constants} from "../../const";
+import {KeyboardDatePicker, MuiPickersUtilsProvider} from "@material-ui/pickers";
+import DateFnsUtils from "@date-io/date-fns";
 
 const API = Constants.API
 
@@ -92,6 +93,22 @@ export const ProductsHistory = () => {
           }}
           onChange={event => setStartDate(new Date(event.target.value))}
         />
+      </FormControl>
+      <FormControl className={classes.formControl}>
+        <MuiPickersUtilsProvider utils={DateFnsUtils}>
+          <KeyboardDatePicker
+            disableToolbar
+            variant='inline'
+            format='MM/dd/yyyy'
+            margin='normal'
+            label='Дата с'
+            value={startDate}
+            onChange={event => setStartDate(event)}
+            KeyboardButtonProps={{
+              'aria-label': 'change date',
+            }}
+          />
+        </MuiPickersUtilsProvider>
       </FormControl>
       <FormControl className={classes.formControl}>
         <TextField

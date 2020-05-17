@@ -28,7 +28,7 @@ namespace WebUI
         public void ConfigureServices(IServiceCollection services)
         {
             string connection =
-                "Data Source=31.31.196.211;Initial Catalog=u0530276_bvdshop;User ID=u0530276_bvdshop_admin;Password=Cfvbhyfchb20";
+                "Data Source=31.31.196.211;Initial Catalog=u0530276_TestBVD;User ID=u0530276_bvdshop_admin;Password=Cfvbhyfchb20";
                 //"Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
 
                 services.AddAuthentication(options =>

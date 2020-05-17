@@ -154,7 +154,7 @@ namespace WebUI.Controllers
 
             ViewBag.SalePayments = _db.InfoMonies
                 .Where(x => (x.SaleId != null || x.BookingId != null)
-                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date
+                            && x.Date.Date == DateTime.Now/*.AddHours(3)*/.Date.Date
                             && (x.Sale.ShopId == shop.Id || x.Booking.ShopId == shop.Id ))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -304,7 +304,7 @@ namespace WebUI.Controllers
 
             var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
             
-            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
             var db = client.GetDatabase("bvdShop");
 
             var managers = db.GetCollection<Manager>("managers")
@@ -318,7 +318,7 @@ namespace WebUI.Controllers
                 {
                     ManagerId = managerId,
                     SaleId = createdSale.Id
-                });
+                });*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
         }
@@ -587,7 +587,7 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
             
-            var bookedProducts = _db.BookingProducts
+            /*var bookedProducts = _db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
                 .Select(x => new
                 {
@@ -629,9 +629,11 @@ namespace WebUI.Controllers
                     Code = x.FirstOrDefault().Code,
                     BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
                 })
-                .ToList();
+                .ToList();*/
 
-            return View(productsInStock);
+            var result = ProductService.GetProductsInStock(_db);
+
+            return View(result);
         }
 
         [HttpGet]
@@ -828,7 +830,7 @@ namespace WebUI.Controllers
 
             _db.SaveChanges();
             
-            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
             var db = client.GetDatabase("bvdShop");
 
             var managers = db.GetCollection<Manager>("managers")
@@ -842,7 +844,7 @@ namespace WebUI.Controllers
                 {
                     ManagerId = managerId,
                     SaleId = createdSale.Id
-                });
+                });*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
         }
@@ -952,7 +954,7 @@ namespace WebUI.Controllers
 
             _db.SaveChanges();
             
-            var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
+            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
             var db = client.GetDatabase("bvdShop");
 
             var managers = db.GetCollection<Manager>("managers")
@@ -966,7 +968,7 @@ namespace WebUI.Controllers
                 {
                     ManagerId = managerId,
                     SaleId = createdSale.Id
-                });
+                });*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = sale.CashSum + sale.CashlessSum });
         }

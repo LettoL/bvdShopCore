@@ -1,4 +1,4 @@
-﻿import React, {useState} from "react";
+﻿import React, {useCallback, useEffect, useState} from "react";
 import {useHttp} from "../../hooks/http.hook";
 import {Constants} from "../../const";
 import {Form} from "../../components/import-form/form";
@@ -7,44 +7,56 @@ const API = Constants.API
 
 export const ImportPage = () => {
   const {request} = useHttp()
-  const [products, setProducts] = useState([])
-  
-  const [form, setForm] = useState({
-    products: ''
-  })
-  
-  const changeHandler = event => {
-    setForm({...form, [event.target.name]: event.target.value})
-  }
-  
-  const productsTextHandle = async () => {
-    const productsText = form.products.split('\n');
-    const productsProperties = productsText.map(x => x.split(';'));
-    
-    const products = productsProperties.map(x => {
-      return {
-        number: +(x[0].replace(',', '.').replace(/\s+/g,'')),
-        code: x[1],
-        title: x[2],
-        amount: +(x[3].replace(',', '.').replace(/\s+/g,'')),
-        price: +(x[5].replace(',', '.').replace(/\s+/g,'')),
-        sum: +(x[6].replace(',', '.').replace(/\s+/g,''))
-      }
-    });
 
-    setProducts(products)
-    
-    /*const data = await request(API + 'api/supplyProducts/import', 'POST', {
-      products: products
-    })*/
+  const [shops, setShops] = useState([])
+  const [categories, setCategories] = useState([])
+  const [suppliers, setSuppliers] = useState([])
+
+  const getShops = useCallback(async () => {
+    try {
+      const data = await request(API + 'api/shops')
+      setShops(data)
+    }
+    catch (e) {}
+  }, [request])
+
+  const getCategories = useCallback(async () => {
+    try {
+      const data = await request(API + 'api/categories')
+      setCategories(data)
+    }
+    catch (e) {}
+  }, [request])
+
+  const getSuppliers = useCallback(async () => {
+    try {
+      const data = await request(API + 'api/suppliers')
+      setSuppliers(data)
+    }
+    catch (e) {}
+  }, [request])
+
+  useEffect(() => {
+    getShops()
+    getCategories()
+    getSuppliers()
+  }, [getShops, getCategories, getSuppliers])
+
+  const saveForm = async (data) => {
+    try {
+      const response = await request(API + 'api/supplyProducts/import', 'POST', {...data})
+      console.log({...data})
+      console.log(response)
+    }
+    catch (e) { }
   }
   
   return (
     <Form
-      products={products}
-      productsText={form.products}
-      productsTextChange={changeHandler}
-      productsTextHandle={productsTextHandle}
+      shops={shops}
+      suppliers={suppliers}
+      categories={categories}
+      saveForm={saveForm}
     />
   )
 }

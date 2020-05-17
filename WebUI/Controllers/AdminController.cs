@@ -121,6 +121,12 @@ namespace WebUI.Controllers
             _salesByCategoryService = salesByCategoryService;
         }
 
+        [HttpPost]
+        public IActionResult Test([FromBody]string test)
+        {
+          return Ok(test);
+        }
+
         public async Task<IActionResult> Managers()
         {
             var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
@@ -162,7 +168,9 @@ namespace WebUI.Controllers
             foreach (var shop in _db.Shops.ToList())
             {
                 var salesProductsToday = _db.SalesProducts
-                        .Where(x => x.Sale.ShopId == shop.Id && x.Sale.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear && x.Sale.Date.Year == DateTime.Now.AddHours(3).Year)
+                        .Where(x => x.Sale.ShopId == shop.Id 
+                                    && x.Sale.Date.DayOfYear == DateTime.Now.DayOfYear 
+                                    && x.Sale.Date.Year == DateTime.Now.Year)
                         .Select(sp => new SaleProduct()
                         {
                             Product = sp.Product,
@@ -174,7 +182,9 @@ namespace WebUI.Controllers
                     ShopTitle = shop.Title,
                     SalesProducts = salesProductsToday.ToList(),
                     Sum = _db.InfoMonies
-                        .Where(im => im.Sale.ShopId == shop.Id && im.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear && im.Sale.Date.Year == DateTime.Now.AddHours(3).Year)
+                        .Where(im => im.Sale.ShopId == shop.Id
+                                     && im.Date.DayOfYear == DateTime.Now.DayOfYear
+                                     && im.Sale.Date.Year == DateTime.Now.Year)
                         .Sum(im => im.Sum)
                 });
             }
@@ -217,7 +227,7 @@ namespace WebUI.Controllers
 
             ViewBag.MoscowSalePayments = _infoMoneyService.All()
                 .Where(x => (x.SaleId != null || x.BookingId != null) 
-                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date
+                            && x.Date.Date == DateTime.Now.Date.Date
                             && (x.Sale.ShopId == 1 || x.Booking.ShopId == 1))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -281,7 +291,7 @@ namespace WebUI.Controllers
 
             ViewBag.PetersburgSalePayments = _infoMoneyService.All()
                 .Where(x => (x.SaleId != null || x.BookingId != null) 
-                            && x.Date.Date == DateTime.Now.AddHours(3).Date.Date 
+                            && x.Date.Date == DateTime.Now.Date.Date 
                             && (x.Sale.ShopId == 2 || x.Booking.ShopId == 2))
                 .OrderByDescending(x => x.Id)
                 .Select(x => new SalePaymentVM
@@ -766,17 +776,20 @@ namespace WebUI.Controllers
         {
             var infoProductsAll = _infoProductService.Filtration(model);
 
-            return View(infoProductsAll.Select(ip => new InfoProduct()
-            {
-                Id = ip.Id,
-                Product = ip.Product,
-                Shop = ip.Shop,
-                Supplier = ip.Supplier,
-                Sale = ip.Sale,
-                Amount = ip.Amount,
-                Date = ip.Date,
-                Type = ip.Type
-            }).OrderByDescending(ip => ip.Id));
+            return View(infoProductsAll
+              .Select(ip => new InfoProduct()
+              {
+                  Id = ip.Id,
+                  Product = ip.Product,
+                  Shop = ip.Shop,
+                  Supplier = ip.Supplier,
+                  Sale = ip.Sale,
+                  Amount = ip.Amount,
+                  Date = ip.Date,
+                  Type = ip.Type
+              }).OrderByDescending(ip => ip.Id)
+              .ToList()
+              .Where(x => model.type == 0 || (int)x.Type == model.type));
         }
 
         [HttpGet]
