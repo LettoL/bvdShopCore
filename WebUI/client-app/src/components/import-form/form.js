@@ -19,8 +19,7 @@ export const Form = (props) => {
     shop: null,
     supplier: null,
     supplyType: null,
-    category: null,
-    deliveryPrice: 0
+    category: null
   })
   const [products, setProducts] = useState([])
 
@@ -122,16 +121,6 @@ export const Form = (props) => {
           </Select>
         </FormControl>
         <br/>
-        <FormControl className={classes.formControl}>
-          <TextField
-            label='Стоимость доставки'
-            variant='outlined'
-            value={form.deliveryPrice}
-            name='deliveryPrice'
-            type='number'
-            onChange={changeFormHandler}
-          />
-        </FormControl>
         <TextField
           label="Внесите товары"
           multiline

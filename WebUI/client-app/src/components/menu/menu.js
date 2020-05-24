@@ -8,6 +8,11 @@ export const Menu = () => {
 
   return (
     <List>
+      <ListItem>
+        <a href='/'>
+          Старый интерфейс
+        </a>
+      </ListItem>
       <ListItem button>
         <NavLink to={'/admin/import'}>
           <ListItemText primary={'Импорт'}/>

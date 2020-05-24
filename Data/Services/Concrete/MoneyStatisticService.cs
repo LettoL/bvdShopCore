@@ -24,7 +24,7 @@ namespace Data.Services.Concrete
         public IQueryable<ExpenseListVM> Expenses(ShopContext context)
         {
             return context.Expenses
-                .Where(x => x.InfoMoney.Date.Date == DateTime.Now.AddHours(3).Date.Date)
+                .Where(x => x.InfoMoney.Date.Date == DateTime.Now.Date.Date)
                 .Select(x => new ExpenseListVM()
                 {
                     Date = x.InfoMoney.Date.ToString("dd.MM.yyyy"),
@@ -37,7 +37,7 @@ namespace Data.Services.Concrete
         public IQueryable<ExpenseListVM> ShopExpenses(ShopContext db, int shopId)
         {
             return db.Expenses
-                .Where(x => x.ShopId == shopId && x.InfoMoney.Date.Date == DateTime.Now.AddHours(3).Date)
+                .Where(x => x.ShopId == shopId && x.InfoMoney.Date.Date == DateTime.Now.Date)
                 .Select(x => new ExpenseListVM()
                 {
                     Date = x.InfoMoney.Date.ToString("dd.MM.yyyy"),
@@ -50,8 +50,8 @@ namespace Data.Services.Concrete
         public decimal DailyProfit(ShopContext context)
         {
             return context.InfoMonies
-                .Where(im => im.Date.DayOfYear == DateTime.Now.AddHours(3).DayOfYear
-                             && im.Date.Year == DateTime.Now.AddHours(3).Year
+                .Where(im => im.Date.DayOfYear == DateTime.Now.DayOfYear
+                             && im.Date.Year == DateTime.Now.Year
                              && im.Sum > 0
                              && im.MoneyOperationType != MoneyOperationType.Transfer
                              && im.MoneyOperationType != MoneyOperationType.Expense
