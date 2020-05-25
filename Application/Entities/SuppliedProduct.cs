@@ -16,10 +16,14 @@ namespace Application.Entities
         public int ProductId { get; private set; }
         public Product Product { get; private set; }
 
+        public int SupplierId { get; private set; }
+        public Supplier Supplier { get; private set; }
+
         public SuppliedProduct(
-            DateTime date, int suppliedAmount, decimal procurementCost, int shopId, int productId, SuppliedType type) =>
-            (Date, SuppliedAmount, ProcurementCost, ShopId, ProductId, Type) =
-            (date, suppliedAmount, procurementCost, shopId, productId, type);
+            DateTime date, int suppliedAmount, decimal procurementCost,
+            int shopId, int productId, SuppliedType type, int supplierId) =>
+            (Date, SuppliedAmount, ProcurementCost, ShopId, ProductId, Type, SupplierId) =
+            (date, suppliedAmount, procurementCost, shopId, productId, type, supplierId);
     }
 
     public enum SuppliedType
