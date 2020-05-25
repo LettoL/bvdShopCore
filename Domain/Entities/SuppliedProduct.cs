@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Application.Entities
+namespace Domain.Entities
 {
     public class SuppliedProduct : Entity
     {

@@ -30,9 +30,6 @@ namespace WebUI
         {
             string connection =
                 "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
-
-            string postgresConnection =
-                "";
             
             services.AddAuthentication(options =>
                 {
@@ -46,11 +43,6 @@ namespace WebUI
                     options.UseSqlServer(connection,
                         b => b.MigrationsAssembly("WebUI")));
                 
-            services.AddDbContext<PostgresContext>(options =>
-                options.UseNpgsql(postgresConnection,
-                    b => b.MigrationsAssembly("PostgresData")));
-            
-            
             services.AddScoped(typeof(IBaseObjectService<>), typeof(BaseObjectService<>));
             services.AddScoped<DbContext, ShopContext>();
             services.AddScoped<PostgresContext, PostgresContext>();
