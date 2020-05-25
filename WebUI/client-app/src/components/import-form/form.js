@@ -22,6 +22,7 @@ export const Form = (props) => {
     category: null
   })
   const [products, setProducts] = useState([])
+  const [disabled, setDisabled] = useState(false)
 
   const changeFormHandler = event => {
     setForm({...form, [event.target.name]: event.target.value})
@@ -54,6 +55,8 @@ export const Form = (props) => {
   }
 
   const saveHandler = () => {
+    setDisabled(true)
+
     const productsForSave = products.map(product => ({
       ...product, ['price']: product.price + ''
     }))
@@ -148,6 +151,7 @@ export const Form = (props) => {
           variant='contained'
           color='primary'
           onClick={saveHandler}
+          disabled={disabled}
         >
           Сохранить
         </Button>
