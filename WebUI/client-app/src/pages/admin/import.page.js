@@ -6,11 +6,12 @@ import {Form} from "../../components/import-form/form";
 const API = Constants.API
 
 export const ImportPage = () => {
-  const {request} = useHttp()
+  const {request, loading, error} = useHttp()
 
   const [shops, setShops] = useState([])
   const [categories, setCategories] = useState([])
   const [suppliers, setSuppliers] = useState([])
+  const [saveSuccess, setSaveSuccess] = useState(false)
 
   const getShops = useCallback(async () => {
     try {
@@ -45,8 +46,7 @@ export const ImportPage = () => {
   const saveForm = async (data) => {
     try {
       const response = await request(API + 'api/supplyProducts/import', 'POST', {...data})
-      console.log({...data})
-      console.log(response)
+      setSaveSuccess(true)
     }
     catch (e) { }
   }
@@ -57,6 +57,9 @@ export const ImportPage = () => {
       suppliers={suppliers}
       categories={categories}
       saveForm={saveForm}
+      loading={loading}
+      error={error}
+      success={saveSuccess}
     />
   )
 }

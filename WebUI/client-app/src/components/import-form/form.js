@@ -9,10 +9,11 @@ import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import MenuItem from "@material-ui/core/MenuItem";
 import {makeStyles} from "@material-ui/core/styles";
+import CircularProgress from "@material-ui/core/CircularProgress";
 
 export const Form = (props) => {
   const classes = useStyles()
-  const {shops, suppliers, categories, saveForm} = props
+  const {shops, suppliers, categories, saveForm, loading, error, success} = props
 
   const [form, setForm] = useState({
     productsText: '',
@@ -155,6 +156,11 @@ export const Form = (props) => {
         >
           Сохранить
         </Button>
+        <br/>
+        <br/>
+        {loading && <CircularProgress/>}
+        {error && <p>Ошибка: {error}</p>}
+        {success && <p>Успех!</p>}
       </Grid>
       <Grid item xs={7}>
         <List>
