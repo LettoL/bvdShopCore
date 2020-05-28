@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 using Data;
 using Data.Entities;
 using Data.Enums;
+using Handlers.CommandHandlers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 using WebUI.Commands;
+using SupplyProduct = Data.Entities.SupplyProduct;
 
 namespace WebUI.API
 {
@@ -16,10 +19,34 @@ namespace WebUI.API
     public class SupplyProducts : ControllerBase
     {
         private readonly ShopContext _db;
+        private readonly PostgresContext _postgresContext;
 
-        public SupplyProducts(ShopContext db)
+        public SupplyProducts(ShopContext db, PostgresContext postgresContext)
         {
             _db = db;
+            _postgresContext = postgresContext;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Commands.SupplyProduct command)
+        {
+            decimal procurementCost = 0;
+            if (!Decimal.TryParse(command.ProcurementCost, out procurementCost))
+                return BadRequest("Неверна введена закупочная цена");
+            
+            var supplyProduct = new Handlers.Commands.SupplyProduct()
+            {
+                ProductId = command.ProductId,
+                Amount = command.Amount,
+                ShopId = command.ShopId,
+                SupplierId = command.SupplierId,
+                Type = command.Type,
+                ProcurementCost = procurementCost
+            };
+            
+            var result = await SupplyProductHandler.Handle(supplyProduct, _postgresContext);
+            
+            return Ok(result);
         }
 
         [HttpPost]
