@@ -4,6 +4,7 @@ using System.Threading.Tasks;
 using Data;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 using WebUI.Dtos;
 
 namespace WebUI.API
@@ -13,10 +14,12 @@ namespace WebUI.API
     public class CategoriesController : ControllerBase
     {
         private readonly ShopContext _db;
+        private readonly PostgresContext _postgresContext;
 
-        public CategoriesController(ShopContext db)
+        public CategoriesController(ShopContext db, PostgresContext postgresContext)
         {
             _db = db;
+            _postgresContext = postgresContext;
         }
 
         [HttpGet]
@@ -37,6 +40,12 @@ namespace WebUI.API
             {
                 return BadRequest(e.Message);
             }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post()
+        {
+            return Ok();
         }
     }
 }
