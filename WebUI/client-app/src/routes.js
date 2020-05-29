@@ -5,6 +5,7 @@ import {ProductsPage} from "./pages/admin/products.page";
 import {ProductsHistory} from "./pages/admin/products-history.page";
 import {ManagersPage} from "./pages/admin/managers.page";
 import {SupplyProductForm} from "./components/supply-product/supply-product-form";
+import {ShopsList} from "./components/shop/shops-list";
 
 export const useRoutes = () => {
 
@@ -24,6 +25,9 @@ export const useRoutes = () => {
       </Route>
       <Route path='/admin/managers' exact>
         <ManagersPage/>
+      </Route>
+      <Route path='/admin/shops' exact>
+        <ShopsList/>
       </Route>
       <Redirect to='/admin/import'/>
     </Switch>

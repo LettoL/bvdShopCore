@@ -2,7 +2,7 @@ import {createEffect, createStore} from "effector";
 import {Constants} from "../const";
 
 const API_URL = Constants.API
-const API_SHOPS = API_URL + '/api/shops'
+const API_SHOPS = API_URL + 'api/shops'
 
 export const fetchShopsFx = createEffect({
   async handler() {
