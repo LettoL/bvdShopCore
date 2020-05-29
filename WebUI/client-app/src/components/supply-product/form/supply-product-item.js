@@ -1,28 +1,23 @@
-import React, {useState} from "react";
-import TextField from "@material-ui/core/TextField";
+import React from "react";
 import FormControl from "@material-ui/core/FormControl";
-import {makeStyles} from "@material-ui/core/styles";
-import Select from "@material-ui/core/Select";
 import InputLabel from "@material-ui/core/InputLabel";
+import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
+import TextField from "@material-ui/core/TextField";
+import {makeStyles} from "@material-ui/core/styles";
 
-export const SupplyProductForm = () => {
+export const SupplyProductItem = props => {
   const classes = useStyles()
 
-  const [form, setForm] = useState({
-    productId: 0,
-    amount: 0,
-    shopId: 0,
-    supplierId: 0,
-    procurementCost: 0
-  })
+  const {index, changeFormHandler} = props
+  const {productId, amount, shopId, supplierId, procurementCost} = props.supplyProduct
 
   const products = [{id: 1, title: 'product1'}, {id: 2, title: 'product2'}]
   const shops = [{id: 2, title: 'shop1'}]
   const suppliers = [{id: 1, title: 'supplier1'}]
 
-  const changeFormHandler = event => {
-    setForm({...form, [event.target.name]: event.target.value})
+  const changeProduct = event => {
+    changeFormHandler(index, event)
   }
 
   return(
@@ -32,8 +27,8 @@ export const SupplyProductForm = () => {
         <Select
           labelId='product-select'
           name='productId'
-          value={form.productId}
-          onChange={changeFormHandler}
+          value={productId}
+          onChange={changeProduct}
         >
           <MenuItem value={0}>Выбрать товар</MenuItem>
           {products.map(product => (
@@ -44,8 +39,8 @@ export const SupplyProductForm = () => {
       <FormControl className={classes.formControl}>
         <TextField
           label='Количество'
-          value={form.amount}
-          onChange={changeFormHandler}
+          value={amount}
+          onChange={changeProduct}
           name='amount'
         />
       </FormControl>
@@ -54,8 +49,8 @@ export const SupplyProductForm = () => {
         <Select
           labelId='shop-select'
           name='shopId'
-          value={form.shopId}
-          onChange={changeFormHandler}
+          value={shopId}
+          onChange={changeProduct}
         >
           <MenuItem value={0}>Выбрать магазин</MenuItem>
           {shops.map(shop => (
@@ -68,8 +63,8 @@ export const SupplyProductForm = () => {
         <Select
           labelId='supplier-select'
           name='supplierId'
-          value={form.supplierId}
-          onChange={changeFormHandler}
+          value={supplierId}
+          onChange={changeProduct}
         >
           <MenuItem value={0}>Выбрать поставшика</MenuItem>
           {suppliers.map(supplier => (
@@ -80,8 +75,8 @@ export const SupplyProductForm = () => {
       <FormControl className={classes.formControl}>
         <TextField
           label='Закупочная стоимость'
-          value={form.procurementCost}
-          onChange={changeFormHandler}
+          value={procurementCost}
+          onChange={changeProduct}
           name='procurementCost'
         />
       </FormControl>

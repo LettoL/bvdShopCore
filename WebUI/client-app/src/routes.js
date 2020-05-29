@@ -4,7 +4,7 @@ import {ImportPage} from "./pages/admin/import.page";
 import {ProductsPage} from "./pages/admin/products.page";
 import {ProductsHistory} from "./pages/admin/products-history.page";
 import {ManagersPage} from "./pages/admin/managers.page";
-import {SupplyProductForm} from "./components/supply-product/supply-product-form";
+import {SupplyProductForm} from "./components/supply-product/form/supply-product-form";
 import {ShopsList} from "./components/shop/shops-list";
 
 export const useRoutes = () => {
