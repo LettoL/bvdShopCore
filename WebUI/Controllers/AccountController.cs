@@ -44,6 +44,9 @@ namespace WebUI.Controllers
                     Console.WriteLine(3);
                     
                     await Authenticate(login); // аутентификация
+                    
+                    HttpContext.Response.Cookies.Append("userId", user.Id + "");
+                    HttpContext.Response.Cookies.Append("userRole", user.Role.ToString());
 
                     Console.WriteLine(4);
                     
@@ -75,6 +78,10 @@ namespace WebUI.Controllers
         public async Task<IActionResult> Logout()
         {
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            
+            HttpContext.Response.Cookies.Delete("userId");
+            HttpContext.Response.Cookies.Delete("userRole");
+            
             return RedirectToAction("Login", "Account");
         }
     }

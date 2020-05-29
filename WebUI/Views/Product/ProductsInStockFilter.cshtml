@@ -1,0 +1,47 @@
+﻿<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Артикул</th>
+            <th>Название</th>
+            <th>Количество</th>
+            <th>Цена</th>
+            <th>Магазин</th>
+            <th>Забронировано</th>
+            <th>Категория</th>
+            @if (ViewBag.User.Role.ToString() == "Administrator")
+            {
+                <th>Действие</th>
+            }
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var p in Model)
+        {
+            <tr id="@p.Id">
+                <td>@p.Code</td>
+                <td>@p.Title</td>
+                <td>@p.Amount</td>
+                <td contenteditable>@p.Cost</td>
+                <td>@p.Shop.Title</td>
+                <td>@p.BookedCount</td>
+                <td>@p.Category.Title</td>               
+                <td>
+                    @if (ViewBag.User.Role.ToString() == "Administrator")
+                     {
+                        <a href="/Product/Detail/@p.Id" class="btn btn-dark">
+                                <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                        </a>
+                        <a href="/Product/Edit/@p.Id" class="btn btn-dark">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </a>
+                     }
+                     <button id="updatePrice" class="btn btn-dark">
+                         <i class="fa fa fa-check" aria-hidden="true"></i>
+                     </button>
+                </td>
+               
+            </tr>
+        }
+    </tbody>
+</table>
+

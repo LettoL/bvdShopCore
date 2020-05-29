@@ -5,9 +5,12 @@ using System.Threading.Tasks;
 using Data;
 using Data.Entities;
 using Data.Enums;
+using Handlers.CommandHandlers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 using WebUI.Commands;
+using SupplyProduct = Data.Entities.SupplyProduct;
 
 namespace WebUI.API
 {
@@ -16,35 +19,67 @@ namespace WebUI.API
     public class SupplyProducts : ControllerBase
     {
         private readonly ShopContext _db;
+        private readonly PostgresContext _postgresContext;
 
-        public SupplyProducts(ShopContext db)
+        public SupplyProducts(ShopContext db, PostgresContext postgresContext)
         {
             _db = db;
+            _postgresContext = postgresContext;
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> Post([FromBody] Commands.SupplyProduct command)
+        {
+            decimal procurementCost = 0;
+            if (!Decimal.TryParse(command.ProcurementCost, out procurementCost))
+                return BadRequest("Неверна введена закупочная цена");
+            
+            var supplyProduct = new Handlers.Commands.SupplyProduct()
+            {
+                ProductId = command.ProductId,
+                Amount = command.Amount,
+                ShopId = command.ShopId,
+                SupplierId = command.SupplierId,
+                Type = command.Type,
+                ProcurementCost = procurementCost
+            };
+            
+            var result = await SupplyProductHandler.Handle(supplyProduct, _postgresContext);
+            
+            return Ok(result);
         }
 
         [HttpPost]
         [Route("import")]
-        public async Task<IActionResult> Import([FromBody] ImportProducts command)
+        public async Task<IActionResult> Import([FromBody] ImportProductsForm command)
         {
             try
             {
                 var result = command;
 
-                var shopId = 1;
-                var categoryId = 1;
-                var supplierId = 1;
-                var realization = 1;
+                var shopId = command.Shop;
+                var categoryId = command.Category;
+                var supplierId = command.Supplier;
+                var realization = command.SupplyType;
                 var additionalCost = 0;
                 var date = DateTime.Now;
                 
                 //old
-                var supplyHistory = await _db.SupplyHistories
-                    .AddAsync(new SupplyHistory());
+                var supplyHistory = _db.SupplyHistories
+                    .Add(new SupplyHistory());
 
                 foreach (var product in command.Products)
                 {
-                    var existingProduct = await _db.Products
-                        .FirstOrDefaultAsync(x => x.Title == product.Title
+                    decimal procurementCost = 0;
+                    decimal a;
+                    if (Decimal.TryParse(product.Price.Replace('.', ','), out a))
+                        procurementCost = a;
+                    else
+                        throw new Exception("Закупочная стоимость неверного формата в товаре: " 
+                                            + product.Title);
+                  
+                    var existingProduct = _db.Products
+                        .FirstOrDefault(x => x.Title == product.Title
                                                   && x.ShopId == shopId);
 
                     if (existingProduct == null)
@@ -52,16 +87,17 @@ namespace WebUI.API
                         var productCost = _db.Products
                             .FirstOrDefault(x => x.Title == product.Title)?.Cost ?? 0;
                         
-                        var createProduct = await _db.Products.AddAsync(new Product()
-                        {
-                            Code = product.Code,
-                            Title = product.Title,
-                            ShopId = shopId,
-                            CategoryId = categoryId,
-                            Cost = productCost
-                        });
+                        var createProduct = _db.Products
+                          .Add(new Product()
+                          {
+                              Code = product.Code,
+                              Title = product.Title,
+                              ShopId = shopId,
+                              CategoryId = categoryId,
+                              Cost = productCost
+                          });
 
-                        await _db.InfoProducts.AddAsync(new InfoProduct()
+                        _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = product.Amount,
                             Date = DateTime.Now.AddHours(3),
@@ -69,27 +105,27 @@ namespace WebUI.API
                             SupplierId = supplierId,
                             Type = InfoProductType.Supply,
                             ShopId = shopId,
-                            SupplyHistoryId = supplyHistory.Entity.Id
+                            SupplyHistory = supplyHistory.Entity
                         });
 
-                        var supplyProduct = await _db.SupplyProducts
-                            .AddAsync(new SupplyProduct()
+                        var supplyProduct = _db.SupplyProducts
+                            .Add(new SupplyProduct()
                             {
-                                ProductId = createProduct.Entity.Id,
+                                Product = createProduct.Entity,
                                 SupplierId = supplierId,
                                 RealizationAmount = (SupplyType) realization == SupplyType.ForRealization
                                     ? product.Amount
                                     : 0,
                                 TotalAmount = product.Amount,
-                                AdditionalCost = additionalCost,
-                                ProcurementCost = product.Price,
-                                FinalCost = product.Price + (additionalCost / product.Amount),
+                                AdditionalCost = 0,
+                                ProcurementCost = procurementCost,
+                                FinalCost = procurementCost,
                                 StockAmount = product.Amount,
-                                SupplyHistoryId = supplyHistory.Entity.Id
+                                SupplyHistory = supplyHistory.Entity
                             });
 
                         if ((SupplyType) realization == SupplyType.ForRealization)
-                            await _db.DeferredSupplyProducts.AddAsync(new DeferredSupplyProduct()
+                            _db.DeferredSupplyProducts.Add(new DeferredSupplyProduct()
                             {
                                 Date = date,
                                 SupplyProductId = supplyProduct.Entity.Id
@@ -97,33 +133,35 @@ namespace WebUI.API
                     }
                     else
                     {
-                        var supplyProduct = await _db.SupplyProducts
-                            .AddAsync(new SupplyProduct()
+                        var supplyProduct = _db.SupplyProducts
+                            .Add(new SupplyProduct()
                             {
                                 ProductId = existingProduct.Id,
                                 RealizationAmount = (SupplyType) realization == SupplyType.ForRealization
                                     ? product.Amount
                                     : 0,
                                 TotalAmount = product.Amount,
-                                AdditionalCost = additionalCost / product.Amount,
-                                ProcurementCost = product.Price,
-                                FinalCost = product.Price + (additionalCost / product.Amount),
+                                AdditionalCost = 0,
+                                ProcurementCost = procurementCost,
+                                FinalCost = procurementCost,
                                 StockAmount = product.Amount,
-                                SupplyHistoryId = supplyHistory.Entity.Id
+                                SupplyHistory = supplyHistory.Entity,
+                                SupplierId = supplierId
                             });
 
-                        await _db.InfoProducts.AddAsync(new InfoProduct()
+                        _db.InfoProducts.Add(new InfoProduct()
                         {
                             Amount = product.Amount,
                             Date = DateTime.Now.AddHours(3),
                             Product = existingProduct,
+                            SupplierId = supplierId,
                             Type = InfoProductType.Supply,
                             ShopId = shopId,
-                            SupplyHistoryId = supplyHistory.Entity.Id
+                            SupplyHistory = supplyHistory.Entity
                         });
 
                         if ((SupplyType) realization == SupplyType.DeferredPayment)
-                            await _db.DeferredSupplyProducts.AddAsync(new DeferredSupplyProduct()
+                            _db.DeferredSupplyProducts.Add(new DeferredSupplyProduct()
                             {
                                 Date = date,
                                 SupplyProductId = supplyProduct.Entity.Id
@@ -131,7 +169,7 @@ namespace WebUI.API
                     }
                 }
 
-                await _db.SaveChangesAsync();
+                _db.SaveChanges();
 
                 return Ok(result);
             }

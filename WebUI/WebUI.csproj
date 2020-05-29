@@ -7,13 +7,15 @@
     <ItemGroup>
       <ProjectReference Include="..\Base\Base.csproj" />
       <ProjectReference Include="..\Data\Data.csproj" />
+      <ProjectReference Include="..\Handlers\Handlers.csproj" />
+      <ProjectReference Include="..\PostgresData\PostgresData.csproj" />
     </ItemGroup>
 
     <ItemGroup>
-      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.3" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="3.1.3" />
-      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="5.0.0-preview.2.20120.8" />
-      <PackageReference Include="MongoDB.Driver" Version="2.10.3" />
+      <PackageReference Include="Microsoft.AspNetCore.Mvc.NewtonsoftJson" Version="3.1.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore" Version="3.1.4" />
+      <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="3.1.4" />
+      <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="3.1.4" />
     </ItemGroup>
 
     <ItemGroup>
@@ -32,6 +34,10 @@
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>
       <Content Update="Views\Admin\CreateManager.cshtml">
+        <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
+        <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
+      </Content>
+      <Content Update="Views\Product\ProductsInStockFilter.cshtml">
         <ExcludeFromSingleFile>true</ExcludeFromSingleFile>
         <CopyToPublishDirectory>PreserveNewest</CopyToPublishDirectory>
       </Content>

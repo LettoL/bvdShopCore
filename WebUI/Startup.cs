@@ -19,6 +19,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Configuration;
+using PostgresData;
 
 namespace WebUI
 {
@@ -28,44 +29,46 @@ namespace WebUI
         public void ConfigureServices(IServiceCollection services)
         {
             string connection =
-                "Data Source=31.31.196.211;Initial Catalog=u0530276_bvdshop;User ID=u0530276_bvdshop_admin;Password=Cfvbhyfchb20";
-                //"Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
+                "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
+            
+            services.AddAuthentication(options =>
+                {
+                    options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
+                })
+                .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
+                    options => { options.LoginPath = new PathString("/Account/Login"); });
+            
 
-                services.AddAuthentication(options =>
-                    {
-                        options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;
-                    })
-                    .AddCookie(CookieAuthenticationDefaults.AuthenticationScheme,
-                        options => { options.LoginPath = new PathString("/Account/Login"); });
+            services.AddDbContext<ShopContext>(options =>
+                    options.UseSqlServer(connection,
+                        b => b.MigrationsAssembly("WebUI")));
                 
-                services.AddDbContext<ShopContext>(options =>
-                    options.UseSqlServer(connection, b => b.MigrationsAssembly("WebUI")));
-                
-                services.AddScoped(typeof(IBaseObjectService<>), typeof(BaseObjectService<>));
-                services.AddScoped<DbContext, ShopContext>();
-                services.AddScoped<IProductService, ProductService>();
-                services.AddScoped<ISaleService, SaleService>();
-                services.AddScoped<IShopService, ShopService>();
-                services.AddScoped<IInfoMoneyService, InfoMoneyService>();
-                services.AddScoped<IMoneyOperationService, MoneyOperationService>();
-                services.AddScoped<IFileService, FileService>();
-                services.AddScoped<IFiltrationService, FiltrationService>();
-                services.AddScoped<IInfoProductService, InfoProductService>();
-                services.AddScoped<IDataCompareService, DataCompareService>();
-                services.AddScoped<IProductOperationService, ProductOperationService>();
-                services.AddScoped<ISalesAmountService, SalesAmountService>();
-                services.AddScoped<ITurnOverService, TurnOverService>();
-                services.AddScoped<IPrimeCostService, PrimeCostService>();
-                services.AddScoped<IMarginService, MarginService>();
-                services.AddScoped<ISaleStatisticService, SaleStatisticService>();
-                services.AddScoped<IMoneyStatisticService, MoneyStatisticService>();
-                services.AddScoped<ISaleInfoService, SaleInfoService>();
-                services.AddScoped<IBookingProductInformationService, BookingProductInformationService>();
-                services.AddScoped<ISalesByCategoryService, SalesByCategoryService>();
-                
-                services.AddCors();
+            services.AddScoped(typeof(IBaseObjectService<>), typeof(BaseObjectService<>));
+            services.AddScoped<DbContext, ShopContext>();
+            services.AddScoped<PostgresContext, PostgresContext>();
+            services.AddScoped<IProductService, ProductService>();
+            services.AddScoped<ISaleService, SaleService>();
+            services.AddScoped<IShopService, ShopService>();
+            services.AddScoped<IInfoMoneyService, InfoMoneyService>();
+            services.AddScoped<IMoneyOperationService, MoneyOperationService>();
+            services.AddScoped<IFileService, FileService>();
+            services.AddScoped<IFiltrationService, FiltrationService>();
+            services.AddScoped<IInfoProductService, InfoProductService>();
+            services.AddScoped<IDataCompareService, DataCompareService>();
+            services.AddScoped<IProductOperationService, ProductOperationService>();
+            services.AddScoped<ISalesAmountService, SalesAmountService>();
+            services.AddScoped<ITurnOverService, TurnOverService>();
+            services.AddScoped<IPrimeCostService, PrimeCostService>();
+            services.AddScoped<IMarginService, MarginService>();
+            services.AddScoped<ISaleStatisticService, SaleStatisticService>();
+            services.AddScoped<IMoneyStatisticService, MoneyStatisticService>();
+            services.AddScoped<ISaleInfoService, SaleInfoService>();
+            services.AddScoped<IBookingProductInformationService, BookingProductInformationService>();
+            services.AddScoped<ISalesByCategoryService, SalesByCategoryService>();
 
-                services.Configure<RequestLocalizationOptions>(options =>
+            services.AddCors();
+            
+            services.Configure<RequestLocalizationOptions>(options =>
                 {
                     options.DefaultRequestCulture = new Microsoft.AspNetCore.Localization.RequestCulture("ru-RU");
                     options.SupportedCultures = new List<CultureInfo> { new CultureInfo("ru-RU") };
