@@ -12,7 +12,6 @@ using Data;
 using Data.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
-using MongoDB.Driver;
 
 namespace WebUI.Controllers
 {
