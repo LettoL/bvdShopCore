@@ -12,8 +12,8 @@ export const fetchSuppliersFx = createEffect({
 })
 
 export const createSupplierFx = createEffect({
-  async handler(name) {
-    const data = {name}
+  async handler(name, phone, email) {
+    const data = {name, phone, email}
 
     const res = await fetch(API_SUPPLIERS, {
       headers: {

@@ -1,6 +1,7 @@
 import React, {useEffect} from "react";
 import {fetchSuppliersFx, suppliers} from "../../store/supplier-store";
 import {useStore} from "effector-react";
+import {SupplierCreate} from "./supplier-create";
 
 export const SuppliersList = () => {
 
@@ -12,6 +13,7 @@ export const SuppliersList = () => {
 
   return(
     <>
+      <SupplierCreate/>
       <ul>
         {suppliersData.map(supplier => (
           <li>{supplier.id} / {supplier.name}</li>
