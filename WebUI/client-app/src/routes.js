@@ -7,6 +7,7 @@ import {ManagersPage} from "./pages/admin/managers.page";
 import {SupplyProductForm} from "./components/supply-product/form/supply-product-form";
 import {ShopsList} from "./components/shop/shops-list";
 import {SuppliersList} from "./components/supplier/suppliers-list";
+import { CategoriesList } from "./components/categories/categories-list";
 
 export const useRoutes = () => {
 
@@ -32,6 +33,9 @@ export const useRoutes = () => {
       </Route>
       <Route path='/admin/suppliers' exact>
         <SuppliersList/>
+      </Route>
+      <Route path='/admin/categories' exact>
+        <CategoriesList/>
       </Route>
       <Redirect to='/admin/import'/>
     </Switch>
