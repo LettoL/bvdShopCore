@@ -14,11 +14,17 @@ using Data.FiltrationModels;
 using Data.ModernServices.Abstract;
 using Data.Services.Abstract;
 using Data.ViewModels;
+using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 using WebUI.ViewModels;
+using Product = Data.Entities.Product;
 using ProductVM = WebUI.ViewModels.ProductVM;
+using Shop = Data.Entities.Shop;
+using Supplier = Data.Entities.Supplier;
+using User = Data.Entities.User;
 
 namespace WebUI.Controllers
 {
@@ -55,6 +61,7 @@ namespace WebUI.Controllers
         private readonly ISaleInfoService _saleInfoService;
         private readonly IBookingProductInformationService _bookingProductInformationService;
         private readonly ISalesByCategoryService _salesByCategoryService;
+        private readonly PostgresContext _postgresContext;
 
         public AdminController(IShopService shopService,
             IBaseObjectService<Supplier> supplierService,
@@ -85,7 +92,8 @@ namespace WebUI.Controllers
             IBaseObjectService<SupplyHistory> supplyHistoryService,
             ISaleInfoService saleInfoService,
             IBookingProductInformationService bookingProductInformationService,
-            ISalesByCategoryService salesByCategoryService)
+            ISalesByCategoryService salesByCategoryService,
+            PostgresContext postgresContext)
         {
             _shopService = shopService;
             _supplierService = supplierService;
@@ -117,6 +125,7 @@ namespace WebUI.Controllers
             _saleInfoService = saleInfoService;
             _bookingProductInformationService = bookingProductInformationService;
             _salesByCategoryService = salesByCategoryService;
+            _postgresContext = postgresContext;
         }
 
         [HttpPost]
@@ -605,13 +614,17 @@ namespace WebUI.Controllers
             supplier.Debt -= sum;
             _supplierService.Update(supplier);
 
-            _infoMoneyService.Create(new InfoMoney()
+            var infoMoney = _infoMoneyService.Create(new InfoMoney()
             {
                 Sum = -sum,
                 PaymentType = PaymentType.Cashless,
                 MoneyWorkerId = moneyWorkerId,
                 MoneyOperationType = MoneyOperationType.SupplierRepayment
             });
+
+            _postgresContext.RepaidDebtsOld.Add(
+                new RepaidDebtOld(supplier.Id, infoMoney.Id));
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }
@@ -649,20 +662,50 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.Scores = _db.MoneyWorkers;
 
-            return View(_infoMoneyService.All()
+            var repaidDebt = _postgresContext.RepaidDebtsOld.ToList()
+                .Join(_db.Suppliers,
+                    repaid => repaid.SupplierId,
+                    supplier => supplier.Id,
+                    (repaid, supplier) => new
+                    {
+                        InfoMoneyId = repaid.InfoMoneyId,
+                        SupplierId = repaid.SupplierId,
+                        SupplierName = supplier.Title
+                    });
+            
+            var imForDebt = repaidDebt.Select(x => x.InfoMoneyId).ToList();
+
+            var result = _infoMoneyService.All()
                 .OrderByDescending(im => im.Id)
                 .Take(200)
-                .Select(im => new MoneyHistoryVM() {
+                .Select(im => new MoneyHistoryVM()
+                {
                     Id = im.Id,
                     Sum = im.Sum,
                     Date = im.Date.ToString("dd.MM.yyyy"),
                     Comment = im.Comment,
                     PaymentType = im.PaymentType,
-                    Sale = im.Sale,
-                    MoneyWorker = im.MoneyWorker,
+                    MoneyWorkerTitle = im.MoneyWorker != null ? im.MoneyWorker.Title : "",
                     MoneyOperationType = im.MoneyOperationType,
                     ShopTitle = im.Sale.Shop.Title
-            }));
+                })
+                .ToList()
+                .Select(im => new MoneyHistoryVM()
+                {
+                    Id = im.Id,
+                    Sum = im.Sum,
+                    Date = im.Date,
+                    Comment = imForDebt.Contains(im.Id)
+                        ? repaidDebt.FirstOrDefault(r
+                            => r.InfoMoneyId == im.Id).SupplierName
+                        : im.Comment,
+                    PaymentType = im.PaymentType,
+                    MoneyWorkerTitle = im.MoneyWorkerTitle,
+                    MoneyOperationType = im.MoneyOperationType,
+                    ShopTitle = im.ShopTitle
+                }).ToList();
+
+            return View(result);
         }
 
         [HttpPost]

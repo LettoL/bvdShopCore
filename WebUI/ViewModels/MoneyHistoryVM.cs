@@ -16,6 +16,7 @@ namespace WebUI.ViewModels
         public PaymentType PaymentType { get; set; }
         public Sale Sale { get; set; }
         public MoneyWorker MoneyWorker { get; set; }
+        public string MoneyWorkerTitle { get; set; }
         public MoneyOperationType MoneyOperationType { get; set; }
         public string ShopTitle { get; set; }
     }
