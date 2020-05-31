@@ -48,6 +48,11 @@ export const Menu = () => {
           <ListItemText primary={'Поставщики'}/>
         </NavLink>
       </ListItem>
+      <ListItem button>
+        <NavLink to={'/admin/categories'}>
+          <ListItemText primary={'Категории'}/>
+        </NavLink>
+      </ListItem>
     </List>
   )
 }
