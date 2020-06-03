@@ -124,11 +124,11 @@ namespace WebUI.API
                                 SupplyHistory = supplyHistory.Entity
                             });
 
-                        if ((SupplyType) realization == SupplyType.ForRealization)
+                        if ((SupplyType) realization == SupplyType.DeferredPayment)
                             _db.DeferredSupplyProducts.Add(new DeferredSupplyProduct()
                             {
                                 Date = date,
-                                SupplyProductId = supplyProduct.Entity.Id
+                                SupplyProduct = supplyProduct.Entity
                             });
                     }
                     else
@@ -164,7 +164,7 @@ namespace WebUI.API
                             _db.DeferredSupplyProducts.Add(new DeferredSupplyProduct()
                             {
                                 Date = date,
-                                SupplyProductId = supplyProduct.Entity.Id
+                                SupplyProduct = supplyProduct.Entity
                             });
                     }
                 }
