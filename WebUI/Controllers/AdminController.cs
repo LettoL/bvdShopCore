@@ -42,7 +42,6 @@ namespace WebUI.Controllers
         private readonly IBaseObjectService<SaleProduct> _saleProductService;
         private readonly ISaleService _saleService;
         private readonly IBaseObjectService<DeferredSupplyProduct> _deferredSupplyProductService;
-        private readonly IBaseObjectService<Partner> _partnerService;
         private readonly IBaseObjectService<User> _userService;
         private readonly IBaseObjectService<SaleInformation> _saleInfromationService;
         private readonly IBaseObjectService<ExpenseCategory> _expenseCategoryService;
@@ -54,7 +53,6 @@ namespace WebUI.Controllers
         private readonly IBaseObjectService<MoneyTransfer> _moneyTransferService;
         private readonly IBaseObjectService<ProductInformation> _productInformationService;
         private readonly IProductOperationService _productOperationService;
-        private readonly ISaleStatisticService _saleStatisticService;
         private readonly IMoneyOperationService _moneyOperationService;
         private readonly IMoneyStatisticService _moneyStatisticService;
         private readonly IBaseObjectService<SupplyHistory> _supplyHistoryService;
@@ -74,7 +72,6 @@ namespace WebUI.Controllers
             IBaseObjectService<SaleProduct> saleProductService,
             ISaleService saleService,
             IBaseObjectService<DeferredSupplyProduct> deferredSupplyProductService,
-            IBaseObjectService<Partner> partnerService,
             IBaseObjectService<User> userService,
             IBaseObjectService<SaleInformation> saleInfromationService,
             IBaseObjectService<ExpenseCategory> expenseCategoryService,
@@ -86,7 +83,6 @@ namespace WebUI.Controllers
             IBaseObjectService<MoneyTransfer> moneyTransferService,
             IBaseObjectService<ProductInformation> productInformationService,
             IProductOperationService productOperationService,
-            ISaleStatisticService saleStatisticService,
             IMoneyOperationService moneyOperationService,
             IMoneyStatisticService moneyStatisticService,
             IBaseObjectService<SupplyHistory> supplyHistoryService,
@@ -106,7 +102,6 @@ namespace WebUI.Controllers
             _saleProductService = saleProductService;
             _saleService = saleService;
             _deferredSupplyProductService = deferredSupplyProductService;
-            _partnerService = partnerService;
             _userService = userService;
             _saleInfromationService = saleInfromationService;
             _expenseCategoryService = expenseCategoryService;
@@ -118,7 +113,6 @@ namespace WebUI.Controllers
             _moneyTransferService = moneyTransferService;
             _productInformationService = productInformationService;
             _productOperationService = productOperationService;
-            _saleStatisticService = saleStatisticService;
             _moneyOperationService = moneyOperationService;
             _moneyStatisticService = moneyStatisticService;
             _supplyHistoryService = supplyHistoryService;
@@ -136,7 +130,9 @@ namespace WebUI.Controllers
 
         public async Task<IActionResult> Managers()
         {
-            return View();
+            var result = await _postgresContext.Managers.Select(x => x.Name).ToListAsync();
+            
+            return View(result);
         }
 
         [HttpGet]
@@ -148,6 +144,9 @@ namespace WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateManager(string name)
         {
+            await _postgresContext.Managers.AddAsync(new Domain.Entities.Manager(name));
+            await _postgresContext.SaveChangesAsync();
+            
             return RedirectToAction("Managers");
         }
         

@@ -1,4 +1,4 @@
-﻿using System.Security.Cryptography.X509Certificates;
+using System.Security.Cryptography.X509Certificates;
 using Domain.Entities;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,6 +12,8 @@ namespace PostgresData
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<SuppliedProduct> SuppliedProducts { get; set; }
         public DbSet<RepaidDebtOld> RepaidDebtsOld { get; set; }
+        public DbSet<Manager> Managers { get; set; }
+        public DbSet<SaleManagerOld> SaleManagersOld { get; set; }
 
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 

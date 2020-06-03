@@ -10,8 +10,13 @@ using System;
 using System.Threading.Tasks;
 using Data;
 using Data.Services;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
+using Shop = Data.Entities.Shop;
+using Supplier = Data.Entities.Supplier;
+using User = Data.Entities.User;
 
 namespace WebUI.Controllers
 {
@@ -40,6 +45,7 @@ namespace WebUI.Controllers
         private readonly IMoneyStatisticService _moneyStatisticService;
         private readonly IBookingProductInformationService _bookingProductInformationService;
         private readonly ISaleInfoService _saleInfoService;
+        private readonly PostgresContext _postgresContext;
 
         public ManagerController(IBaseObjectService<Partner> partnerService,
             IBaseObjectService<User> userService,
@@ -62,7 +68,8 @@ namespace WebUI.Controllers
             IMoneyOperationService moneyOperationService,
             IMoneyStatisticService moneyStatisticService,
             IBookingProductInformationService bookingProductInformationService,
-            ISaleInfoService saleInfoService)
+            ISaleInfoService saleInfoService,
+            PostgresContext postgresContext)
         {
             _partnerService = partnerService;
             _userService = userService;
@@ -86,6 +93,7 @@ namespace WebUI.Controllers
             _moneyStatisticService = moneyStatisticService;
             _bookingProductInformationService = bookingProductInformationService;
             _saleInfoService = saleInfoService;
+            _postgresContext = postgresContext;
         }
 
         public IActionResult Index()
@@ -302,22 +310,12 @@ namespace WebUI.Controllers
             };
 
             var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
-            
-            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
-            var db = client.GetDatabase("bvdShop");
 
-            var managers = db.GetCollection<Manager>("managers")
-                .Find(manager => true)
-                .ToList();
 
-            var managerId = managers.FirstOrDefault(x => x.Name == json.Manager)?.Id;
-            
-            db.GetCollection<SaleManager>("saleManagers")
-                .InsertOne(new SaleManager()
-                {
-                    ManagerId = managerId,
-                    SaleId = createdSale.Id
-                });*/
+           /* _postgresContext.SaleManagersOld.Add(
+                new SaleManagerOld(json.ManagerId, createdSale.Id));
+
+            _postgresContext.SaveChanges();*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
         }

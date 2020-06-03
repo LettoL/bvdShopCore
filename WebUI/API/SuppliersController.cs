@@ -51,7 +51,8 @@ namespace WebUI.API
                 await _db.SaveChangesAsync();
 
 
-                await _postgresContext.Suppliers.AddAsync(new Domain.Entities.Supplier(command.Name));
+                await _postgresContext.Suppliers.AddAsync(
+                    new Domain.Entities.Supplier(command.Name, command.Phone, command.Email));
                 await _postgresContext.SaveChangesAsync();
 
                 return Ok(new {Id = createTask.Entity.Id, Name = createTask.Entity.Title});
