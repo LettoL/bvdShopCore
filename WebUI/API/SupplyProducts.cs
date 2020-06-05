@@ -72,7 +72,7 @@ namespace WebUI.API
                 {
                     decimal procurementCost = 0;
                     decimal a;
-                    if (Decimal.TryParse(product.Price.Replace('.', ','), out a))
+                    if (Decimal.TryParse(product.Price.Replace(',', '.'), out a))
                         procurementCost = a;
                     else
                         throw new Exception("Закупочная стоимость неверного формата в товаре: " 
