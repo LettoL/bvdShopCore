@@ -23,6 +23,8 @@ namespace Data.ModernServices.Concrete
                         SaleProductsByCategory(saleProducts, x.Id), 2),
                     SalesBySamara = ProductSalesByShop(
                         SaleProductsByCategory(saleProducts, x.Id), 27),
+                    SalesByMoscowSever = ProductSalesByShop(
+                        SaleProductsByCategory(saleProducts, x.Id), 29),
                     Margin = Math.Round(
                         IncomeBySales(
                             SaleProductsByCategory(saleProducts, x.Id))
@@ -51,6 +53,11 @@ namespace Data.ModernServices.Concrete
                         IncomeBySales(
                             SaleProductsByShop(
                                 SaleProductsByCategory(saleProducts, x.Id),27)),
+                        2),
+                    TurnOverMoscowSever = Math.Round(
+                        IncomeBySales(
+                            SaleProductsByShop(
+                                SaleProductsByCategory(saleProducts, x.Id),29)),
                         2),
                     TurnOverRF = Math.Round(
                         IncomeBySales(
@@ -85,6 +92,14 @@ namespace Data.ModernServices.Concrete
                         - PurchaseProductPrice(
                             ProductInformationsByShop(
                                 ProductInformationsByCategory(productInformations, x.Id), 27)),
+                        2),
+                    MarginMoscowSever = Math.Round(
+                        IncomeBySales(
+                            SaleProductsByShop(
+                                SaleProductsByCategory(saleProducts, x.Id), 29))
+                        - PurchaseProductPrice(
+                            ProductInformationsByShop(
+                                ProductInformationsByCategory(productInformations, x.Id), 29)),
                         2),
                     MarginPartner = Math.Round(
                         IncomeBySales(

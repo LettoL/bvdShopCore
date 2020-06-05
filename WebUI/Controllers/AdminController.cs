@@ -25,6 +25,7 @@ using ProductVM = WebUI.ViewModels.ProductVM;
 using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
 using User = Data.Entities.User;
+using Sale = Data.Entities.Sale;
 
 namespace WebUI.Controllers
 {
@@ -1493,6 +1494,12 @@ namespace WebUI.Controllers
                 shopId = 27,
                 startDate = fromDate
             };
+            
+            var filtrationModelForMoscowSever = new SaleFiltrationModel()
+            {
+                shopId = 29,
+                startDate = fromDate
+            };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
@@ -1532,9 +1539,11 @@ namespace WebUI.Controllers
                 SumSalesByMoscow = result.Sum(x => x.SalesByMoscow),
                 SumSalesByPetersburg = result.Sum(x => x.SalesByPetersburg),
                 SumSalesBySamara = result.Sum(x => x.SalesBySamara),
+                SumSalesByMoscowSever = result.Sum(x => x.SalesByMoscowSever),
                 SumChecksByMoscow = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByPetersburg = _saleService.Filtration(filtrationModelForPetersburg).Count(),
                 SumChecksBySamara = _saleService.Filtration(filtrationModelForSamara).Count(),
+                SumChecksByMoscowSever = _saleService.Filtration(filtrationModelForMoscowSever).Count(),
                 SumChecksByPartners = _saleService.Filtration(filtrationModelForPartners).Count(),
                 SumChecksByRF = _saleService.Filtration(filtrationModelForRF).Count(),
                 SumMargin = result.Sum(x => x.Margin),
@@ -1544,11 +1553,13 @@ namespace WebUI.Controllers
                 SumTurnOverMoscow = result.Sum(x => x.TurnOverMoscow),
                 SumTurnOverPetersburg = result.Sum(x => x.TurnOverPetersburg),
                 SumTurnOverSamara = result.Sum(x => x.TurnOverSamara),
+                SumTurnOverMoscowSever = result.Sum(x => x.TurnOverMoscowSever),
                 SumTurnOverRF = result.Sum(x => x.TurnOverRF),
                 SumTurnOverPartner = result.Sum(x => x.TurnOverPartner),
                 SumMarginMoscow = result.Sum(x => x.MarginMoscow),
                 SumMarginPetersburg = result.Sum(x => x.MarginPetersburg),
                 SumMarginSamara = result.Sum(x => x.MarginSamara),
+                SumMarginMoscowSever = result.Sum(x => x.MarginMoscowSever),
                 SumMarginPartner = result.Sum(x => x.MarginPartner),
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };

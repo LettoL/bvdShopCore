@@ -11,18 +11,21 @@ namespace Data.ViewModels
         public int SalesByMoscow { get; set; }
         public int SalesByPetersburg { get; set; }
         public int SalesBySamara { get; set; }
+        public int SalesByMoscowSever { get; set; }
         public int ForRussianFederation { get; set; }
         public int PartnerSales { get; set; }
         public decimal TurnOver { get; set; }
         public decimal TurnOverMoscow { get; set; }
         public decimal TurnOverPetersburg { get; set; }
         public decimal TurnOverSamara { get; set; }
+        public decimal TurnOverMoscowSever { get; set; }
         public decimal TurnOverRF { get; set; }
         public decimal TurnOverPartner { get; set; }
         public decimal Margin { get; set; }
         public decimal MarginMoscow { get; set; }
         public decimal MarginPetersburg { get; set; }
         public decimal MarginSamara { get; set; }
+        public decimal MarginMoscowSever { get; set; }
         public decimal MarginRF { get; set; }
         public decimal MarginPartner { get; set; }
     }
