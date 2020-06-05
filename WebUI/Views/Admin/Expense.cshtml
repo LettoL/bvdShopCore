@@ -37,7 +37,7 @@
                     </select><br />
                     <label>Коментарий</label>
                     <input type="text" class="form-control" name="comment" /><br />
-                    <button class="btn btn-submit">Сохранить</button>
+                    <button id="netroj" class="btn btn-submit">Сохранить</button>
                     <a href="/Admin/Index" class="btn btn-dark">Назад</a>
                 </form>
             </div>
@@ -72,5 +72,10 @@
                 });
             });
     }
+    
+    $('form').submit(() => {
+      $('#netroj').prop('disabled', true)
+      return true
+    })
 
 </script>
