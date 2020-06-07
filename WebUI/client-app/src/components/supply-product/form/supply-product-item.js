@@ -15,13 +15,14 @@ export const SupplyProductItem = props => {
   const products = [{id: 1, title: 'product1'}, {id: 2, title: 'product2'}]
   const shops = [{id: 2, title: 'shop1'}]
   const suppliers = [{id: 1, title: 'supplier1'}]
-
+  
   const changeProduct = event => {
     changeFormHandler(index, event)
   }
 
   return(
     <>
+      <div>
       <FormControl className={classes.formControl}>
         <InputLabel id='product-select'>Товар</InputLabel>
         <Select
@@ -66,7 +67,7 @@ export const SupplyProductItem = props => {
           value={supplierId}
           onChange={changeProduct}
         >
-          <MenuItem value={0}>Выбрать поставшика</MenuItem>
+          <MenuItem value={0}>Выбрать поставщика</MenuItem>
           {suppliers.map(supplier => (
             <MenuItem key={supplier.id} value={supplier.id}>{supplier.title}</MenuItem>
           ))}
@@ -80,6 +81,7 @@ export const SupplyProductItem = props => {
           name='procurementCost'
         />
       </FormControl>
+      </div>
     </>
   )
 }
