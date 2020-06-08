@@ -8,6 +8,7 @@ import {SupplyProductForm} from "./components/supply-product/form/supply-product
 import {ShopsList} from "./components/shop/shops-list";
 import {SuppliersList} from "./components/supplier/suppliers-list";
 import { CategoriesList } from "./components/categories/categories-list";
+import {SupplyProductsList} from "./components/supply-product/list/supply-products-list";
 
 export const useRoutes = () => {
 
@@ -36,6 +37,9 @@ export const useRoutes = () => {
       </Route>
       <Route path='/admin/categories' exact>
         <CategoriesList/>
+      </Route>
+      <Route path='/admin/supplyProductsList' exact>
+        <SupplyProductsList/>
       </Route>
       <Redirect to='/admin/import'/>
     </Switch>

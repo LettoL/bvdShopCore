@@ -27,6 +27,47 @@ namespace WebUI.API
             _postgresContext = postgresContext;
         }
 
+        [HttpGet]
+        public async Task<IActionResult> Get()
+        {
+            var result = await _db.SupplyProducts
+                .Where(x => x.SupplyHistoryId > 0)
+                .Select(s => new Dtos.SupplyProductItem()
+                {
+                    SupplyProductId = s.Id,
+                    //DateTime = i.Date,
+                    ProductId = s.ProductId,
+                    ProductTitle = s.Product.Title,
+                    ShopAmount = s.StockAmount,
+                    SuppliedAmount = s.TotalAmount,
+                    ShopId = s.Product.ShopId,
+                    ShopTitle = s.Product.Shop.Title,
+                    SupplierId = s.SupplierId ?? 0,
+                    SupplierName = s.Supplier.Title,
+                    ProcurementCost = s.ProcurementCost
+                })               
+                /*.Join(_db.InfoProducts.Where(x => x.SupplyHistoryId > 0),
+                    s => s.SupplyHistoryId,
+                    i => i.SupplyHistoryId,
+                    (s, i) => new Dtos.SupplyProductItem()
+                    {
+                        SupplyProductId = s.Id,
+                        DateTime = i.Date,
+                        ProductId = s.ProductId,
+                        ProductTitle = s.Product.Title,
+                        ShopAmount = s.StockAmount,
+                        SuppliedAmount = s.TotalAmount,
+                        ShopId = s.Product.ShopId,
+                        ShopTitle = s.Product.Shop.Title,
+                        SupplierId = s.SupplierId ?? 0,
+                        SupplierName = s.Supplier.Title
+                    })*/
+                .OrderByDescending(x => x.SupplyProductId)
+                .ToListAsync();
+            
+            return Ok(result);
+        }
+
         [HttpPost]
         public async Task<IActionResult> Post([FromBody] Commands.SupplyProduct command)
         {
