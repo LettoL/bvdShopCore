@@ -24,11 +24,15 @@
                     <h5>Список товаров:</h5>
                     @foreach (var product in ViewBag.SalesProduct)
                     {
-                        <p style="font-size: 18px">Название: @product.Product.Title / Количество: @product.Amount</p>
+                        <p style="font-size: 18px">Название: @product.Title / Количество: @product.Amount</p>
                     }
 
                     <label>Выбрать Поставщика</label>
                     <select name="supplierId" class="form-control">
+                        @if (ViewBag.SelectedSupplier != null)
+                        {
+                            <option value="@ViewBag.SelectedSupplier.Id">@ViewBag.SelectedSupplier.Title</option>
+                        }
                         @foreach (var sup in ViewBag.Suppliers)
                         {
                             <option value="@sup.Id">@sup.Title</option>
@@ -43,13 +47,13 @@
                     {
                              <div id="productPrice">
 
-                                 <label>Стоимость Товара: <b>@product.Product.Title</b></label> <br />
+                                 <label>Стоимость Товара: <b>@product.Title</b></label> <br />
 
-                                 <input type="text" hidden value="@product.Product.Id" name="productIds" />
+                                 <input type="text" hidden value="@product.Id" name="productIds" />
                                  <input class="amounts" type="text" hidden value="@product.Amount" name="amounts" />
 
                                  <label asp-for="code">Закупочная стоимость за 1 шт</label>
-                                 <input class="form-control procurementCosts" type="text" value="0" name="procurementCosts"> <br />
+                                 <input class="form-control procurementCosts" type="text" value="@product.ProcurementCost" name="procurementCosts"> <br />
                                 
                              </div>
                     }

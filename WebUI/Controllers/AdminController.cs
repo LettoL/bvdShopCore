@@ -18,6 +18,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.EntityFrameworkCore.Internal;
 using PostgresData;
 using WebUI.Dtos.CloseSale;
 using WebUI.ViewModels;
@@ -1256,10 +1257,43 @@ namespace WebUI.Controllers
 
             ViewBag.Suppliers = _supplierService.All();
 
-            ViewBag.SalesProduct = _saleProductService
+            var saleProducts = _saleProductService
                 .All()
                 .Include(x => x.Product)
-                .Where(x => x.SaleId == id);
+                .Where(x => x.SaleId == id)
+                .ToList();
+
+            ViewBag.SalesProduct = saleProducts
+                .Select(x => new SaleProductItem()
+                {
+                    Id = x.Id,
+                    Title = x.Product.Title,
+                    Amount = x.Amount,
+                    ProcurementCost = 0
+                });
+
+            var saleFromStockInfo = _postgresContext.SalesFromStockOld
+                .Include(x => x.Products)
+                .FirstOrDefault(x => x.SaleId == id);
+
+            if (saleFromStockInfo != null)
+            {
+                ViewBag.SalesProduct = saleFromStockInfo.Products
+                    .Join(saleProducts,
+                        sp => sp.ProductId,
+                        p => p.ProductId,
+                        (sp, p) => new SaleProductItem()
+                        {
+                            Id = p.ProductId,
+                            Title = p.Product.Title,
+                            Amount = p.Amount,
+                            ProcurementCost = sp.ProcurementCost
+                        }).ToList();
+
+                var selectedSupplierId = saleFromStockInfo.SupplierId;
+
+                ViewBag.SelectedSupplier = _db.Suppliers.FirstOrDefault(x => x.Id == selectedSupplierId);
+            }
 
             return View(sale);
         }

@@ -90,6 +90,11 @@
 
                                 <label>Внесение безналичных средств</label>
                                 <input class="form-control" v-model="cashlessMoney"/>
+                                
+                                <label>Поставщик</label>
+                                <select id="supplier_select" class="form-control" v-model="supplier">
+                                    <option disabled value="">Выберите один из вариантов</option>
+                                </select>
 
                                 <label>Перевести безналичные средства на</label>
                                 <select id="moneyWorkerType" class="form-control" v-model="moneyWorkerType" onchange="saleForm.getMoneyWorkers(this.value)">
@@ -119,7 +124,18 @@
                                 <ul class="list-group">
                                     <h6>Стоимость товаров за 1 штуку</h6>
                                     <li class="list-group-item" v-for="product in products">
-                                        <b>Название:</b> {{product.title}} / <b>Стоимость:</b> <input v-model="product.cost"/>
+                                        <b>Название:</b> {{product.title}} /
+                                        <b>Стоимость:</b> <input v-model="product.cost"/>
+                                        <b>Закупочная стоимость:</b> <input v-model="product.procurementCost"/>
+                                    </li>
+                                </ul>
+                            </div>
+                            <div v-else class="col-lg-6 col-md-8">
+                                <ul class="list-group">
+                                    <h6>Закупочная стоимость товаров за 1 штуку</h6>
+                                    <li class="list-group-item" v-for="product in products">
+                                        <b>Название:</b> {{product.title}}
+                                        <b>Закупочная стоимость:</b> <input v-model="product.procurementCost"/>
                                     </li>
                                 </ul>
                             </div>
@@ -315,7 +331,8 @@
             moneyWorkerType: null,
             moneyWorkerId: null,
             forRussian: "false",
-            manager: ''
+            manager: '',
+            supplier: ''
         },
         methods: {
             initProps: function() {
@@ -368,22 +385,36 @@
             }
         },
         created: 
-                    function() {
-                        fetch('/api/managers', {
-                            headers: { 'Content-Type': 'application/json'},
-                            credentials: 'include'
-                        })
-                        .then((res) => {
-                            return res.json()
-                        })
-                        .then((res) => {
-                            console.log(res, $('#manager_select'))
-                            res.forEach(x => {
-                                $('#manager_select')
-                                    .append('<option>' + x.name + '</option>');
-                                })
-                        })                    
-                    }     
+            function() {
+                fetch('/api/managers', {
+                    headers: { 'Content-Type': 'application/json'},
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json()
+                })
+                .then((res) => {
+                    console.log(res, $('#manager_select'))
+                    res.forEach(x => {
+                        $('#manager_select')
+                            .append('<option>' + x.name + '</option>');
+                    })
+                })  
+         
+                fetch('/api/suppliers', {
+                    headers: { 'Content-Type': 'application/json'},
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json()
+                })
+                .then((res) => {
+                    res.forEach(x => {
+                        $('#supplier_select')
+                            .append('<option>' + x.name + '</option>');
+                    })
+                })                    
+            }     
     });
 
     var confirmForm = new Vue({
@@ -400,8 +431,9 @@
             moneyWorkerId,
             forRussian: null,
             russianStatus: "Да",
-            manager: ''
-       },
+            manager: '',
+            supplier: ''
+        },
         methods: {
             initProps: function() {
                 confirmForm.products = saleProduct.products;
@@ -414,12 +446,14 @@
                 confirmForm.cashlessSum = saleForm.cashlessMoney;
                 confirmForm.additionalComment = saleForm.additionalComment;
                 confirmForm.forRussian = saleForm.forRussian;
-                confirmForm.manager = saleForm.manager
+                confirmForm.manager = saleForm.manager;
+                confirmForm.supplier = saleForm.supplier;
             },
             sendData: function () {
                 this.products.forEach(product => {
                     product.amount = +(product.amount)
                     product.cost = +(product.cost)
+                    product.procurementCost = +(product.procurementCost)
                     delete product.category;
                 });
 
@@ -435,7 +469,8 @@
                     moneyWorkerId: +this.moneyWorkerId,
                     userId: userId,
                     forRussian: JSON.parse(this.forRussian.toLowerCase()),
-                    manager: this.manager
+                    manager: this.manager,
+                    supplier: this.supplier
             }
 
                 /*var xhr = new XMLHttpRequest();

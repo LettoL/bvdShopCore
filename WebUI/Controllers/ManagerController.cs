@@ -908,6 +908,9 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult DefferedSaleFromStock([FromBody]DefferedSaleFromStockVM sale)
         {
+            var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == sale.Supplier)?.Id
+                             ?? throw new Exception("Не указан поставщик");
+            
             var user = _userService.All().FirstOrDefault(x => x.Id == sale.UserId);
 
             SaleCreateVM saleCreate = new SaleCreateVM()
@@ -956,21 +959,22 @@ namespace WebUI.Controllers
 
             _db.SaveChanges();
             
-            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
-            var db = client.GetDatabase("bvdShop");
-
-            var managers = db.GetCollection<Manager>("managers")
-                .Find(manager => true)
-                .ToList();
-
-            var managerId = managers.FirstOrDefault(x => x.Name == sale.Manager)?.Id;
             
-            db.GetCollection<SaleManager>("saleManagers")
-                .InsertOne(new SaleManager()
-                {
-                    ManagerId = managerId,
-                    SaleId = createdSale.Id
-                });*/
+            var saleFromStockOld = new SaleFromStockOld()
+            {
+                SaleId = createdSale.Id,
+                SupplierId = supplierId,
+                Products = sale.Products.Select(x =>
+                    new SoldProductFromStockOld()
+                    {
+                        ProcurementCost = x.ProcurementCost,
+                        ProductId = x.Id
+                    }).ToList()
+            };
+
+            _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
+            _postgresContext.SaveChanges();
+            
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = sale.CashSum + sale.CashlessSum });
         }
