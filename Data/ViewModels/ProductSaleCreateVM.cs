@@ -11,5 +11,6 @@ namespace Data.ViewModels
         public int Amount { get; set; }
         public bool Additional { get; set; }
         public decimal Cost { get; set; }
+        public decimal ProcurementCost { get; set; }
     }
 }

@@ -14,6 +14,7 @@ using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.EntityFrameworkCore;
 using PostgresData;
+using Sale = Data.Entities.Sale;
 using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
 using User = Data.Entities.User;
@@ -795,6 +796,9 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult SaleFromStock([FromBody]SaleFromStockVM json)
         {
+            var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == json.Supplier)?.Id 
+                             ?? throw new Exception("Не указан поставщик");
+            
             SaleCreateVM saleCreate = new SaleCreateVM()
             {
                 UserId = json.UserId,
@@ -826,22 +830,23 @@ namespace WebUI.Controllers
             });
 
             _db.SaveChanges();
-            
-            /*var client = new MongoClient("mongodb+srv://admin:1234@cluster0-qpif1.azure.mongodb.net/test?retryWrites=true&w=majority");
-            var db = client.GetDatabase("bvdShop");
 
-            var managers = db.GetCollection<Manager>("managers")
-                .Find(manager => true)
-                .ToList();
 
-            var managerId = managers.FirstOrDefault(x => x.Name == json.Manager)?.Id;
+            var saleFromStockOld = new SaleFromStockOld()
+            {
+                SaleId = createdSale.Id,
+                SupplierId = supplierId,
+                Products = json.Products.Select(x =>
+                    new SoldProductFromStockOld()
+                    {
+                        ProcurementCost = x.ProcurementCost,
+                        ProductId = x.Id
+                    }).ToList()
+            };
+
+            _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
+            _postgresContext.SaveChanges();
             
-            db.GetCollection<SaleManager>("saleManagers")
-                .InsertOne(new SaleManager()
-                {
-                    ManagerId = managerId,
-                    SaleId = createdSale.Id
-                });*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
         }

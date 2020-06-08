@@ -13,8 +13,10 @@ namespace PostgresData
         public DbSet<SuppliedProduct> SuppliedProducts { get; set; }
         public DbSet<RepaidDebtOld> RepaidDebtsOld { get; set; }
         public DbSet<Manager> Managers { get; set; }
+        
         public DbSet<SaleManagerOld> SaleManagersOld { get; set; }
-
+        public DbSet<SaleFromStockOld> SalesFromStockOld { get; set; }
+        
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
