@@ -1,4 +1,4 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
@@ -1759,6 +1759,9 @@ namespace WebUI.Controllers
             if (type == SalesByCategoriesFilterType.Samara)
                 sales = sales.Where(x => x.ShopId == 27 && x.PartnerId == null && x.ForRussian == false);
 
+            if (type == SalesByCategoriesFilterType.MoscowSever)
+                sales = sales.Where(x => x.ShopId == 29 && x.PartnerId == null && x.ForRussian == false);
+            
             if (type == SalesByCategoriesFilterType.ForRF)
                 sales = sales.Where(x => x.ForRussian == true);
 
