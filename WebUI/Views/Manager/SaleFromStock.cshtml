@@ -483,10 +483,17 @@
                         headers: {
                             'Content-Type': 'application/json'
                         },
-                        redirect: "follow",
                         credentials: 'include',
                         body: JSON.stringify(realization)
-                    });
+                    })
+                    .then(res => {
+                      
+                      if(res.status !== 400)
+                        window.location.href = res.url
+                      else
+                        return res.json()
+                    })
+                    .then(res => alert(res.message))
             }
         },
         watch: {
@@ -521,7 +528,7 @@
             productZeroCost = true;
 
         if (productZeroCost == false)
-            this.confirmForm.sendData().then(res => window.location.href = res.url)
+            this.confirmForm.sendData();
         else
             alert('В продаже присутствуют товары с нулевой стоимостью')
     }
