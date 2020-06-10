@@ -15,6 +15,7 @@ using Data.ModernServices.Abstract;
 using Data.Services.Abstract;
 using Data.ViewModels;
 using Domain.Entities;
+using Domain.Entities.Olds;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -22,6 +23,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using PostgresData;
 using WebUI.Dtos.CloseSale;
 using WebUI.ViewModels;
+using Manager = Domain.Entities.Sales.Manager;
 using Product = Data.Entities.Product;
 using ProductVM = WebUI.ViewModels.ProductVM;
 using Shop = Data.Entities.Shop;
@@ -147,7 +149,7 @@ namespace WebUI.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateManager(string name)
         {
-            await _postgresContext.Managers.AddAsync(new Domain.Entities.Manager(name));
+            await _postgresContext.Managers.AddAsync(new Manager(name));
             await _postgresContext.SaveChangesAsync();
             
             return RedirectToAction("Managers");

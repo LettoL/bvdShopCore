@@ -1,4 +1,4 @@
-﻿namespace Domain.Entities
+﻿namespace Domain.Entities.Supplies
 {
     public class Supplier : Entity
     {

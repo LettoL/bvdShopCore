@@ -1,5 +1,6 @@
 ﻿using System;
 using Domain.Entities;
+using Domain.Entities.Supplies;
 
 namespace Handlers.Commands
 {
