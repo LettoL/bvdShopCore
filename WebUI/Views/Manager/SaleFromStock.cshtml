@@ -169,7 +169,9 @@
                     </div>
                     <div class="steps">
                         <button class="prevStep btn btn-dark" onclick="changeStep('second')">Назад</button>
-                        <button class="btn btn-dark" onclick="send(); this.disabled=true;">Отправить</button>
+                        <button id="button_submit" class="btn btn-dark" onclick="send(); this.disabled=true;">
+                            Отправить
+                        </button>
                     </div>
                 </div>
             </div>
@@ -493,7 +495,11 @@
                       else
                         return res.json()
                     })
-                    .then(res => alert(res.message))
+                    .then(res => {
+                      
+                      alert(res.message)
+                      $('#button_submit').prop('disabled', false)
+                    })
             }
         },
         watch: {
