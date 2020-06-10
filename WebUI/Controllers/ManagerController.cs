@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -796,59 +796,65 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult SaleFromStock([FromBody]SaleFromStockVM json)
         {
-            var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == json.Supplier)?.Id 
-                             ?? throw new Exception("Не указан поставщик");
-            
-            SaleCreateVM saleCreate = new SaleCreateVM()
+            try
             {
-                UserId = json.UserId,
-                Discount = json.Discount,
-                AdditionalComment = json.AdditionalComment,
-                Comment = json.Comment,
-                Sum = json.Sum,
-                CashSum = json.Cash,
-                CashlessSum = json.Cashless,
-                Products = json.Products,
-                PartnerId = json.Buyer == "Обычный покупатель"
-                    ? null
-                    : _partnerService.All().First(p => p.Title == json.Buyer)?.Id,
-                SaleType = SaleType.SaleFromStock,
-                ForRussian = json.ForRussian
-            };
+                var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == json.Supplier)?.Id
+                                 ?? throw new Exception("Не указан поставщик");
 
-            var createdSale = _saleService.CreatePostPayment(_db, saleCreate, json.UserId);
-            var shop = _shopService.ShopByUserId(_db, json.UserId);
+                SaleCreateVM saleCreate = new SaleCreateVM()
+                {
+                    UserId = json.UserId,
+                    Discount = json.Discount,
+                    AdditionalComment = json.AdditionalComment,
+                    Comment = json.Comment,
+                    Sum = json.Sum,
+                    CashSum = json.Cash,
+                    CashlessSum = json.Cashless,
+                    Products = json.Products,
+                    PartnerId = json.Buyer == "Обычный покупатель"
+                        ? null
+                        : _partnerService.All().First(p => p.Title == json.Buyer)?.Id,
+                    SaleType = SaleType.SaleFromStock,
+                    ForRussian = json.ForRussian
+                };
 
-            _db.SaleInformations.Add(new SaleInformation()
+                var createdSale = _saleService.CreatePostPayment(_db, saleCreate, json.UserId);
+                var shop = _shopService.ShopByUserId(_db, json.UserId);
+
+                _db.SaleInformations.Add(new SaleInformation()
+                {
+                    Sale = createdSale,
+                    MoneyWorkerForIncomeId = shop.Id,
+                    MoneyWorkerForCashlessIncomeId = json.MoneyWorkerIdForCashlessIncome == 0
+                        ? null
+                        : json.MoneyWorkerIdForCashlessIncome,
+                    SaleType = SaleType.SaleFromStock
+                });
+
+                _db.SaveChanges();
+
+
+                var saleFromStockOld = new SaleFromStockOld()
+                {
+                    SaleId = createdSale.Id,
+                    SupplierId = supplierId,
+                    Products = json.Products.Select(x =>
+                        new SoldProductFromStockOld()
+                        {
+                            ProcurementCost = x.ProcurementCost,
+                            ProductId = x.Id
+                        }).ToList()
+                };
+
+                _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
+                _postgresContext.SaveChanges();
+                
+                return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
+            }
+            catch (Exception e)
             {
-                Sale = createdSale,
-                MoneyWorkerForIncomeId = shop.Id,
-                MoneyWorkerForCashlessIncomeId = json.MoneyWorkerIdForCashlessIncome == 0
-                    ? null
-                    : json.MoneyWorkerIdForCashlessIncome,
-                SaleType = SaleType.SaleFromStock
-            });
-
-            _db.SaveChanges();
-
-
-            var saleFromStockOld = new SaleFromStockOld()
-            {
-                SaleId = createdSale.Id,
-                SupplierId = supplierId,
-                Products = json.Products.Select(x =>
-                    new SoldProductFromStockOld()
-                    {
-                        ProcurementCost = x.ProcurementCost,
-                        ProductId = x.Id
-                    }).ToList()
-            };
-
-            _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
-            _postgresContext.SaveChanges();
-            
-
-            return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
+                return BadRequest(new {message = e.Message});
+            }
         }
 
         //TODO: В сервис
