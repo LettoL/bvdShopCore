@@ -1268,7 +1268,7 @@ namespace WebUI.Controllers
             ViewBag.SalesProduct = saleProducts
                 .Select(x => new SaleProductItem()
                 {
-                    Id = x.Id,
+                    Id = x.ProductId,
                     Title = x.Product.Title,
                     Amount = x.Amount,
                     ProcurementCost = 0
