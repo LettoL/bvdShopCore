@@ -312,12 +312,9 @@ namespace WebUI.Controllers
             };
 
             var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
+            
+            //new
 
-
-           /* _postgresContext.SaleManagersOld.Add(
-                new SaleManagerOld(json.ManagerId, createdSale.Id));
-
-            _postgresContext.SaveChanges();*/
 
             return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
         }
