@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -582,50 +582,6 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
-            
-            /*var bookedProducts = _db.BookingProducts
-                .Where(x => x.Booking.Status == BookingStatus.Open)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Amount = x.Amount
-                })
-                .ToList()
-                .GroupBy(x => x.ProductId)
-                .Select(x => new
-                {
-                    ProductId = x.Key,
-                    Amount = x.Sum(z => z.Amount)
-                })
-                .ToList();
-
-            var productsInStock = _db.SupplyProducts
-                .Where(x => x.StockAmount > 0)
-                .Select(x => new
-                {
-                    ProductId = x.ProductId,
-                    Title = x.Product.Title,
-                    Cost = x.Product.Cost,
-                    Shop = x.Product.Shop,
-                    Category = x.Product.Category,
-                    Code = x.Product.Code,
-                    StockAmount = x.StockAmount
-                })
-                .ToList()
-                .GroupBy(x => x.ProductId)
-                .Select(x => new ProductVM
-                {
-                    Id = x.Key,
-                    Amount = x.Sum(z => z.StockAmount)
-                             - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
-                    Title = x.FirstOrDefault().Title,
-                    Cost = x.FirstOrDefault().Cost,
-                    Shop = x.FirstOrDefault().Shop,
-                    Category = x.FirstOrDefault().Category,
-                    Code = x.FirstOrDefault().Code,
-                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
-                })
-                .ToList();*/
 
             var result = ProductService.GetProductsInStock(_db);
 
