@@ -9,6 +9,9 @@ namespace Domain.Entities.Sales
 
         public decimal Sum { get; private set; }
 
+        public int ManagerId { get; private set; }
+        public Manager Manager { get; private set; }
+
         public ICollection<SoldProduct> SoldProducts { get; private set; } = new HashSet<SoldProduct>();
     }
 }

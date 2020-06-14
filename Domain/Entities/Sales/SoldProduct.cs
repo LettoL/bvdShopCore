@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.Sales
+﻿using Domain.Entities.Supplies;
+
+namespace Domain.Entities.Sales
 {
     public class SoldProduct : Entity
     {
@@ -10,8 +12,14 @@
 
         public int Amount { get; private set; }
 
-        public SoldProduct(int productId, int saleId, int amount) =>
-            (ProductId, SaleId, Amount) = (productId, saleId, amount);
+        public int SuppliedProductId { get; private set; }
+        public SuppliedProduct SuppliedProduct { get; private set; }
+
+        public decimal Price { get; private set; }
+
+        public SoldProduct(int productId, int saleId, int amount, int suppliedProductId, decimal price) =>
+            (ProductId, SaleId, Amount, SuppliedProductId, Price) = 
+            (productId, saleId, amount, suppliedProductId, price);
 
         public SoldProduct(int productId, Sale sale, int amount) =>
             (ProductId, Sale, Amount) = (productId, sale, amount);
