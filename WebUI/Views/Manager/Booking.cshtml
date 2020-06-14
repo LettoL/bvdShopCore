@@ -74,26 +74,30 @@
                     <div id="sale_form">
                         <div class="row">
                             <div class="col-md-4">
+                                <label>Выберите менеджера</label>
+                                <select id="manager_select" class="form-control" v-model="manager">
+                                    <option disabled value="">Выберите один из вариантов</option>
+                                </select>
 
                                 <label>Скидка</label>
-                                <input class="form-control" v-model="discount" />
+                                <input class="form-control" v-model="discount"/>
 
                                 <label>Стоимость</label>
-                                <input v-if="buyer == 'Обычный покупатель'" readonly class="form-control" v-model="cost" style="margin-bottom: 20px;" />
-                                <input v-if="buyer != 'Обычный покупатель'" class="form-control" v-model="cost" style="margin-bottom: 20px;" />
+                                <input v-if="buyer == 'Обычный покупатель'" readonly class="form-control" v-model="cost" style="margin-bottom: 20px;"/>
+                                <input v-if="buyer != 'Обычный покупатель'" class="form-control" v-model="cost" style="margin-bottom: 20px;"/>
 
                                 <label>Внесение наличных средств</label>
-                                <input class="form-control" v-model="cashMoney" />
+                                <input class="form-control" v-model="cashMoney"/>
 
                                 <label>Внесение безналичных средств</label>
-                                <input class="form-control" v-model="cashlessMoney" />
+                                <input class="form-control" v-model="cashlessMoney"/>
 
                                 <label>Перевести безналичные средства на</label>
                                 <select id="moneyWorkerType" class="form-control" v-model="moneyWorkerType" onchange="saleForm.getMoneyWorkers(this.value)">
                                     <option value="null">Не отправлять</option>
                                     <option value="1">Держатель Карты</option>
                                     <option value="2">Рассчетный Счет</option>
-                                </select> <br />
+                                </select> <br/>
 
                                 <select id="moneyWorkerId" class="form-control" v-model="moneyWorkerId">
                                     <option disabled selected value="null">Выбрать</option>
@@ -103,7 +107,7 @@
                                 <select id="forRussian" class="form-control" v-model="forRussian">
                                     <option value="true">Да</option>
                                     <option value="false">Нет</option>
-                                </select> <br />
+                                </select> <br/>
 
                             </div>
                             <div v-if="buyer !== 'Обычный покупатель'" class="col-lg-6 col-md-8">
@@ -321,6 +325,7 @@
             moneyWorkerId: null,
             error: null,
             forRussian: "false",
+            manager: ""
         },
         methods: {
             initProps: function () {
@@ -377,8 +382,24 @@
                 deep: true
             }
 
-        },
-        
+        },  
+         created: 
+            function() {
+                fetch('/api/managers', {
+                    headers: { 'Content-Type': 'application/json'},
+                    credentials: 'include'
+                })
+                .then((res) => {
+                    return res.json()
+                })
+                .then((res) => {
+                    console.log(res, $('#manager_select'))
+                    res.forEach(x => {
+                        $('#manager_select')
+                            .append('<option>' + x.name + '</option>');
+                    })
+                })                    
+            }     
     });
 
     var confirmForm = new Vue({
@@ -392,7 +413,8 @@
             sum: 0,
             buyer: "",
             forRussian: null,
-            russianStatus: "Да"
+            russianStatus: "Да",
+            manager: ""
         },
         methods: {
             initProps: function() {
@@ -404,6 +426,7 @@
                 confirmForm.buyer = buyer.buyer;
                 confirmForm.discount = saleForm.discount;
                 confirmForm.forRussian = saleForm.forRussian;
+                confirmForm.manager = saleForm.manager
             },
             sendData: function () {
                 this.products.forEach(product => {
@@ -422,7 +445,8 @@
                     userId: userId,
                     bookingType: 0,
                     buyer: this.buyer,
-                    forRussian: JSON.parse(this.forRussian.toLowerCase())
+                    forRussian: JSON.parse(this.forRussian.toLowerCase()),
+                    manager: this.manager
                 }
 
                 /*var xhr = new XMLHttpRequest();

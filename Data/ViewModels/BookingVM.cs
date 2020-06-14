@@ -17,6 +17,7 @@ namespace Data.ViewModels
         public int BookingType { get; set; }
         public string Buyer { get; set; }
         public bool forRussian { get; set; }
+        public string Manager { get; set; }
     }
 
     public class BookingCreateVM

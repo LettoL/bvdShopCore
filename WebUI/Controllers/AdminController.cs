@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Internal;
 using PostgresData;
+using WebUI.Dtos;
 using WebUI.Dtos.CloseSale;
 using WebUI.ViewModels;
 using Manager = Domain.Entities.Sales.Manager;
@@ -135,7 +136,46 @@ namespace WebUI.Controllers
 
         public async Task<IActionResult> Managers()
         {
-            var result = await _postgresContext.Managers.Select(x => x.Name).ToListAsync();
+            var saleManagers = await _postgresContext.SaleManagersOld.ToListAsync();
+
+            var salesId = saleManagers.Select(x => x.SaleId).ToList();
+            var sales = await _db.Sales
+                .Where(x => salesId.Contains(x.Id))
+                .Select(x => new
+                {
+                    SaleId = x.Id,
+                    Margin = x.Margin,
+                    Sum = x.Sum,
+                })
+                .ToListAsync();
+
+            var managers = await _postgresContext.Managers
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToListAsync();
+
+            var salesWithManager = sales.Select(x => new
+            {
+                SaleId = x.SaleId,
+                Margin = x.Margin,
+                Sum = x.Sum,
+                ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
+            });
+
+            var result = managers.Select(x => new ManagerDto()
+            {
+                Id = x.Id,
+                Name = x.Name,
+                Margin = salesWithManager
+                    .Where(z => z.ManagerId == x.Id)
+                    .Sum(z => z.Margin),
+                Sum = salesWithManager
+                    .Where(z => z.ManagerId == x.Id)
+                    .Sum(z => z.Sum)
+            }).ToList();
             
             return View(result);
         }

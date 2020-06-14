@@ -22,13 +22,17 @@
                     <thead>
                         <tr>
                             <th>Имя</th>
+                            <th>Маржа</th>
+                            <th>Оборот</th>
                         </tr>
                     </thead>
                     <tbody>
                         @foreach (var m in Model)
                         {
                         <tr>
-                            <td>@m</td>
+                            <td>@m.Name</td>
+                            <td>@m.Margin</td>
+                            <td>@m.Sum</td>
                         </tr>
                         }
                     </tbody>

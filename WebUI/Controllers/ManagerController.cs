@@ -1,4 +1,4 @@
-using System.Linq;
+﻿using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -290,33 +290,46 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult RealizationPost([FromBody] RealizationVM json)
         {
-            SaleCreateVM saleCreate = new SaleCreateVM()
+            try
             {
-                UserId = json.UserId,
-                MoneyWorkerId = json.MoneyWorkerId,
-                Discount = json.Discount,
-                AdditionalComment = json.AdditionalComment,
-                Comment = json.Comment,
-                PaymentType = json.Cashless 
-                    ? PaymentType.Cashless 
-                    : PaymentType.Cash,
-                CashSum = json.CashSum,
-                CashlessSum = json.CashlessSum,
-                Sum = json.Sum,
-                Products = json.Products,
-                PartnerId = json.Buyer == "Обычный покупатель"
-                    ? null
-                    : _db.Partners.First(p => p.Title == json.Buyer)?.Id,
-                Payment = json.Payment,
-                ForRussian = json.ForRussian
-            };
+                var managerId = _postgresContext.Managers.FirstOrDefault(x => x.Name == json.Manager)?.Id ??
+                                throw new Exception("Не указан менеджен");
 
-            var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
-            
-            //new
+                SaleCreateVM saleCreate = new SaleCreateVM()
+                {
+                    UserId = json.UserId,
+                    MoneyWorkerId = json.MoneyWorkerId,
+                    Discount = json.Discount,
+                    AdditionalComment = json.AdditionalComment,
+                    Comment = json.Comment,
+                    PaymentType = json.Cashless
+                        ? PaymentType.Cashless
+                        : PaymentType.Cash,
+                    CashSum = json.CashSum,
+                    CashlessSum = json.CashlessSum,
+                    Sum = json.Sum,
+                    Products = json.Products,
+                    PartnerId = json.Buyer == "Обычный покупатель"
+                        ? null
+                        : _db.Partners.First(p => p.Title == json.Buyer)?.Id,
+                    Payment = json.Payment,
+                    ForRussian = json.ForRussian
+                };
+
+                var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
 
 
-            return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum });
+                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                _postgresContext.SaveChanges();
+                
+
+                return RedirectToAction("CheckPrint",
+                    new {saleId = createdSale.Id, operationSum = json.CashSum + json.CashlessSum});
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new {message = e.Message});
+            }
         }
 
         [HttpGet]
@@ -376,9 +389,25 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult Booking([FromBody] BookingVM booking)
         {
-            var createdBooking = _productService.Booking(booking, booking.UserId);
+            try
+            {
+                var managerId = _postgresContext.Managers.FirstOrDefault(x => x.Name == booking.Manager)?.Id
+                                ?? throw new Exception("Менеджер не выбран");
+                
+                var createdBooking = _productService.Booking(booking, booking.UserId);
 
-            return RedirectToAction("CheckPrint", new { bookingId = createdBooking.Id, operationSum = booking.CashSum + booking.CashlessSum });
+
+                _postgresContext.BookingManagersOld.Add(new BookingManagerOld(createdBooking.Id, managerId));
+                _postgresContext.SaveChanges();
+                
+
+                return RedirectToAction("CheckPrint",
+                    new {bookingId = createdBooking.Id, operationSum = booking.CashSum + booking.CashlessSum});
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new {message = e.Message});
+            }
         }
 
         [HttpGet]
@@ -565,6 +594,15 @@ namespace WebUI.Controllers
                 createdSaleId = createdSale.Id;
 
                 _saleService.Update(createdSale);
+            }
+
+            if (createdSaleId != 0)
+            {
+                var managerId = _postgresContext.BookingManagersOld
+                    .FirstOrDefault(x => x.BookingId == id).ManagerId;
+
+                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSaleId));
+                _postgresContext.SaveChanges();
             }
             
             return RedirectToAction("CheckPrint", new { saleId = createdSaleId, operationSum = cashSum + cashlessSum });
@@ -755,6 +793,9 @@ namespace WebUI.Controllers
                 var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == json.Supplier)?.Id
                                  ?? throw new Exception("Не указан поставщик");
 
+                var managerId = _postgresContext.Managers.FirstOrDefault(x => x.Name == json.Manager)?.Id
+                                ?? throw new Exception("Не указан менеджер");
+
                 SaleCreateVM saleCreate = new SaleCreateVM()
                 {
                     UserId = json.UserId,
@@ -800,8 +841,13 @@ namespace WebUI.Controllers
                         }).ToList()
                 };
 
+                
                 _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
+
+                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                
                 _postgresContext.SaveChanges();
+                
                 
                 return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = json.Cash + json.Cashless });
             }
@@ -868,75 +914,91 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult DefferedSaleFromStock([FromBody]DefferedSaleFromStockVM sale)
         {
-            var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == sale.Supplier)?.Id
-                             ?? throw new Exception("Не указан поставщик");
-            
-            var user = _userService.All().FirstOrDefault(x => x.Id == sale.UserId);
-
-            SaleCreateVM saleCreate = new SaleCreateVM()
+            try
             {
-                UserId = sale.UserId,
-                Discount = sale.Discount,
-                CashSum = sale.CashSum,
-                CashlessSum = sale.CashlessSum,
-                Comment = sale.Comment,
-                Sum = sale.Sum,
-                Products = sale.Products,
-                PartnerId = sale.Buyer == "Обычный покупатель"
-                    ? null
-                    : _partnerService.All().First(p => p.Title == sale.Buyer)?.Id,
-                SaleType = SaleType.DefferedSaleFromStock,
-                ForRussian = sale.ForRussian
-            };
+                var supplierId = _db.Suppliers.FirstOrDefault(x => x.Title == sale.Supplier)?.Id
+                                 ?? throw new Exception("Не указан поставщик");
 
-            var createdSale = _saleService.CreatePostPayment(_db, saleCreate, sale.UserId);
+                var managerId = _postgresContext.Managers.FirstOrDefault(x => x.Name == sale.Manager)?.Id
+                                ?? throw new Exception("Не указан менеджер");
+                
 
-            _db.SaleInformations.Add(new SaleInformation()
-            {
-                Sale = createdSale,        
-                SaleType = SaleType.DefferedSaleFromStock
-            });
+                var user = _userService.All().FirstOrDefault(x => x.Id == sale.UserId);
 
-            if (sale.CashSum > 0)
-                _infoMoneyService.Create(new InfoMoney()
+                SaleCreateVM saleCreate = new SaleCreateVM()
                 {
-                    MoneyWorkerId = _shopService.All().FirstOrDefault(x => x.Id == user.ShopId).Id,
-                    Sum = sale.CashSum,
+                    UserId = sale.UserId,
+                    Discount = sale.Discount,
+                    CashSum = sale.CashSum,
+                    CashlessSum = sale.CashlessSum,
+                    Comment = sale.Comment,
+                    Sum = sale.Sum,
+                    Products = sale.Products,
+                    PartnerId = sale.Buyer == "Обычный покупатель"
+                        ? null
+                        : _partnerService.All().First(p => p.Title == sale.Buyer)?.Id,
+                    SaleType = SaleType.DefferedSaleFromStock,
+                    ForRussian = sale.ForRussian
+                };
+
+                var createdSale = _saleService.CreatePostPayment(_db, saleCreate, sale.UserId);
+
+                _db.SaleInformations.Add(new SaleInformation()
+                {
                     Sale = createdSale,
-                    PaymentType = PaymentType.Cash,
-                    MoneyOperationType = MoneyOperationType.Sale
+                    SaleType = SaleType.DefferedSaleFromStock
                 });
 
-            if (sale.CashlessSum > 0)
-                _infoMoneyService.Create(new InfoMoney()
-                {
-                    MoneyWorkerId = sale.MoneyWorkerId,
-                    Sum = sale.CashlessSum,
-                    Sale = createdSale,
-                    PaymentType = PaymentType.Cashless,
-                    MoneyOperationType = MoneyOperationType.Sale
-                });
-
-            _db.SaveChanges();
-            
-            
-            var saleFromStockOld = new SaleFromStockOld()
-            {
-                SaleId = createdSale.Id,
-                SupplierId = supplierId,
-                Products = sale.Products.Select(x =>
-                    new SoldProductFromStockOld()
+                if (sale.CashSum > 0)
+                    _infoMoneyService.Create(new InfoMoney()
                     {
-                        ProcurementCost = x.ProcurementCost,
-                        ProductId = x.Id
-                    }).ToList()
-            };
+                        MoneyWorkerId = _shopService.All().FirstOrDefault(x => x.Id == user.ShopId).Id,
+                        Sum = sale.CashSum,
+                        Sale = createdSale,
+                        PaymentType = PaymentType.Cash,
+                        MoneyOperationType = MoneyOperationType.Sale
+                    });
 
-            _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
-            _postgresContext.SaveChanges();
-            
+                if (sale.CashlessSum > 0)
+                    _infoMoneyService.Create(new InfoMoney()
+                    {
+                        MoneyWorkerId = sale.MoneyWorkerId,
+                        Sum = sale.CashlessSum,
+                        Sale = createdSale,
+                        PaymentType = PaymentType.Cashless,
+                        MoneyOperationType = MoneyOperationType.Sale
+                    });
 
-            return RedirectToAction("CheckPrint", new { saleId = createdSale.Id, operationSum = sale.CashSum + sale.CashlessSum });
+                _db.SaveChanges();
+
+
+                var saleFromStockOld = new SaleFromStockOld()
+                {
+                    SaleId = createdSale.Id,
+                    SupplierId = supplierId,
+                    Products = sale.Products.Select(x =>
+                        new SoldProductFromStockOld()
+                        {
+                            ProcurementCost = x.ProcurementCost,
+                            ProductId = x.Id
+                        }).ToList()
+                };
+
+                
+                _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
+
+                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                
+                _postgresContext.SaveChanges();
+
+
+                return RedirectToAction("CheckPrint",
+                    new {saleId = createdSale.Id, operationSum = sale.CashSum + sale.CashlessSum});
+            }
+            catch (Exception e)
+            {
+                return BadRequest(new {message = e.Message});
+            }
         }
 
         public IActionResult CloseDefferedSale(int id)
