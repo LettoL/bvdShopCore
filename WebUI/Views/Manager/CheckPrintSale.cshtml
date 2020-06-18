@@ -1,0 +1,129 @@
+﻿
+@{
+    Layout = null;
+}
+
+<!DOCTYPE html>
+
+<html>
+<head>
+    <meta name="viewport" content="width=device-width" />
+    <title>CheckPrint</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.0/css/bootstrap.min.css" integrity="sha384-9gVQ4dYFwwWSjIDZnLEWnxCjeSWFphJiwGPXr1jddIhOegiu1FwO5qRGvFXOdJZ4" crossorigin="anonymous">
+    <link href="~/Content/css/checkPrint.css" rel="stylesheet" />
+</head>
+
+
+
+<body style="padding: 40px 0px;">
+
+    <div class="container">
+
+        <div class="row">
+            <div class="col">
+                <div class="logo">
+                    <h3>b <span class="separator">/</span> v <span class="separator">/</span> d</h3>
+                    <p style="text-transform: uppercase; font-weight: bold;line-height: 1.2">Магазин <br> электротранспорта № 1</p>
+                </div>
+            </div>
+            <div class="col offset-2">
+                <div class="info">
+                    <p>Прием заказов по телефону <br> Ежедневно с 10:00 до 21:00</p>
+                </div>
+            </div>
+            <div class="col">
+                <div class="phones">
+                    <p>
+                        8(812) 413-98-18<br>8(495) 104-47-71<br>8(800) 350-58-18
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <strong style="display: inline-block; width: 100%; text-align: center;" class="title">Расходная накладная № @Model.Id от: @Model.Date.ToString("dd.MM.yyyy")  </strong>
+
+        <table class="table table-striped table-bordered">
+            <thead>
+                <tr>
+                    <th scope="col">Артикул</th>
+                    <th scope="col">Наименование</th>
+                    <th scope="col">Количество</th>
+                    <th scope="col">Цена</th>
+                    <th scope="col">Сумма</th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach (var product in ViewBag.SaleProducts)
+                {
+                    var sum = product.Amount * product.Cost;
+
+                    <tr>
+                        <td>@product.Product.Code</td>
+                        <td>@product.Product.Title</td>
+                        <td>@product.Amount</td>
+                        <td>@product.Cost</td>
+                        <td>@sum </td>
+                    </tr>
+                }
+                    <tr>
+                        @{
+                            var sumWithoutDisc = Model.Discount + Model.Sum;
+
+                            var sumCash = Model.CashSum + Model.CashlessSum;
+                         }
+                        @if(Model.Discount == 0) {
+                            <td colspan="2">Итог:</td>
+                        }
+                        else
+                        {
+                            <td>Итог:</td>
+                        }
+                        <td></td>
+                        <td><b>Цена:  @sumWithoutDisc</b></td>
+                        @if(Model.Discount > 0)
+                        {
+                            <td><b>Скидка: @Model.Discount</b></td>
+                        }                        
+                        <td><b>Внесенная Сумма: @ViewBag.TotalOperationSum </b></td>
+                    </tr>
+            </tbody>
+        </table>
+
+        <div class="row bvd-info">
+            <div class="col">
+                <p><a href="">bvdshop.ru</a> - Магазин электротранспорта №1</p>
+            </div>
+            <div class="col">
+                <p>
+                    Магазин в Москве: Большая Очаковская 47с1 <br>
+                    Магазин в Санкт-Петербурге: Свердловская набережная, дом 60 <br>
+                    Магазин в Самаре: 5-я просека 99
+                </p>
+            </div>
+        </div>
+
+        <div class="row bvd-info">
+            <p class="coupon">
+                Компания BVDshop.ru благодарит вас за покупку и дарит купон на 1000 руб. <span>#BVD</span>@Model.Id
+                Воспользуйтесь купоном и сэкономьте 1000 рублей при следующей покупке или подарите купон другу!
+            </p>
+        </div>
+
+        <div class="row" style="margin-top: 20px">
+            <div class="col-sm-8" style="padding: 0px">
+                <p style="font-weight: bold; margin: 0px">С Правилами приема-передачи товара на гарантийное обслуживание ознакомлен.</p>
+            </div>
+            <div class="col-sm-4" style="padding: 0px; position: relative"> 
+                <div class="underline" style="width: 100%; border-bottom: 1px solid #222; position: absolute; bottom: 0px"></div>
+            </div>
+
+        </div>
+
+        <div class="row">            
+            <h2 style="margin-top: 20px">Спасибо за покупку!</h2>
+        </div>
+
+    </div>
+
+</body>
+</html>
