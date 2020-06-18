@@ -552,6 +552,12 @@ namespace WebUI.Controllers
                 });
             }
 
+            if (booking.Status != BookingStatus.Close)
+            {
+                return RedirectToAction("CheckPrint", 
+                    new { bookingId = booking.Id, operationSum = cashSum + cashlessSum });
+            }
+            
             int createdSaleId = 0;
 
             if(booking.Status == BookingStatus.Close)
