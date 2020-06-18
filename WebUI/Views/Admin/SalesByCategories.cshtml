@@ -15,6 +15,13 @@
                     <form id="dateFilter"  style="display: inline-block">
                         <input placeholder="Дата с:" type="text" name="value" id="dateFilter1" class="form-control" style="width: 200px; display: inline-block" />
                         <input placeholder="Дата по:" type="text" name="value" id="dateFilter2" class="form-control" style="width: 200px; display: inline-block" />
+                        <select id="managerFilter" class="form-control">
+                            <option value="0">Менеджер не выбран</option>
+                            @foreach (var m in ViewBag.Managers)
+                            {
+                                <option value="@m.Id">@m.Name</option>
+                            }
+                        </select>
                         <button id="dateFilterSubmit" class="btn btn-dark" style="position: relative; top: -3px" type="button">Поиск</button>
                     </form>
                 </div>
@@ -232,12 +239,16 @@
     }
 
     function loadData() {
+      
+        let managerFilterValue = $('#managerFilter').val();
+        console.log(managerFilterValue);
 
         $('#result').load(
             "/Admin/SalesByCategoriesFilter",
             {
                 fromDate: date1,
                 forDate: date2,
+                managerId: managerFilterValue
             }
         );
     }

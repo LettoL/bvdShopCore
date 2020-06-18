@@ -1676,11 +1676,18 @@ namespace WebUI.Controllers
 
             ViewBag.fromDate = fromDate.ToString();
 
+            ViewBag.Managers = _postgresContext.Managers
+                .Select(x => new ManagerDto()
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToList();
+
             return View(result);
         }
 
         [HttpPost]
-        public IActionResult SalesByCategoriesFilter(string fromDate, string forDate)
+        public IActionResult SalesByCategoriesFilter(string fromDate, string forDate, int managerId)
         {
             DateTime? fromD = null;
             DateTime? forD = null;
@@ -1760,6 +1767,17 @@ namespace WebUI.Controllers
                 endDate = forD,
                 forRF = true
             };
+
+            if (managerId != 0)
+            {
+                var salesId = _postgresContext.SaleManagersOld
+                    .Where(x => x.ManagerId == managerId)
+                    .Select(x => x.SaleId)
+                    .ToList();
+
+                saleProducts = saleProducts.Where(x => salesId.Contains(x.SaleId));
+                productInfromations = productInfromations.Where(x => salesId.Contains(x.SaleId));
+            }
 
             if (fromDate != null)
             {
