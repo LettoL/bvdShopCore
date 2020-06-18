@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;
@@ -372,6 +372,27 @@ namespace WebUI.Controllers
 
                 return View(booking);
             }
+        }
+
+        [HttpGet]
+        public IActionResult CheckPrintSale(int id)
+        {
+            var sale = _saleService.All().FirstOrDefault(x => x.Id == id);
+
+            ViewBag.SaleProducts = _saleProductService.All()
+                .Include(x => x.Product)
+                .Where(x => x.SaleId == sale.Id)
+                .ToList();
+            
+            var sum = _infoMoneyService.All()
+                .Where(x => x.SaleId == sale.Id)
+                .Sum(x => x.Sum);
+
+            ViewBag.Sale = true;
+            ViewBag.OperationSum = sum;
+            ViewBag.TotalOperationSum = sum;
+
+            return View(sale);
         }
 
         [HttpGet]
