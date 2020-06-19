@@ -1,13 +1,44 @@
-import React from "react";
+import React, {useEffect} from "react";
 import FormControl from "@material-ui/core/FormControl";
 import InputLabel from "@material-ui/core/InputLabel";
 import Select from "@material-ui/core/Select";
 import MenuItem from "@material-ui/core/MenuItem";
 import TextField from "@material-ui/core/TextField";
 import {makeStyles} from "@material-ui/core/styles";
+import {useStore} from "effector-react";
+import {
+  $filterCategoryId,
+  $filterShopId,
+  setCategoryFilter,
+  setShopFilter,
+  setTitleFilter
+} from "../../models/product/product.store";
+import {$categoriesFilter, $shopsFilter, fetchCategoriesFx, fetchShopsFx} from "../../models/filter/filter.store";
 
-export const ProductTableFilters = props => {
+export const ProductTableFilters = () => {
   const classes = useStyles()
+
+  const shopId = useStore($filterShopId)
+  const categoryId = useStore($filterCategoryId)
+  const shops = useStore($shopsFilter)
+  const categories = useStore($categoriesFilter)
+
+  const handleChangeShop = (event) => {
+    setShopFilter(event.target.value)
+  };
+
+  const handleChangeCategory = (event) => {
+    setCategoryFilter(event.target.value)
+  };
+
+  const handleChangeTitle = (event) => {
+    setTitleFilter(event.target.value)
+  };
+
+  useEffect(() => {
+    fetchCategoriesFx()
+    fetchShopsFx()
+  }, [])
 
   return (
     <>
@@ -16,11 +47,11 @@ export const ProductTableFilters = props => {
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={props.shop}
-          onChange={props.handleChangeShop}
+          value={shopId}
+          onChange={handleChangeShop}
         >
           <MenuItem value={0}>Выбрать магазин</MenuItem>
-          {props.shops.map(shop => (
+          {shops.map(shop => (
             <MenuItem key={shop.id} value={shop.id}>{shop.title}</MenuItem>
           ))}
         </Select>
@@ -30,11 +61,11 @@ export const ProductTableFilters = props => {
         <Select
           labelId="demo-simple-select-label"
           id="demo-simple-select"
-          value={props.category}
-          onChange={props.handleChangeCategory}
+          value={categoryId}
+          onChange={handleChangeCategory}
         >
           <MenuItem value={0}>Выбрать категорию</MenuItem>
-          {props.categories.map(category => (
+          {categories.map(category => (
             <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>
           ))}
         </Select>
@@ -42,7 +73,7 @@ export const ProductTableFilters = props => {
       <FormControl className={classes.formControl}>
         <TextField
           label="Поиск по названию"
-          onChange={props.handleChangeTitle}
+          onChange={handleChangeTitle}
         />
       </FormControl>
     </>

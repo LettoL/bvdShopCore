@@ -8,8 +8,7 @@ import Button from "@material-ui/core/Button";
 import TableContainer from "@material-ui/core/TableContainer";
 
 export const ProductsTable = props => {
-  const {products, shop, category,
-    title, page, rowsPerPage, handleOpenDialog} = props
+  const {products, page, rowsPerPage, handleOpenDialog} = props
 
   return (
     <TableContainer>
@@ -27,15 +26,6 @@ export const ProductsTable = props => {
         </TableHead>
         <TableBody>
           {products
-          .filter(row => shop !== 0
-            ? row.shopId === shop
-            : true)
-          .filter(row => category !== 0
-            ? row.categoryId === category
-            : true)
-          .filter(row => title !== ''
-            ? row.title.toLowerCase().includes(title.toLowerCase())
-            : true)
           .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
           .map(row => (
             <TableRow key={row.id}>
