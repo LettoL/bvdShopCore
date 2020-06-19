@@ -16,6 +16,7 @@ import {
   fetchProductsFx
 } from "../../models/product/product.store";
 import {useStore} from "effector-react";
+import {CSVLink} from "react-csv";
 
 export const Products = () => {
   const classes = useStyles()
@@ -50,8 +51,31 @@ export const Products = () => {
     fetchProductsFx()
   }, [])
 
+  const headers = [
+    {label: "Артикул", key: 'code'},
+    {label: "Наименование", key: 'name'},
+    {label: "Кол-во", key: 'amount'},
+    {label: "Цена", key: 'price'},
+    {label: "Магазин", key: 'shop'},
+    {label: "Категория", key: 'category'}
+  ]
+
+  const data = products.map(product => (
+    {
+      code: product.code,
+      name: product.name,
+      amount: product.amount,
+      price: product.price,
+      shop: product.shop,
+      category: product.category
+    }
+  ));
+
   return (
     <>
+      <CSVLink data={data} headers={headers} separator={';'}>
+        Download me
+      </CSVLink>;
       <ProductTableFilters/>
       <ProductsTable
         products={products}
