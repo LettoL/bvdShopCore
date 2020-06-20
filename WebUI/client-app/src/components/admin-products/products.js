@@ -53,7 +53,7 @@ export const Products = () => {
 
   const headers = [
     {label: "Артикул", key: 'code'},
-    {label: "Наименование", key: 'name'},
+    {label: "Наименование", key: 'title'},
     {label: "Кол-во", key: 'amount'},
     {label: "Цена", key: 'price'},
     {label: "Магазин", key: 'shop'},
@@ -63,7 +63,7 @@ export const Products = () => {
   const data = products.map(product => (
     {
       code: product.code,
-      name: product.name,
+      title: product.title,
       amount: product.amount,
       price: product.price,
       shop: product.shop,
