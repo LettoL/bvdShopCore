@@ -9,6 +9,7 @@ import {ShopsList} from "./components/shop/shops-list";
 import {SuppliersList} from "./components/supplier/suppliers-list";
 import { CategoriesList } from "./components/categories/categories-list";
 import {SupplyProductsList} from "./components/supply-product/list/supply-products-list";
+import {ManagerList} from "./components/manager/manager-list";
 
 export const useRoutes = () => {
 
@@ -27,7 +28,7 @@ export const useRoutes = () => {
         <ProductsHistory/>
       </Route>
       <Route path='/admin/managers' exact>
-        <ManagersPage/>
+        <ManagerList/>
       </Route>
       <Route path='/admin/shops' exact>
         <ShopsList/>
