@@ -761,6 +761,19 @@ namespace WebUI.Controllers
                 RedirectToAction("Index", "Home");
 
             var getAllInfoMoneys = _infoMoneyService.All();
+            
+            var repaidDebt = _postgresContext.RepaidDebtsOld.ToList()
+                .Join(_db.Suppliers,
+                    repaid => repaid.SupplierId,
+                    supplier => supplier.Id,
+                    (repaid, supplier) => new
+                    {
+                        InfoMoneyId = repaid.InfoMoneyId,
+                        SupplierId = repaid.SupplierId,
+                        SupplierName = supplier.Title
+                    });
+            
+            var imForDebt = repaidDebt.Select(x => x.InfoMoneyId).ToList();
 
             if (date1 != null)
             {
@@ -812,7 +825,10 @@ namespace WebUI.Controllers
                 Id = x.Id,
                 Sum = x.Sum,
                 Date = x.Date.ToString("dd.MM.yyyy"),
-                Comment = x.Comment,
+                Comment = imForDebt.Contains(x.Id)
+                    ? repaidDebt.FirstOrDefault(r
+                        => r.InfoMoneyId == x.Id).SupplierName
+                    : x.Comment,
                 PaymentType = x.PaymentType,
                 Sale = x.Sale,
                 MoneyWorker = x.MoneyWorker,
