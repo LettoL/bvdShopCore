@@ -24,6 +24,7 @@ using Microsoft.EntityFrameworkCore.Internal;
 using PostgresData;
 using WebUI.Dtos;
 using WebUI.Dtos.CloseSale;
+using WebUI.QueriesHandlers;
 using WebUI.ViewModels;
 using Manager = Domain.Entities.Sales.Manager;
 using Product = Data.Entities.Product;
@@ -716,48 +717,7 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.Scores = _db.MoneyWorkers;
 
-            var repaidDebt = _postgresContext.RepaidDebtsOld.ToList()
-                .Join(_db.Suppliers,
-                    repaid => repaid.SupplierId,
-                    supplier => supplier.Id,
-                    (repaid, supplier) => new
-                    {
-                        InfoMoneyId = repaid.InfoMoneyId,
-                        SupplierId = repaid.SupplierId,
-                        SupplierName = supplier.Title
-                    });
-            
-            var imForDebt = repaidDebt.Select(x => x.InfoMoneyId).ToList();
-
-            var result = _infoMoneyService.All()
-                .OrderByDescending(im => im.Id)
-                .Take(200)
-                .Select(im => new MoneyHistoryVM()
-                {
-                    Id = im.Id,
-                    Sum = im.Sum,
-                    Date = im.Date.ToString("dd.MM.yyyy"),
-                    Comment = im.Comment,
-                    PaymentType = im.PaymentType,
-                    MoneyWorkerTitle = im.MoneyWorker != null ? im.MoneyWorker.Title : "",
-                    MoneyOperationType = im.MoneyOperationType,
-                    ShopTitle = im.Sale.Shop.Title
-                })
-                .ToList()
-                .Select(im => new MoneyHistoryVM()
-                {
-                    Id = im.Id,
-                    Sum = im.Sum,
-                    Date = im.Date,
-                    Comment = imForDebt.Contains(im.Id)
-                        ? repaidDebt.FirstOrDefault(r
-                            => r.InfoMoneyId == im.Id).SupplierName
-                        : im.Comment,
-                    PaymentType = im.PaymentType,
-                    MoneyWorkerTitle = im.MoneyWorkerTitle,
-                    MoneyOperationType = im.MoneyOperationType,
-                    ShopTitle = im.ShopTitle
-                }).ToList();
+            var result = MoneyHistoryHandlers.GetMoneyHistory(_postgresContext, _db);
 
             return View(result);
         }
@@ -770,81 +730,12 @@ namespace WebUI.Controllers
             if (user == null)
                 RedirectToAction("Index", "Home");
 
-            var getAllInfoMoneys = _infoMoneyService.All();
-            
-            var repaidDebt = _postgresContext.RepaidDebtsOld.ToList()
-                .Join(_db.Suppliers,
-                    repaid => repaid.SupplierId,
-                    supplier => supplier.Id,
-                    (repaid, supplier) => new
-                    {
-                        InfoMoneyId = repaid.InfoMoneyId,
-                        SupplierId = repaid.SupplierId,
-                        SupplierName = supplier.Title
-                    });
-            
-            var imForDebt = repaidDebt.Select(x => x.InfoMoneyId).ToList();
+            var result = MoneyHistoryHandlers.GetMoneyHistory(
+                _postgresContext,
+                _db,
+                new MoneyHistoryFilterQuery(date1, date2, shopId, score, type));
 
-            if (date1 != null)
-            {
-                var buf = date1.Split('.');
-                var date = new DateTime(
-                    Convert.ToInt32(buf[2]),
-                    Convert.ToInt32(buf[1]),
-                    Convert.ToInt32(buf[0]));
-                
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date >= date);
-            }
-
-            if (date2 != null)
-            {
-                var buf = date2.Split('.');
-                var date = new DateTime(
-                    Convert.ToInt32(buf[2]),
-                    Convert.ToInt32(buf[1]),
-                    Convert.ToInt32(buf[0]));
-                
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Date.Date <= date);
-            }
-
-            if (shopId != 0)
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.Sale.ShopId == shopId);
-
-            if (score != 0)
-                getAllInfoMoneys = getAllInfoMoneys.Where(x => x.MoneyWorkerId == score);
-
-            if (type != 0)
-                return PartialView(getAllInfoMoneys
-                    .Select(x => new MoneyHistoryVM()
-                    {
-                        Id = x.Id,
-                        Sum = x.Sum,
-                        Date = x.Date.ToString("dd.MM.yyyy"),
-                        Comment = x.Comment,
-                        PaymentType = x.PaymentType,
-                        Sale = x.Sale,
-                        MoneyWorker = x.MoneyWorker,
-                        MoneyOperationType = x.MoneyOperationType,
-                        ShopTitle = x.Sale.Shop.Title
-                    }).ToList()
-                    .Where(x => (int)x.MoneyOperationType == type)
-                    .OrderByDescending(x => x.Id));
-
-            return PartialView(getAllInfoMoneys.Select(x => new MoneyHistoryVM()
-            {
-                Id = x.Id,
-                Sum = x.Sum,
-                Date = x.Date.ToString("dd.MM.yyyy"),
-                Comment = imForDebt.Contains(x.Id)
-                    ? repaidDebt.FirstOrDefault(r
-                        => r.InfoMoneyId == x.Id).SupplierName
-                    : x.Comment,
-                PaymentType = x.PaymentType,
-                Sale = x.Sale,
-                MoneyWorker = x.MoneyWorker,
-                MoneyOperationType = x.MoneyOperationType,
-                ShopTitle = x.Sale.Shop.Title
-            }).OrderByDescending(x => x.Id));
+            return PartialView(result);
         }
 
         [HttpGet]
