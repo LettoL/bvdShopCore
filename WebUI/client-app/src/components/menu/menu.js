@@ -19,6 +19,31 @@ export const Menu = () => {
         </NavLink>
       </ListItem>
       <ListItem button>
+        <NavLink to={'/admin/supplyProductsList'}>
+          <ListItemText primary={'Список поставок'}/>
+        </NavLink>
+      </ListItem>
+      <ListItem button>
+        <NavLink to={'/admin/managers'}>
+          <ListItemText primary={'Менеджеры'}/>
+        </NavLink>
+      </ListItem>
+    </List>
+  )
+
+  /*return (
+    <List>
+      <ListItem>
+        <a href='/'>
+          Старый интерфейс
+        </a>
+      </ListItem>
+      <ListItem button>
+        <NavLink to={'/admin/import'}>
+          <ListItemText primary={'Импорт'}/>
+        </NavLink>
+      </ListItem>
+      <ListItem button>
         <NavLink to={'/admin/supply'}>
           <ListItemText primary={'Поставка'}/>
         </NavLink>
@@ -59,5 +84,5 @@ export const Menu = () => {
         </NavLink>
       </ListItem>
     </List>
-  )
+  )*/
 }
