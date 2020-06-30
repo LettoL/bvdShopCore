@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Data;
 using Data.Entities;
 using Data.Enums;
+using Domain.Entities.Supplies;
 using Handlers.CommandHandlers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;

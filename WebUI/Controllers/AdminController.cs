@@ -16,6 +16,7 @@ using Data.Services.Abstract;
 using Data.ViewModels;
 using Domain.Entities;
 using Domain.Entities.Olds;
+using Domain.Entities.Supplies;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -601,6 +602,15 @@ namespace WebUI.Controllers
             }
 
             _db.SaveChanges();
+
+            _postgresContext.SuppliesInfo.Add(new SupplyInfo()
+            {
+                DateTime = DateTime.Now.AddHours(3),
+                Text = result,
+                OldSupplyHistoryId = supplyHistory.Id,
+                NewImport = false
+            });
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }
