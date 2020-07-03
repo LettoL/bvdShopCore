@@ -222,26 +222,26 @@ namespace WebUI.Controllers
         public IActionResult Delete(int id)
         {
             Sale sale = _saleService.All().FirstOrDefault(x => x.Id == id);
-            var informations = _productInformationService.All().Where(x => x.SaleId == sale.Id).ToList();
+            var productInformations = _productInformationService.All().Where(x => x.SaleId == sale.Id).ToList();
 
-            foreach (var info in informations)
+            foreach (var productInfo in productInformations)
             {
-                var supplyProduct = _supplyProductService.All().FirstOrDefault(x => x.Id == info.SupplyProductId);
+                var supplyProduct = _supplyProductService.All().FirstOrDefault(x => x.Id == productInfo.SupplyProductId);
 
-                if (info.ForRealization == true)
+                if (productInfo.ForRealization == true)
                 {
-                    supplyProduct.StockAmount += info.Amount;
-                    supplyProduct.RealizationAmount += info.Amount;
+                    supplyProduct.StockAmount += productInfo.Amount;
+                    supplyProduct.RealizationAmount += productInfo.Amount;
 
                     var supplier = _supplierService.All().FirstOrDefault(x => x.Id == supplyProduct.SupplierId);
 
-                    supplier.Debt -= supplyProduct.ProcurementCost * info.Amount;
+                    supplier.Debt -= supplyProduct.ProcurementCost * productInfo.Amount;
 
                     _supplierService.Update(supplier);
                 }
                 else if(supplyProduct != null)
                 {
-                    supplyProduct.StockAmount += info.Amount;
+                    supplyProduct.StockAmount += productInfo.Amount;
                 }
 
                 if(supplyProduct != null)
