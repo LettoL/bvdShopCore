@@ -10,6 +10,7 @@ import {SuppliersList} from "./components/supplier/suppliers-list";
 import { CategoriesList } from "./components/categories/categories-list";
 import {SupplyProductsList} from "./components/supply-product/list/supply-products-list";
 import {ManagerList} from "./components/manager/manager-list";
+import {ArchiveSalesList} from "./components/archive-sale/archive-sales-list";
 
 export const useRoutes = () => {
 
@@ -41,6 +42,9 @@ export const useRoutes = () => {
       </Route>
       <Route path='/admin/supplyProductsList' exact>
         <SupplyProductsList/>
+      </Route>
+      <Route path='/admin/archiveSales' exact>
+        <ArchiveSalesList/>
       </Route>
       <Redirect to='/admin/import'/>
     </Switch>
