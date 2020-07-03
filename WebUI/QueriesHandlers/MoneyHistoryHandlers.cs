@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using Data;
+using Microsoft.EntityFrameworkCore;
 using PostgresData;
 using WebUI.ViewModels;
 
@@ -58,8 +59,9 @@ namespace WebUI.QueriesHandlers
             var repaidDebts = DebtRepaymentOperations(postgresContext, shopContext);
 
             var repaidDebtsIds = repaidDebts.Select(x => x.Item1).ToList();
-            
-            var allInfoMoneys = shopContext.InfoMonies.AsQueryable();
+
+            var allInfoMoneys = shopContext.InfoMonies
+                .AsQueryable();
             
             if (query.StartDate != null)
             {
@@ -121,7 +123,7 @@ namespace WebUI.QueriesHandlers
                     Sale = x.Sale,
                     MoneyWorker = x.MoneyWorker,
                     MoneyOperationType = x.MoneyOperationType,
-                    ShopTitle = x.Sale.Shop.Title
+                    ShopTitle = x.ShopTitle
                 })
                 .OrderByDescending(x => x.Id)
                 .ToList();
