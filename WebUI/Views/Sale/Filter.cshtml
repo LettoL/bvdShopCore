@@ -56,15 +56,18 @@
                 <td>@s.BuyerTitle</td>
                 <td>@s.ProductTitle</td>
                 <td>
+                    <a href="/Manager/CheckPrintSale/@s.Id" class="btn btn-dark">
+                        <i class="fa fa-bookmark" aria-hidden="true"></i>
+                    </a>
                     <a href="/Sale/Detail/@s.Id" class="btn btn-dark">
                         <i class="fa fa-arrow-right" aria-hidden="true"></i>
                     </a>
-                    @if(ViewBag.User.Role.ToString() == "Administrator")
+                    @if (ViewBag.User.Role.ToString() == "Administrator")
                     {
                         <a href="/Sale/Delete/@s.Id" class="btn btn-danger">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </a>
-                    }               
+                    }
                 </td>
             </tr>
         }
