@@ -1743,14 +1743,16 @@ namespace WebUI.Controllers
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
 
-            ViewBag.fromDate = fromDate.ToString();
-            ViewBag.forDate = forDate.ToString();
+            ViewBag.fromDate = fromDate;// != null ? fromDate : null;
+            ViewBag.forDate = forDate;// != null ? forDate : null;
+            ViewBag.ManagerId = managerId;
 
             return PartialView(result);
         }
 
         [HttpGet]
-        public IActionResult SalesByCategoriesDetail(string fromDate, string forDate, SalesByCategoriesFilterType type, int categoryId)
+        public IActionResult SalesByCategoriesDetail(string fromDate, string forDate,
+            SalesByCategoriesFilterType type, int categoryId, int managerId)
         {
             ViewBag.CategoryTitle = _categoryService.Get(categoryId).Title;
 
@@ -1771,6 +1773,16 @@ namespace WebUI.Controllers
 
             if (forDateFilter != null)
                 sales = sales.Where(x => x.Date.Date <= forDateFilter);
+            
+            if (managerId != 0)
+            {
+                var salesIds = _postgresContext.SaleManagersOld
+                    .Where(x => x.ManagerId == managerId)
+                    .Select(x => x.SaleId)
+                    .ToList();
+
+                sales = sales.Where(x => salesIds.Contains(x.Id));
+            }
 
             if (type == SalesByCategoriesFilterType.Moscow)
                 sales = sales.Where(x => x.ShopId == 1 && x.PartnerId == null && x.ForRussian == false);
