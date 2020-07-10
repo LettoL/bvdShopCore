@@ -10,9 +10,11 @@ using Data.FiltrationModels;
 using Data.Services.Abstract;
 using Data.Services.Concrete.Filtration;
 using Data.ViewModels;
+using Domain.Entities.Olds;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 using WebUI.ViewModels;
 
 namespace WebUI.Controllers
@@ -35,6 +37,7 @@ namespace WebUI.Controllers
         private readonly ISaleInfoService _saleInfoService;
         private readonly IProductOperationService _productOperationService;
         private readonly ShopContext _db;
+        private readonly PostgresContext _postgresContext;
 
         public SaleController(ISaleService saleService, 
             IBaseObjectService<User> userService,
@@ -50,7 +53,8 @@ namespace WebUI.Controllers
             ISaleStatisticService saleStatisticService,
             ISaleInfoService saleInfoService,
             IProductOperationService productOperationService,
-            IBookingProductInformationService bookingProductInformationService)
+            IBookingProductInformationService bookingProductInformationService,
+            PostgresContext postgresContext)
         {
             _saleService = saleService;
             _userService = userService;
@@ -67,6 +71,7 @@ namespace WebUI.Controllers
             _saleInfoService = saleInfoService;
             _productOperationService = productOperationService;
             _bookingProductInformationService = bookingProductInformationService;
+            _postgresContext = postgresContext;
         }
 
         public IActionResult Index()
@@ -221,13 +226,62 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Delete(int id)
         {
-            Sale sale = _saleService.All().FirstOrDefault(x => x.Id == id);
-            var productInformations = _productInformationService.All().Where(x => x.SaleId == sale.Id).ToList();
+            Sale sale = _db.Sales
+                .Include(x => x.Partner)
+                .Include(x => x.Shop)
+                .FirstOrDefault(x => x.Id == id);
+            
+            var productInformations = _db.ProductInformations
+                .Where(x => x.SaleId == sale.Id)
+                .ToList();
+            
+            var deletedSale = new DeletedSale()
+            {
+                Buyer = sale.Partner?.Title ?? "Обычный покупатель",
+                Date = sale.Date,
+                Discount = sale.Discount,
+                Margin = sale.Margin,
+                Number = sale.Id,
+                ShopId = sale.ShopId,
+                ShopTitle = sale.Shop.Title,
+                Sum = sale.Sum,
+                ProcurementCost = sale.PrimeCost,
+                SaleType = sale.SaleType == SaleType.Sale
+                            ? "Обычная продажа"
+                            : sale.SaleType == SaleType.SaleFromStock
+                                ? "Продажа со склада"
+                                : sale.SaleType == SaleType.DefferedSale
+                                    ? "Продажа с отложенным платежом"
+                                    : sale.SaleType == SaleType.DefferedSaleFromStock
+                                        ? "Отложенная продажа со склада поставщика"
+                                        : sale.SaleType == SaleType.Booking
+                                            ? "Бронирование"
+                                            : ""
+            };
 
             foreach (var productInfo in productInformations)
             {
-                var supplyProduct = _supplyProductService.All().FirstOrDefault(x => x.Id == productInfo.SupplyProductId);
-
+                var supplyProduct = _db.SupplyProducts
+                    .Include(x => x.Product)
+                    .Include(x => x.Supplier)
+                    .FirstOrDefault(x => x.Id == productInfo.SupplyProductId);
+                
+                var saleProduct = _db.SalesProducts
+                    .AsNoTracking()
+                    .FirstOrDefault(x => x.SaleId == sale.Id && x.ProductId == productInfo.ProductId);
+                
+                deletedSale.Products.Add(new DeletedSaleProduct()
+                {
+                    Title = supplyProduct.Product.Title,
+                    Code = supplyProduct.Product.Code,
+                    ProductId = supplyProduct.ProductId,
+                    Amount = productInfo.Amount,
+                    Price = saleProduct.Cost,
+                    ProcurementCost = supplyProduct.ProcurementCost,
+                    SupplierId = supplyProduct.SupplierId ?? 0,
+                    SupplierName = supplyProduct.Supplier?.Title ?? ""
+                });
+                
                 if (productInfo.ForRealization == true)
                 {
                     supplyProduct.StockAmount += productInfo.Amount;
@@ -248,23 +302,44 @@ namespace WebUI.Controllers
                     _supplyProductService.Update(supplyProduct);
             }
 
-            var infoMoneys = _infoMoneyService.All().Where(x => x.SaleId == sale.Id).ToList();
+            var infoMoneys = _db.InfoMonies
+                .Include(x => x.MoneyWorker)
+                .Where(x => x.SaleId == sale.Id).ToList();
 
             foreach (var infoMoney in infoMoneys)
             {
-                _infoMoneyService.Delete(infoMoney);
+                deletedSale.Payments.Add(new DeletedPayment()
+                {
+                    Sum = infoMoney.Sum,
+                    Account = infoMoney.MoneyWorker.Title,
+                    Comment = infoMoney.Comment,
+                    PaymentType = infoMoney.PaymentType == PaymentType.Cash
+                                    ? "Наличный"
+                                    : infoMoney.PaymentType == PaymentType.Cashless
+                                        ? "Безналичный"
+                                        : "Смешанный",
+                    Date = infoMoney.Date
+                });
+                
+                _db.InfoMonies.Remove(infoMoney);
             }
 
             var salesProducts = _saleProductService.All().Where(x => x.SaleId == sale.Id).ToList();
 
             foreach (var saleProduct in salesProducts)
             {
-                _saleProductService.Delete(saleProduct);
+                _db.SalesProducts.Remove(saleProduct);
             }
-
-            _saleService.Delete(sale);
+            
+            _db.Sales.Remove(sale);
 
             _db.SaveChanges();
+
+            _postgresContext.DeletedSalesInfoOld.Add(new DeletedSaleInfoOld()
+            {
+                Sale = deletedSale
+            });
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }
