@@ -267,19 +267,20 @@ namespace WebUI.Controllers
                     .FirstOrDefault(x => x.Id == productInfo.SupplyProductId);
                 
                 var saleProduct = _db.SalesProducts
+                    .Include(x => x.Product)
                     .AsNoTracking()
                     .FirstOrDefault(x => x.SaleId == sale.Id && x.ProductId == productInfo.ProductId);
                 
                 deletedSale.Products.Add(new DeletedSaleProduct()
                 {
-                    Title = supplyProduct.Product.Title,
-                    Code = supplyProduct.Product.Code,
-                    ProductId = supplyProduct.ProductId,
+                    Title = saleProduct.Product.Title,
+                    Code = saleProduct.Product.Code,
+                    ProductId = saleProduct.ProductId,
                     Amount = productInfo.Amount,
                     Price = saleProduct.Cost,
-                    ProcurementCost = supplyProduct.ProcurementCost,
-                    SupplierId = supplyProduct.SupplierId ?? 0,
-                    SupplierName = supplyProduct.Supplier?.Title ?? ""
+                    ProcurementCost = productInfo.ProcurementCost,
+                    SupplierId = supplyProduct?.SupplierId ?? 0,
+                    SupplierName = supplyProduct?.Supplier?.Title ?? ""
                 });
                 
                 if (productInfo.ForRealization == true)
