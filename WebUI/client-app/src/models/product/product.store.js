@@ -7,6 +7,7 @@ const API_PRODUCTS = API_URL + 'api/products'
 export const setShopFilter = createEvent()
 export const setCategoryFilter = createEvent()
 export const setTitleFilter = createEvent()
+export const setMinAmountFilter = createEvent()
 
 export const fetchProductsFx = createEffect({
   async handler() {
@@ -27,12 +28,16 @@ export const $filterCategoryId = createStore(0)
 export const $filterTitle = createStore('')
   .on(setTitleFilter, (_, title) => title)
 
+export const $filterMinAmount = createStore(0)
+  .on(setMinAmountFilter, (_, amount) => amount)
+
 export const $filteredProducts = combine(
   $products,
   $filterShopId,
   $filterCategoryId,
   $filterTitle,
-  (products, shopId, categoryId, title) => products
+  $filterMinAmount,
+  (products, shopId, categoryId, title, minAmount) => products
     .filter(product => shopId !== 0
       ? product.shopId === shopId
       : true)
@@ -42,4 +47,5 @@ export const $filteredProducts = combine(
     .filter(product => title !== ''
       ? product.title.toLowerCase().includes(title.toLowerCase())
       : true)
+    .filter(product => product.amount >= minAmount)
 )

@@ -7,9 +7,9 @@ import TextField from "@material-ui/core/TextField";
 import {makeStyles} from "@material-ui/core/styles";
 import {useStore} from "effector-react";
 import {
-  $filterCategoryId,
+  $filterCategoryId, $filterMinAmount,
   $filterShopId,
-  setCategoryFilter,
+  setCategoryFilter, setMinAmountFilter,
   setShopFilter,
   setTitleFilter
 } from "../../models/product/product.store";
@@ -22,6 +22,11 @@ export const ProductTableFilters = () => {
   const categoryId = useStore($filterCategoryId)
   const shops = useStore($shopsFilter)
   const categories = useStore($categoriesFilter)
+  const minAmount = useStore($filterMinAmount)
+
+  const handleChangeMinAmount = event => {
+    setMinAmountFilter(event.target.value)
+  }
 
   const handleChangeShop = (event) => {
     setShopFilter(event.target.value)
@@ -74,6 +79,13 @@ export const ProductTableFilters = () => {
         <TextField
           label="Поиск по названию"
           onChange={handleChangeTitle}
+        />
+      </FormControl>
+      <FormControl className={classes.formControl}>
+        <TextField
+          label="Минимальное кол-во"
+          onChange={handleChangeMinAmount}
+          value={minAmount}
         />
       </FormControl>
     </>
