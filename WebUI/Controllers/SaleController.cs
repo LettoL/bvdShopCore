@@ -283,14 +283,40 @@ namespace WebUI.Controllers
                     SupplierName = supplyProduct?.Supplier?.Title ?? ""
                 });
                 
-                if (productInfo.ForRealization == true)
+                if (productInfo.ForRealization == true && supplyProduct != null)
                 {
                     supplyProduct.StockAmount += productInfo.Amount;
                     supplyProduct.RealizationAmount += productInfo.Amount;
 
                     var supplier = _supplierService.All().FirstOrDefault(x => x.Id == supplyProduct.SupplierId);
 
+                    if(supplier == null)
+                        throw new Exception("Поставщик не найден");
+                    
                     supplier.Debt -= supplyProduct.ProcurementCost * productInfo.Amount;
+
+                    _supplierService.Update(supplier);
+                }
+                else if (productInfo.ForRealization == true && supplyProduct == null)
+                {
+                    var supplierId = _postgresContext.SalesFromStockOld
+                        .FirstOrDefault(x => x.SaleId == sale.Id)?.SupplierId ?? 0;
+                    
+                    var supplier = _supplierService.All()
+                        .FirstOrDefault(x => x.Id == supplierId);
+                    
+                    if(supplier == null)
+                        throw new Exception("Поставщик не найден");
+
+                    var product = deletedSale.Products
+                        .FirstOrDefault(x => x.ProductId == productInfo.ProductId);
+                    if (product != null)
+                    {
+                        product.SupplierId = supplier.Id;
+                        product.SupplierName = supplier.Title;
+                    }
+
+                    supplier.Debt -= productInfo.ProcurementCost * productInfo.Amount;
 
                     _supplierService.Update(supplier);
                 }
