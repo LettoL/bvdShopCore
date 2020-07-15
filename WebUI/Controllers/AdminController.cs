@@ -1098,7 +1098,8 @@ namespace WebUI.Controllers
                     FinalCost = product.Cost * product.Amount + productAdditionalCost,
                     ProcurementCost = product.Cost,
                     AdditionalCost = productAdditionalCost,
-                    ProductId = product.Id
+                    ProductId = product.Id,
+                    ForRealization = realization
                 });
             }
 
@@ -1284,7 +1285,8 @@ namespace WebUI.Controllers
                     FinalCost = product.Cost * product.Amount + productAdditionalCost,
                     AdditionalCost = productAdditionalCost,
                     ProcurementCost = product.Cost,
-                    ProductId = product.Id
+                    ProductId = product.Id,
+                    ForRealization = realization
                 });
             }
 
