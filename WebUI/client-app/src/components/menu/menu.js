@@ -14,6 +14,11 @@ export const Menu = () => {
         </a>
       </ListItem>
       <ListItem button>
+        <NavLink to={'/admin/product'}>
+          <ListItemText primary={'Товар'}/>
+        </NavLink>
+      </ListItem>
+      <ListItem button>
         <NavLink to={'/admin/import'}>
           <ListItemText primary={'Импорт'}/>
         </NavLink>
