@@ -3,7 +3,7 @@ import {useHttp} from "../../hooks/http.hook";
 import {Constants} from "../../const";
 import {Products} from "../../components/admin-products/products";
 import {useStore} from "effector-react";
-import {$filteredProducts, fetchProductsFx} from "../../models/product/product.store";
+import {$filteredProducts, fetchProductsFx} from "../../models/product-table/product.store";
 
 const API = Constants.API
 

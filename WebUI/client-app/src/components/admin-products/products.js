@@ -14,7 +14,7 @@ import FormControl from "@material-ui/core/FormControl";
 import {
   $filteredProducts,
   fetchProductsFx
-} from "../../models/product/product.store";
+} from "../../models/product-table/product.store";
 import {useStore} from "effector-react";
 import {CSVLink} from "react-csv";
 

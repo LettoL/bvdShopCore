@@ -12,7 +12,7 @@ import {
   setCategoryFilter, setMinAmountFilter,
   setShopFilter,
   setTitleFilter
-} from "../../models/product/product.store";
+} from "../../models/product-table/product.store";
 import {$categoriesFilter, $shopsFilter, fetchCategoriesFx, fetchShopsFx} from "../../models/filter/filter.store";
 
 export const ProductTableFilters = () => {
