@@ -21,6 +21,9 @@ namespace PostgresData
         public DbSet<BookingManagerOld> BookingManagersOld { get; set; }
         public DbSet<SaleFromStockOld> SalesFromStockOld { get; set; }
         public DbSet<SaleOld> SalesOld { get; set; }
+        public DbSet<DeletedSaleInfoOld> DeletedSalesInfoOld { get; set; }
+        public DbSet<SupplyInfo> SuppliesInfo { get; set; }
+        public DbSet<IncompleteProduct> IncompleteProducts { get; set; }
         
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 
