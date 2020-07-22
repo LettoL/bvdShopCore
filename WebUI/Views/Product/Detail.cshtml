@@ -21,6 +21,7 @@
                         <a style="color: #333" class="nav-item nav-link active" id="nav-home-tab" data-toggle="tab" href="#nav-home" role="tab" aria-controls="nav-home" aria-selected="true">Основное</a>
                         <a style="color: #333" class="nav-item nav-link" id="nav-profile-tab" data-toggle="tab" href="#nav-profile" role="tab" aria-controls="nav-profile" aria-selected="false">Дополнительно</a>
                         <a style="color: #333" class="nav-item nav-link" id="nav-detail-tab" data-toggle="tab" href="#nav-detail" role="tab" aria-controls="nav-detail" aria-selected="false">О продукте</a>
+                        <a style="color: #333" class="nav-item nav-link" id="nav-incomplete-tab" data-toggle="tab" href="#nav-incomplete" role="tab" aria-controls="nav-detail" aria-selected="false">Не комплект</a>
                     </div>
                 </nav>
                 <div class="tab-content" id="nav-tabContent">
@@ -74,28 +75,71 @@
                     <div class="tab-pane fade" id="nav-detail" role="tabpanel" aria-labelledby="nav-home-tab">
                         <table class="table table-striped">
                             <thead>
-                                <tr>
-                                    <th>Название</th>
-                                    <th>Количество</th>
-                                    <th>На складе</th>
-                                    <th>Закупочная стоимость</th>
-                                    <th>Дополнительная стоимость</th>
-                                    <th>Общая стоимость</th>
-                                </tr>
+                            <tr>
+                                <th>Название</th>
+                                <th>Количество</th>
+                                <th>На складе</th>
+                                <th>Закупочная стоимость</th>
+                                <th>Дополнительная стоимость</th>
+                                <th>Общая стоимость</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                @foreach(var sp in ViewBag.SupplyProduct)
-                                {
-                                 <tr>
+                            @foreach(var sp in ViewBag.SupplyProduct)
+                            {
+                                <tr>
                                     <td>@sp.Product.Title</td>
                                     <td>@sp.TotalAmount</td>
-                                     <td>@sp.StockAmount</td>
-                                     <td>@sp.ProcurementCost</td>
+                                    <td>@sp.StockAmount</td>
+                                    <td>@sp.ProcurementCost</td>
                                     <td>@sp.AdditionalCost</td>
                                     <td>@sp.FinalCost</td>
                                 </tr>
-                                }
+                            }
                                 
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="tab-pane fade" id="nav-incomplete" role="tabpanel" aria-labelledby="nav-home-tab">
+                        <form action="/Product/AddIncompleteProduct" method="post">
+                            <input type="hidden" value="@Model.Id" name="productId"/>
+                            <label style="font-size: 18px; margin-bottom: 20px; margin-top: 20px">Магазин</label>
+                            <select
+                                style="display: inline-block; width: 250px; margin-right: 50px"
+                                class="form-control"
+                                name="shopId">
+                                <option>Выбрать магазин</option>
+                                @foreach (var shop in ViewBag.Shops)
+                                {
+                                    <option value="@shop.Id">@shop.Title</option>
+                                }
+                            </select>
+                            <label style="font-size: 18px">Количество</label>
+                            <input
+                                name="amount"
+                                style="display: inline-block; width: 250px"
+                                class="form-control"
+                                type="number"/>
+                            <textarea name="comment" style="display: inline-block" class="form-control"></textarea>
+                            <button style="display: inline-block" class="btn btn-submit">Сохранить</button>
+                        </form>
+                        <table class="table table-striped">
+                            <thead>
+                            <tr>
+                                <th>Магазин</th>
+                                <th>Количество</th>
+                                <th>Комментарий</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            @foreach (var incompleteProduct in ViewBag.IncompleteProducts)
+                            {
+                                <tr>
+                                    <td>@incompleteProduct.Shop</td>
+                                    <td>@incompleteProduct.Amount</td>
+                                    <td>@incompleteProduct.Comment</td>
+                                </tr>
+                            }
                             </tbody>
                         </table>
                     </div>

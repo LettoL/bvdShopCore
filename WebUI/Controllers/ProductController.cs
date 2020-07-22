@@ -10,9 +10,14 @@ using Data;
 using Data.Enums;
 using Data.Services;
 using Data.ViewModels;
+using Domain.Entities;
 using Microsoft.AspNetCore.Authorization;
+using PostgresData;
+using WebUI.Dtos;
+using Product = Data.Entities.Product;
 using ProductFilterVM = WebUI.ViewModels.ProductFilterVM;
 using ProductVM = WebUI.ViewModels.ProductVM;
+using User = Data.Entities.User;
 
 namespace WebUI.Controllers
 {
@@ -27,6 +32,7 @@ namespace WebUI.Controllers
         private readonly IBaseObjectService<BookingProduct> _bookingProductService;
         private readonly IProductOperationService _productOperationService;
         private readonly ShopContext _db;
+        private readonly PostgresContext _postgresContext;
 
         public ProductController(IProductService productService,
             IBaseObjectService<Category> categoryService,
@@ -35,7 +41,8 @@ namespace WebUI.Controllers
             IBaseObjectService<User> userService,
             IBaseObjectService<BookingProduct> bookingProductService,
             IProductOperationService productOperationService,
-            ShopContext db)
+            ShopContext db,
+            PostgresContext postgresContext)
         {
             _productService = productService;
             _categoryService = categoryService;
@@ -45,6 +52,7 @@ namespace WebUI.Controllers
             _bookingProductService = bookingProductService;
             _productOperationService = productOperationService;
             _db = db;
+            _postgresContext = postgresContext;
         }
 
         public IActionResult Index()
@@ -182,8 +190,6 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Detail(int id)
         {
-            //TODO: Сделать Join один поставщик - один SupplyProduct на отображение
-            //Для таба с поставщиками
             ViewBag.SupplierProducts = _supplyProductService.All()
                 .Where(x => x.ProductId == id && x.SupplierId != null)
                 .Select(x => new SupplyProduct
@@ -209,7 +215,36 @@ namespace WebUI.Controllers
                     FinalCost = x.FinalCost
                 });
 
+            var shops = _db.Shops.ToList();
+            
+            ViewBag.Shops = shops;
+            
+            ViewBag.IncompleteProducts = _postgresContext.IncompleteProducts
+                .Where(x => x.ProductId == id)
+                .ToList()
+                .Select(x => new IncompleteProductDto()
+                {
+                    Amount = x.Amount,
+                    Comment = x.Comment,
+                    Shop = shops.FirstOrDefault(s => s.Id == x.ShopId)?.Title ?? ""
+                });
+
             return View(ProductService.GetProductDetail(_db, id));
+        }
+
+        [HttpPost]
+        public IActionResult AddIncompleteProduct(int productId, int shopId, int amount, string comment)
+        {
+            _postgresContext.IncompleteProducts
+                .Add(new IncompleteProduct(
+                    productId,
+                    amount,
+                    shopId,
+                    comment));
+
+            _postgresContext.SaveChanges();
+            
+            return RedirectToAction("Detail", new { id = productId});
         }
 
         [HttpPost]
