@@ -63,7 +63,7 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            var result = ProductService.GetProductsInStock(_db);
+            var result = ProductService.GetProductsInStock(_db, _postgresContext);
 
             return View(result);
         }

@@ -4,6 +4,7 @@ using Data.Entities;
 using Data.Enums;
 using Data.ViewModels;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 
 namespace Data.Services
 {
@@ -52,7 +53,7 @@ namespace Data.Services
             return result;
         }
 
-        public static ICollection<ProductInStockVM> GetProductsInStock(ShopContext db)
+        public static ICollection<ProductInStockVM> GetProductsInStock(ShopContext db, PostgresContext postgresContext)
         {
             var bookedProducts = db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
@@ -62,6 +63,20 @@ namespace Data.Services
                     Amount = x.Amount
                 })
                 .ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
+
+            var incompleteProducts = postgresContext.IncompleteProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                }).ToList()
                 .GroupBy(x => x.ProductId)
                 .Select(x => new
                 {
@@ -94,7 +109,10 @@ namespace Data.Services
                     Shop = x.FirstOrDefault().Shop,
                     Category = x.FirstOrDefault().Category,
                     Code = x.FirstOrDefault().Code,
-                    BookedCount = bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
+                    BookedCount = bookedProducts
+                        .FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0,
+                    IncompleteCount = incompleteProducts
+                        .FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0
                 })
                 .ToList();
 

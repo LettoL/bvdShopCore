@@ -6,6 +6,7 @@
 
     <ItemGroup>
       <ProjectReference Include="..\Base\Base.csproj" />
+      <ProjectReference Include="..\PostgresData\PostgresData.csproj" />
     </ItemGroup>
 
     <ItemGroup>

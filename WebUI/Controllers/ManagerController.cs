@@ -648,7 +648,7 @@ namespace WebUI.Controllers
             ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
 
-            var result = ProductService.GetProductsInStock(_db);
+            var result = ProductService.GetProductsInStock(_db, _postgresContext);
 
             return View(result);
         }

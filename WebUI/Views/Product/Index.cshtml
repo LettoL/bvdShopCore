@@ -53,6 +53,7 @@
                             <th>Магазин</th>
                             <th>Категория</th>
                             <th>Забронировано</th>
+                            <th>Некомплектных</th>
                             <th>Действие</th>
                         </tr>
                     </thead>
@@ -67,6 +68,7 @@
                                     <td>@p.Shop.Title</td>
                                     <td>@p.Category.Title</td>
                                     <td>@p.BookedCount</td>
+                                    <td>@p.IncompleteCount</td>
                                     <td>
                                         <a href="/Product/Detail/@p.Id" class="btn btn-dark">
                                             <i class="fa fa-arrow-right" aria-hidden="true"></i>

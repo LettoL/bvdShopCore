@@ -52,6 +52,7 @@
                                 <th>Цена</th>
                                 <th>Магазин</th>
                                 <th>Забронировано</th>
+                                <th>Некомплектных</th>
                                 <th>Категория</th>
                                 <th>Действие</th>
                             </tr>
@@ -66,11 +67,15 @@
                                     <td contenteditable>@p.Cost</td>
                                     <td>@p.Shop.Title</td>
                                     <td>@p.BookedCount</td>
+                                    <td>@p.IncompleteCount</td>
                                     <td>@p.Category.Title</td>
                                     <td>
                                         <button id="updatePrice" class="btn btn-dark">
-                                                <i class="fa fa fa-check" aria-hidden="true"></i>
+                                            <i class="fa fa fa-check" aria-hidden="true"></i>
                                         </button>
+                                        <a href="/Product/Detail/@p.Id" class="btn btn-dark">
+                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                        </a>
                                     </td>
                                 </tr>
                             }

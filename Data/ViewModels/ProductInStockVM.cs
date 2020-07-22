@@ -9,6 +9,7 @@ namespace Data.ViewModels
         public string Code { get; set; }
         public int Amount { get; set; }
         public int BookedCount { get; set; }
+        public int IncompleteCount { get; set; }
         public decimal ProcurementCost { get; set; }
         public decimal AdditionalCost { get; set; }
         public decimal FinalCost { get; set; }
