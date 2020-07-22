@@ -180,7 +180,8 @@ namespace Data.Services
             return result;
         }
 
-        public static ICollection<ProductInStockVM> GetProductsInStockFilter(ShopContext db, ProductFilterVM filter)
+        public static ICollection<ProductInStockVM> GetProductsInStockFilter(
+            ShopContext db, PostgresContext postgresContext, ProductFilterVM filter)
         {
             var bookingProductsAmount = db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
@@ -191,6 +192,20 @@ namespace Data.Services
                     ProductId = x.ProductId,
                     Amount = x.Amount
                 }).ToList();
+            
+            var incompleteProducts = postgresContext.IncompleteProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                }).ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
 
             var productsInStock = db.SupplyProducts
                 .Where(x => filter.CategoryId == 0 || x.Product.Category.Id == filter.CategoryId)
@@ -234,6 +249,9 @@ namespace Data.Services
                     Category = x.Category,
                     Code = x.Code,
                     BookedCount = bookingProductsAmount
+                        .Where(z => z.ProductId == x.Id)
+                        .Sum(z => z.Amount),
+                    IncompleteCount = incompleteProducts
                         .Where(z => z.ProductId == x.Id)
                         .Sum(z => z.Amount)
                 }).ToList();

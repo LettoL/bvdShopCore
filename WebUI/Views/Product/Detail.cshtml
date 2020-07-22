@@ -1,7 +1,15 @@
-﻿
+﻿@using Data.Enums
+
 @{
     ViewData["Title"] = "Detail";
-    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    if (ViewBag.UserRole == Role.Administrator)
+    {
+        Layout = "~/Views/Shared/AdminLayout.cshtml";
+    }
+    else
+    {
+        Layout = "~/Views/Shared/ManagerLayout.cshtml";
+    }
 }
 
 

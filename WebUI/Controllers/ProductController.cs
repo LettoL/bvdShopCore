@@ -101,6 +101,20 @@ namespace WebUI.Controllers
                     Amount = x.Sum(z => z.Amount)
                 })
                 .ToList();
+            
+            var incompleteProducts = _postgresContext.IncompleteProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                }).ToList()
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
+                })
+                .ToList();
 
             var productsInStock = _db.SupplyProducts
                 .Where(x => x.Product.ShopId == shopId)
@@ -121,7 +135,10 @@ namespace WebUI.Controllers
                 {
                     Id = x.Key,
                     Amount = x.Sum(z => z.StockAmount)
-                             - (bookedProducts.FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
+                             - (bookedProducts
+                                 .FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0)
+                             - (incompleteProducts
+                                 .FirstOrDefault(z => z.ProductId == x.Key)?.Amount ?? 0),
                     Title = x.FirstOrDefault().Title,
                     Cost = x.FirstOrDefault().Cost,
                     Shop = x.FirstOrDefault().Shop,
@@ -190,6 +207,9 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Detail(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            ViewBag.UserRole = _userService.All().First(u => u.Login == userName).Role;
+            
             ViewBag.SupplierProducts = _supplyProductService.All()
                 .Where(x => x.ProductId == id && x.SupplierId != null)
                 .Select(x => new SupplyProduct
@@ -281,7 +301,7 @@ namespace WebUI.Controllers
             
             var filter = productFilterVm.ProductFiltrationModel;
 
-            var result = ProductService.GetProductsInStockFilter(_db,
+            var result = ProductService.GetProductsInStockFilter(_db, _postgresContext,
                 new Data.ViewModels.ProductFilterVM()
                 {
                     All = filter.all,
