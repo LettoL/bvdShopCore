@@ -1504,7 +1504,10 @@ namespace WebUI.Controllers
 
         public IActionResult SalesByCategories()
         {
-            var fromDate = new DateTime(DateTime.Now.AddHours(3).Year, DateTime.Now.AddHours(3).Month, 1);
+            var fromDate = DateTime.Parse(new DateTime(
+                DateTime.Now.AddHours(3).Year,
+                DateTime.Now.AddHours(3).Month,
+                1).ToString(), CultureInfo.CreateSpecificCulture("ru-RU"));
 
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {
@@ -1745,8 +1748,8 @@ namespace WebUI.Controllers
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
 
-            ViewBag.fromDate = fromDate;// != null ? fromDate : null;
-            ViewBag.forDate = forDate;// != null ? forDate : null;
+            ViewBag.fromDate = fromDate != null ? fromDate : null;
+            ViewBag.forDate = forDate != null ? forDate : null;
             ViewBag.ManagerId = managerId;
 
             return PartialView(result);
