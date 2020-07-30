@@ -1504,10 +1504,10 @@ namespace WebUI.Controllers
 
         public IActionResult SalesByCategories()
         {
-            var fromDate = DateTime.Parse(new DateTime(
+            var fromDate = new DateTime(
                 DateTime.Now.AddHours(3).Year,
                 DateTime.Now.AddHours(3).Month,
-                1).ToString(), CultureInfo.CreateSpecificCulture("ru-RU"));
+                1);
 
             var filtrationModelForMoscow = new SaleFiltrationModel()
             {
@@ -1596,7 +1596,7 @@ namespace WebUI.Controllers
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
 
-            ViewBag.fromDate = fromDate.ToString();
+            ViewBag.fromDate = fromDate.ToString("dd.MM.yyyy");
 
             ViewBag.Managers = _postgresContext.Managers
                 .Select(x => new ManagerDto()
@@ -1807,30 +1807,36 @@ namespace WebUI.Controllers
             if (type == SalesByCategoriesFilterType.Partner)
                 sales = sales.Where(x => x.PartnerId != null && x.ForRussian == false);
 
-            sales = sales.Include(x => x.SalesProducts)
+            sales = sales
+                .Include(x => x.SalesProducts).ThenInclude(x => x.Product)
+                .Include(x => x.Partner)
                 .Where(x => x.SalesProducts.Any(z => z.Product.CategoryId == categoryId));
+
+            var infoMoneys = _db.InfoMonies.ToList();
 
             var result = sales.Select(x => new SaleListVM()
                 {
                     Id = x.Id,
                     Date = x.Date.ToString("dd.MM.yyyy"),
-                    Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
                     ShopTitle = x.Shop.Title,
                     PrimeCost = x.PrimeCost,
-                    ProductTitle = _saleInfoService.FirstProductTitle(x.Id),
+                    BuyerTitle = x.PartnerId != null
+                        ? x.Partner.Title
+                        : "Обычный покупатель",
+                    SalesProducts = x.SalesProducts,
                 })
                 .ToList()
                 .Select(x => new SaleListVM()
                 {
                     Id = x.Id,
                     Date = x.Date,
-                    Sum = x.Sum,
+                    Sum = infoMoneys.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
                     PrimeCost = x.PrimeCost,
                     ShopTitle = x.ShopTitle,
-                    HasAdditionalProduct = _saleInfoService.HasAdditionalProduct(x.Id),
-                    BuyerTitle = _saleInfoService.BuyerTitle(x.Id),
-                    ProductTitle = x.ProductTitle,
-                    PaymentType = _saleInfoService.PaymentType(x.Id),
+                    HasAdditionalProduct = x.SalesProducts.Any(x => x.Additional),
+                    BuyerTitle = x.BuyerTitle,
+                    ProductTitle = x.SalesProducts.FirstOrDefault()?.Product.Title ?? "",
+                    PaymentType = _saleInfoService.PaymentType(x.Id, infoMoneys),
                 }).OrderByDescending(x => x.Id)
                 .ToList();
             

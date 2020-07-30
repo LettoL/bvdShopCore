@@ -76,6 +76,8 @@ namespace Data.Services.Concrete
 
         public IQueryable<SaleListVM> SaleList(ShopContext db)
         {
+            var infoMoneys = db.InfoMonies.ToList();
+            
             var query = db.Sales
                 .Where(x => x.Payment)
                 .Include(x => x.SalesProducts).ThenInclude(x => x.Product)
@@ -106,7 +108,7 @@ namespace Data.Services.Concrete
                     HasAdditionalProduct = x.HasAdditionalProduct,
                     BuyerTitle = x.BuyerTitle,
                     ProductTitle = x.ProductTitle,
-                    PaymentType = _saleInfoService.PaymentType(x.Id),
+                    PaymentType = _saleInfoService.PaymentType(x.Id, infoMoneys),
                 }).AsQueryable();
 
             return query;

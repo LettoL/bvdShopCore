@@ -93,12 +93,14 @@ namespace WebUI.Controllers
 
             ViewBag.Role = user;
 
+            var infoMoneys = _db.InfoMonies.ToList();
+
             Sale sale = _saleService.All().Select(x => new Sale()
             {
                 Id = x.Id,
                 Title = x.Title,
                 Date = x.Date,
-                Sum = _infoMoneyService.All().Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                //Sum = infoMoneys.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
                 Discount = x.Discount,
                 Margin = x.Margin,
                 Partner = x.Partner,
@@ -106,6 +108,8 @@ namespace WebUI.Controllers
                 Shop = x.Shop,
                 SaleType = x.SaleType
             }).First(p => p.Id == id);
+            sale.Sum = infoMoneys.Where(z => z.SaleId == sale.Id)
+                .Sum(z => z.Sum);
           
             ViewBag.SalesProducts = _saleProductService.All().Select(sp => new SaleProduct
             {
@@ -116,7 +120,7 @@ namespace WebUI.Controllers
                 Cost = sp.Cost
             }).Where(sp => sp.SaleId == sale.Id).ToList();
 
-            ViewBag.PaymentType = _saleInfoService.PaymentType(sale.Id);
+            ViewBag.PaymentType = _saleInfoService.PaymentType(sale.Id, infoMoneys);
 
             var scores = _infoMoneyService.All().Where(x => x.SaleId == id);
 

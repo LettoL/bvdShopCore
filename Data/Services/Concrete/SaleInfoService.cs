@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System.Collections.Generic;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Data.Enums;
@@ -50,9 +51,9 @@ namespace Data.Services.Concrete
             return db.SalesProducts.Where(x => x.SaleId == saleId);
         }
 
-        public PaymentType PaymentType(int id)
+        public PaymentType PaymentType(int id, IEnumerable<InfoMoney> infoMonies)
         {
-            var infoMonies = _infoMoneyService.All().Where(x => x.SaleId == id);
+            infoMonies = infoMonies.Where(x => x.SaleId == id);
 
             bool cash = infoMonies.Any(x => x.PaymentType == Enums.PaymentType.Cash);
             bool cashless = infoMonies.Any(x => x.PaymentType == Enums.PaymentType.Cashless);

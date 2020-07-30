@@ -1,4 +1,6 @@
-﻿using Data.Enums;
+﻿using System.Collections.Generic;
+using Data.Entities;
+using Data.Enums;
 
 namespace Data.ViewModels
 {
@@ -19,5 +21,6 @@ namespace Data.ViewModels
         public decimal PrimeCost { get; set; }
         public decimal Rest { get; set; }
         public decimal Total { get; set; }
+        public ICollection<SaleProduct> SalesProducts { get; set; } = new HashSet<SaleProduct>();
     }
 }
