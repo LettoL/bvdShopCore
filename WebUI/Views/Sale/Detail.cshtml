@@ -48,6 +48,7 @@
                                         <th>Скидка</th>
                                         <th>Платеж</th>
                                         <th>Магазин</th>
+                                        <th>Менеджер</th>
                                         <th>Партнер</th>
                                         <th>Тип продажи</th>
                                     </tr>
@@ -78,6 +79,7 @@
                                             <td>Смешанный</td>
                                         }
                                         <td>@Model.Shop.Title</td>
+                                        <td>@ViewBag.Manager</td>
                                         <td>@Model.Partner?.Title</td>
 
                                          @if(Model.SaleType.ToString() == "Sale")

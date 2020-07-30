@@ -140,6 +140,14 @@ namespace WebUI.Controllers
                     })
             };
 
+            var managerId = _postgresContext.SaleManagersOld
+                .FirstOrDefault(x => x.SaleId == id)?.ManagerId;
+            if (managerId != null)
+                ViewBag.Manager = _postgresContext.Managers
+                                      .FirstOrDefault(x => x.Id == managerId)?.Name ??
+                                  "Менеджер не указан или не найден";
+            else
+                ViewBag.Manager = "Менеджер не указан или не найден";
 
             return View(sale);
         }
