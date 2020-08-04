@@ -88,12 +88,23 @@ namespace Data.Services.Concrete
                 _moneyOperationService.SalePayment(db, obj.CashSum, obj.CashlessSum,
                     sale, shop.Id, obj.MoneyWorkerId);
             else
-                db.SaleInformations.Add(new SaleInformation()
-                {
-                    MoneyWorkerForIncomeId = shop.Id == 0 ? null : obj.MoneyWorkerId,
-                    SaleId = sale.Id,
-                    SaleType = SaleType.DefferedSale
-                });
+            {
+                if(obj.PaymentType == PaymentType.Cash)
+                    db.SaleInformations.Add(new SaleInformation()
+                    {
+                        MoneyWorkerForIncomeId = shop.Id,
+                        SaleId = sale.Id,
+                        SaleType = SaleType.DefferedSale
+                    });
+                else
+                    db.SaleInformations.Add(new SaleInformation()
+                    {
+                        MoneyWorkerForIncomeId = shop.Id == 0 ? null : obj.MoneyWorkerId,
+                        SaleId = sale.Id,
+                        SaleType = SaleType.DefferedSale
+                    });
+            }
+                
 
             decimal primeCost = 0;
 
