@@ -138,6 +138,10 @@ namespace WebUI.Controllers
 
         public async Task<IActionResult> Managers()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var saleManagers = await _postgresContext.SaleManagersOld.ToListAsync();
 
             var salesId = saleManagers.Select(x => x.SaleId).ToList();
@@ -199,6 +203,10 @@ namespace WebUI.Controllers
         
         public IActionResult Index()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var saleProductsToday = new List<SaleProductsTodayVM>();
 
             foreach (var shop in _db.Shops.ToList())
@@ -619,6 +627,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult SupplyProduct()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.Products = _productService.All();
             ViewBag.Suppliers = _supplierService.All();
             ViewBag.Shops = _shopService.All();
@@ -638,6 +650,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult WriteoffProduct()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.Shops = _shopService.All();
 
             return View();
@@ -654,6 +670,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult SupplierRepayment()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View(_supplierService.All().Where(s => s.Debt != 0).Select(x => new Supplier
             {
                 Id = x.Id,
@@ -687,6 +707,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Encashment()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View(_shopService.All().ToList().Select(s => new ShopVM
             {
                 Id = s.Id,
@@ -712,6 +736,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult MoneyHistory()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var userName = HttpContext.User.Identity.Name;
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Shops = _shopService.All();
@@ -741,6 +769,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult ProductHistory()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.Shops = _shopService.All();
 
             return View(_infoProductService.All().Select(ip => new InfoProduct()
@@ -780,6 +812,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult BookingList()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View(_bookingService.All()
                 .OrderByDescending(x => x.Id)
                 .Select(x => new BookingListVM()
@@ -798,6 +834,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult BookingDetail(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.BookingProducts = _bookingProductService.All()
                 .Where(bp => bp.BookingId == id)
                 .Select(bp => new BookingDetailVM()
@@ -851,6 +891,10 @@ namespace WebUI.Controllers
 
         public IActionResult ChangeProducts()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.Shops = _shopService.All();
 
             return View();
@@ -934,6 +978,10 @@ namespace WebUI.Controllers
 
         public IActionResult Expense()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.CategoryExpense = _expenseCategoryService.All();
 
             return View();
@@ -977,6 +1025,10 @@ namespace WebUI.Controllers
 
         public IActionResult MoneyTransfer()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View();
         }
 
@@ -991,6 +1043,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult CloseSale(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             Sale sale = _saleService.All().FirstOrDefault(s => s.Id == id);
 
             ViewBag.Suppliers = _supplierService.All();
@@ -1120,6 +1176,9 @@ namespace WebUI.Controllers
         public IActionResult AdditionalProducts()
         {
             var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Shops = _shopService.All();
 
@@ -1190,6 +1249,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult Replenishment()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View();
         }
 
@@ -1213,6 +1276,10 @@ namespace WebUI.Controllers
 
         public IActionResult CloseDefferedSale(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             Sale sale = _saleService.All().FirstOrDefault(s => s.Id == id);
 
             ViewBag.Suppliers = _supplierService.All();
@@ -1320,6 +1387,10 @@ namespace WebUI.Controllers
         public IActionResult ExpenseList()
         {
             var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
+            var userName = HttpContext.User.Identity.Name;
             var expenses = _expenseService
                     .All()
                     .Include(x => x.InfoMoney)
@@ -1389,6 +1460,10 @@ namespace WebUI.Controllers
 
         public IActionResult ExportFile()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             return View(_shopService.All());
         }
 
@@ -1416,6 +1491,10 @@ namespace WebUI.Controllers
 
         public IActionResult MoneyWorkerBalanceInfo()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var moneyWorkers = _moneyWorkerService.All();
             var today = DateTime.Now.AddHours(3).Date;
             var result = new List<MoneyWorkerInfoVM>();
@@ -1462,6 +1541,10 @@ namespace WebUI.Controllers
 
         public IActionResult MoneyHistoryDetail(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var infoMoney = _infoMoneyService.Get(id);
 
             switch (infoMoney.MoneyOperationType)
@@ -1492,6 +1575,10 @@ namespace WebUI.Controllers
 
         public IActionResult MoneyTransferDetail(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var moneyTransfer = _moneyTransferService.All()
                 .Include(x => x.PrevInfoMoney)
                 .Include(x => x.NextInfoMoney)
@@ -1504,6 +1591,10 @@ namespace WebUI.Controllers
 
         public IActionResult SalesByCategories()
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             var fromDate = new DateTime(
                 DateTime.Now.AddHours(3).Year,
                 DateTime.Now.AddHours(3).Month,
@@ -1759,6 +1850,10 @@ namespace WebUI.Controllers
         public IActionResult SalesByCategoriesDetail(string fromDate, string forDate,
             SalesByCategoriesFilterType type, int categoryId, int managerId)
         {
+            var userName = HttpContext.User.Identity.Name;
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+            
             ViewBag.CategoryTitle = _categoryService.Get(categoryId).Title;
 
             DateTime? fromDateFilter = null;

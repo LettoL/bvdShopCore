@@ -79,6 +79,9 @@ namespace WebUI.Controllers
             var userName = HttpContext.User.Identity.Name;
             ViewBag.UserId = _userService.All().First(u => u.Login == userName).Id;
 
+            if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
+                return RedirectToAction("Login", "Account");
+                
             ViewBag.Partners = _partnerService.All();
             ViewBag.Shops = _shopService.All();
 
