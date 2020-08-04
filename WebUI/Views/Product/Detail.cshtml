@@ -155,7 +155,14 @@
             </div>
             </div>
             
-            <a href="/Product/Index" class="btn btn-dark button-back">Назад</a>
+            @if (ViewBag.UserRole == Role.Administrator)
+            {    
+                <a href="/Product/Index" class="btn btn-dark button-back">Назад</a>
+            }
+            else
+            {
+                <a href="/Manager/Products" class="btn btn-dark button-black">Назад</a>
+            }
         </div>
         
     </div>
