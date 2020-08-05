@@ -740,7 +740,6 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            var userName = HttpContext.User.Identity.Name;
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Shops = _shopService.All();
             ViewBag.Scores = _db.MoneyWorkers;
@@ -1390,7 +1389,6 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            var userName = HttpContext.User.Identity.Name;
             var expenses = _expenseService
                     .All()
                     .Include(x => x.InfoMoney)
