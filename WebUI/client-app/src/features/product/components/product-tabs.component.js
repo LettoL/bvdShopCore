@@ -47,10 +47,10 @@ export const ProductTabs = () => {
         <Tab label={'Two'}/>
       </Tabs>
       <TabPanel value={value} index={0}>
-          <ProductSupplies></ProductSupplies>
+          <ProductSupplies />
       </TabPanel>
       <TabPanel value={value} index={1}>
-          <ProductsUnderstaffed></ProductsUnderstaffed>
+          <ProductsUnderstaffed />
       </TabPanel>
     </Paper>
   )
