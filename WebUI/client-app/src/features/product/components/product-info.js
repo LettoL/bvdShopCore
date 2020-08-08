@@ -4,7 +4,7 @@ import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
 import {makeStyles} from '@material-ui/core/styles'
 import Divider from '@material-ui/core/Divider'
-import { productInfo, fetchProductInfoFx } from '../../../store/product-info-store'
+import { $currentProduct, fetchProductInfoFx } from '../models/product-info-store'
 import { useStore } from 'effector-react'
 
 export const ProductInfo = () => {
@@ -13,7 +13,7 @@ export const ProductInfo = () => {
     fetchProductInfoFx()
   }, [])
   
-  const product = useStore(productInfo)
+  const product = useStore($currentProduct)
 
   const classes = useStyles()
 

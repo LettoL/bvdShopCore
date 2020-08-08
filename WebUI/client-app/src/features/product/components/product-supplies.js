@@ -9,11 +9,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { useStore } from 'effector-react';
-import { productInfo } from '../../../store/product-info-store';
+import { $currentProduct } from '../models/product-info-store';
 
 export const ProductSupplies = () => {
 
-  const supplies = useStore(productInfo).supplies || [];
+  const supplies = useStore($currentProduct).supplies || [];
 
   return (
     <TableContainer component={Paper}>
@@ -22,6 +22,8 @@ export const ProductSupplies = () => {
           <TableRow>
             <TableCell>Название</TableCell>
             <TableCell align="right">Количество</TableCell>
+            <TableCell align="right">Поставщик</TableCell>
+            <TableCell align="right">Магазин</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -31,6 +33,8 @@ export const ProductSupplies = () => {
                 {row.title}
               </TableCell>
               <TableCell align="right">{row.amount}</TableCell>
+              <TableCell align="right">{row.supplierTitle}</TableCell>
+              <TableCell align="right">{row.shopTitle}</TableCell>
             </TableRow>
           ))}
         </TableBody>

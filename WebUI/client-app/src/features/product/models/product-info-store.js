@@ -1,4 +1,4 @@
-import {Constants} from "../const";
+import {Constants} from "../../../const";
 import {createEffect, createStore} from "effector";
 
 const API_URL = Constants.API
@@ -16,8 +16,8 @@ export const fetchProductInfoFx = createEffect({
                 code: 'Код',
                 price: 150,
                 category: 'категория',
-                supplies: [{ id: 1, title: 'test', amount: 1 }],
-                understaffed: [{ id: 2, title: 'test'}]
+                supplies: [{ id: 1, title: 'test', amount: 1, supplierId: 1, supplierTitle: 'Поставщик', shopId: 1, shopTitle: 'Магазин' }],
+                understaffed: [{ id: 2, title: 'test', shopId: 1, shopTitle: 'Магазин'}]
             })
         }, 100)
     })
@@ -26,5 +26,5 @@ export const fetchProductInfoFx = createEffect({
   }
 })
 
-export const productInfo = createStore({})
+export const $currentProduct = createStore({})
   .on(fetchProductInfoFx.doneData, (state, productInfo) => productInfo)

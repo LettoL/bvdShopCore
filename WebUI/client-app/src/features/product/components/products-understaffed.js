@@ -8,11 +8,11 @@ import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
 import { useStore } from 'effector-react';
-import { productInfo } from '../../../store/product-info-store';
+import { $currentProduct } from '../models/product-info-store';
 
 export const ProductsUnderstaffed = () => {
 
-  const understaffed = useStore(productInfo).understaffed || [];
+  const understaffed = useStore($currentProduct).understaffed || [];
 
   return (
     <TableContainer component={Paper}>
@@ -21,6 +21,7 @@ export const ProductsUnderstaffed = () => {
           <TableRow>
             <TableCell>Id</TableCell>
             <TableCell align="right">Название</TableCell>
+            <TableCell align="right">Магазин</TableCell>
           </TableRow>
         </TableHead>
         <TableBody>
@@ -30,6 +31,7 @@ export const ProductsUnderstaffed = () => {
                 {row.id}
               </TableCell>
               <TableCell align="right">{row.title}</TableCell>
+              <TableCell align="right">{row.shopTitle}</TableCell>
             </TableRow>
           ))}
         </TableBody>
