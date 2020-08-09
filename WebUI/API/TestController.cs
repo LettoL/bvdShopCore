@@ -3,7 +3,6 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
 using Data;
-using Handlers.QueryHandler;
 using Microsoft.AspNetCore.Mvc;
 using PostgresData;
 
@@ -102,15 +101,6 @@ namespace WebUI.API
             _shopContext.SaveChanges();*/
             
             return Ok("lalal");
-        }
-
-        [HttpGet]
-        [Route("GetAllProducts")]
-        public async Task<IActionResult> GetAllProducts()
-        {
-            var result = await GetProductHandler.Handle(_db);
-
-            return Ok(result);
         }
     }
 }

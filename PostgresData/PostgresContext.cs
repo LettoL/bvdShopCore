@@ -13,7 +13,6 @@ namespace PostgresData
         public DbSet<Shop> Shops { get; set; }
         public DbSet<User> Users { get; set; }
         public DbSet<Supplier> Suppliers { get; set; }
-        public DbSet<SuppliedProduct> SuppliedProducts { get; set; }
         public DbSet<RepaidDebtOld> RepaidDebtsOld { get; set; }
         public DbSet<Manager> Managers { get; set; }
         

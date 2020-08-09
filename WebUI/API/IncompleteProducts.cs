@@ -34,7 +34,7 @@ namespace WebUI.API
             }
         }
 
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateIncompleteProduct command)
         {
             try
@@ -54,6 +54,6 @@ namespace WebUI.API
             {
                 return BadRequest(e.Message);
             }
-        }
+        }*/
     }
 }

@@ -10,6 +10,5 @@ namespace Domain.Commands
         public int SupplierId { get; set; }
         public int Amount { get; set; }
         public decimal ProcurementCost { get; set; }
-        public SuppliedType Type { get; set; }
     }
 }

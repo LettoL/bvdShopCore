@@ -52,7 +52,7 @@ namespace WebUI.API
             return Ok(result);
         }
 
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> Post([FromBody] Commands.SupplyProduct command)
         {
             decimal procurementCost = 0;
@@ -72,7 +72,7 @@ namespace WebUI.API
             var result = await SupplyProductHandler.Handle(supplyProduct, _postgresContext);
             
             return Ok(result);
-        }
+        }*/
 
         [HttpPost]
         [Route("import")]
