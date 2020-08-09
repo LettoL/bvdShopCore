@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Domain.Commands;
 using Domain.Entities;
-using Handlers.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PostgresData;

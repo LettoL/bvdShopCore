@@ -1,4 +1,4 @@
-﻿namespace Handlers.Commands
+﻿namespace Domain.Commands
 {
     public class ShopCreate
     {

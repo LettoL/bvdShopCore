@@ -1,8 +1,7 @@
 ﻿using System;
-using Domain.Entities;
-using Domain.Entities.Supplies;
+using Domain.Entities.Products;
 
-namespace Handlers.Commands
+namespace Domain.Commands
 {
     public class SupplyProduct
     {
@@ -12,11 +11,5 @@ namespace Handlers.Commands
         public int Amount { get; set; }
         public decimal ProcurementCost { get; set; }
         public SuppliedType Type { get; set; }
-
-        public SuppliedProduct CreateSuppliedProduct(DateTime currentDate)
-        {
-            return new SuppliedProduct(
-                currentDate, Amount, ProcurementCost, ShopId, ProductId, Type, SupplierId);
-        }
     }
 }

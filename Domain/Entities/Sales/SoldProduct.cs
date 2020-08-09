@@ -1,4 +1,6 @@
-﻿using Domain.Entities.Supplies;
+﻿using Domain.Commands;
+using Domain.Entities.Products;
+using Domain.Entities.Supplies;
 
 namespace Domain.Entities.Sales
 {
@@ -23,5 +25,10 @@ namespace Domain.Entities.Sales
 
         public SoldProduct(int productId, Sale sale, int amount) =>
             (ProductId, Sale, Amount) = (productId, sale, amount);
+
+        public static SoldProduct Create(SoldProductCreate command, Sale sale)
+        {
+            return new SoldProduct(command.ProductId, sale, command.Amount);
+        }
     }
 }

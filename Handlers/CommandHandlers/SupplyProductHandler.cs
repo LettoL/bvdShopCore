@@ -1,23 +1,23 @@
 ﻿using System;
 using System.Threading.Tasks;
-using Handlers.Commands;
+using Domain.Commands;
+using Domain.Entities.Products;
 using PostgresData;
 
 namespace Handlers.CommandHandlers
 {
     public static class SupplyProductHandler
     {
-        public static async Task<int> Handle(this SupplyProduct command, PostgresContext db)
+        public static async Task<SuppliedProduct> Handle(this SupplyProduct command, PostgresContext db)
         {
             var currentDate = DateTime.UtcNow;
-            
-            var suppliedProduct = command.CreateSuppliedProduct(currentDate);
 
-            var suppliedProductSave = await db.SuppliedProducts.AddAsync(suppliedProduct);
+            var createTask = await db.SuppliedProducts
+                .AddAsync(SuppliedProduct.Create(command, currentDate));
 
             await db.SaveChangesAsync();
             
-            return suppliedProductSave.Entity.Id;
+            return createTask.Entity;
         }
     }
 }

@@ -1107,16 +1107,17 @@ namespace WebUI.Controllers
             if (saleFromStockInfo != null)
             {
                 ViewBag.SalesProduct = saleFromStockInfo.Products
-                    .Join(saleProducts,
-                        sp => sp.ProductId,
-                        p => p.ProductId,
-                        (sp, p) => new SaleProductItem()
-                        {
-                            Id = p.ProductId,
-                            Title = p.Product.Title,
-                            Amount = p.Amount,
-                            ProcurementCost = sp.ProcurementCost
-                        }).ToList();
+                    .Select(x => new SaleProductItem()
+                    {
+                        Id = x.ProductId,
+                        Title = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Product?.Title ?? "",
+                        Amount = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Amount ?? 0,
+                        ProcurementCost = x.ProcurementCost
+                    }).ToList();
             
                 var selectedSupplierId = saleFromStockInfo.SupplierId;
 

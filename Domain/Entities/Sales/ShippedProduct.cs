@@ -1,4 +1,6 @@
-﻿namespace Domain.Entities.Sales
+﻿using Domain.Entities.Products;
+
+namespace Domain.Entities.Sales
 {
     public class ShippedProduct : Entity
     {

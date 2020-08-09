@@ -1,4 +1,5 @@
 ﻿using Domain.Entities;
+using Domain.Entities.Products;
 using Domain.Entities.Supplies;
 
 namespace WebUI.Commands
