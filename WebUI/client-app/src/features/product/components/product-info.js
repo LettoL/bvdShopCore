@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react'
+import React, { useEffect, createRef } from 'react'
 import Card from '@material-ui/core/Card'
 import CardContent from '@material-ui/core/CardContent'
 import Typography from '@material-ui/core/Typography'
@@ -6,11 +6,16 @@ import {makeStyles} from '@material-ui/core/styles'
 import Divider from '@material-ui/core/Divider'
 import { $currentProduct, fetchProductInfoFx } from '../models/product-info-store'
 import { useStore } from 'effector-react'
+import { fetchShopsFx } from '../../../store/shop-store'
 
 export const ProductInfo = () => {
 
   useEffect(() => {
     fetchProductInfoFx()
+  }, [])
+
+  useEffect(() => {
+    fetchShopsFx()
   }, [])
   
   const product = useStore($currentProduct)
