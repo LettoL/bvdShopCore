@@ -50,6 +50,7 @@
                                         <th>Магазин</th>
                                         <th>Менеджер</th>
                                         <th>Партнер</th>
+                                        <th>По РФ</th>
                                         <th>Тип продажи</th>
                                     </tr>
                                 </thead>
@@ -81,6 +82,14 @@
                                         <td>@Model.Shop.Title</td>
                                         <td>@ViewBag.Manager</td>
                                         <td>@Model.Partner?.Title</td>
+                                        @if (Model.ForRussian)
+                                        {
+                                            <td>Да</td>
+                                        }
+                                        else
+                                        {
+                                            <td>Нет</td>
+                                        }
 
                                          @if(Model.SaleType.ToString() == "Sale")
                                             {
