@@ -12,6 +12,7 @@ using Data.Entities;
 using Data.Enums;
 using Data.FiltrationModels;
 using Data.ModernServices.Abstract;
+using Data.Services;
 using Data.Services.Abstract;
 using Data.ViewModels;
 using Domain.Entities;
@@ -28,6 +29,7 @@ using WebUI.QueriesHandlers;
 using WebUI.ViewModels;
 using Manager = Domain.Entities.Sales.Manager;
 using Product = Data.Entities.Product;
+using ProductFilterVM = Data.ViewModels.ProductFilterVM;
 using ProductVM = WebUI.ViewModels.ProductVM;
 using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
@@ -862,12 +864,18 @@ namespace WebUI.Controllers
         [Route("/Admin/GetProductsByShop/{id}")]
         public async Task<IActionResult> GetProductsByShop(int id)
         {
-            var products = _db.Products
+            /*var products = _db.Products
                 .Where(x => x.ShopId == id)
                 .ToList()
                 .GroupBy(x => x.Title)
                 .Select(x => x.FirstOrDefault())
-                .ToList();
+                .ToList();*/
+
+            var products = ProductService.GetProductsInStockFilter(_db, _postgresContext,
+                new Data.ViewModels.ProductFilterVM()
+                {
+                    ShopId = id,
+                });
 
             return Ok(new
             {

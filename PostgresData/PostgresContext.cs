@@ -24,6 +24,8 @@ namespace PostgresData
         public DbSet<DeletedSaleInfoOld> DeletedSalesInfoOld { get; set; }
         public DbSet<SupplyInfo> SuppliesInfo { get; set; }
         public DbSet<IncompleteProduct> IncompleteProducts { get; set; }
+
+        public DbSet<SuppliedProduct> SuppliedProducts { get; set; }
         
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 
