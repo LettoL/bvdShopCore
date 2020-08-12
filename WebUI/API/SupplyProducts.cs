@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using PostgresData;
 using WebUI.Commands;
 using SupplyProduct = Data.Entities.SupplyProduct;
+using SupplyType = Data.Enums.SupplyType;
 
 namespace WebUI.API
 {

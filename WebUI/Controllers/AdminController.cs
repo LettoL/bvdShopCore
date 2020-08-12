@@ -33,6 +33,7 @@ using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
 using User = Data.Entities.User;
 using Sale = Data.Entities.Sale;
+using SupplyType = Data.Enums.SupplyType;
 
 namespace WebUI.Controllers
 {

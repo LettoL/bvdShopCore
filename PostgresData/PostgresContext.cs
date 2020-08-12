@@ -1,6 +1,7 @@
 using System.Security.Cryptography.X509Certificates;
 using Domain.Entities;
 using Domain.Entities.Olds;
+using Domain.Entities.Products;
 using Domain.Entities.Sales;
 using Domain.Entities.Supplies;
 using Microsoft.EntityFrameworkCore;
