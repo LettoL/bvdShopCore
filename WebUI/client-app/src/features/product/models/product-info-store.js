@@ -1,5 +1,6 @@
 import { Constants } from "../../../const";
 import { createEffect, createStore } from "effector";
+import { setError } from "../../../shared/store/error-store";
 
 const API_URL = Constants.API
 const API_PRODUCT_INFO = API_URL + 'не забудь вписать url'
@@ -26,6 +27,11 @@ export const fetchProductInfoFx = createEffect({
   }
 })
 
+fetchProductInfoFx.finally.watch(data => {
+  if(data.error)
+    setError(`При загрузке подробной информации о товаре, произошла ошибка: ${data.error}`)
+})
+
 export const createUnderstaffedProductFx = createEffect(
   {
     async handler(product) {
@@ -43,6 +49,11 @@ export const createUnderstaffedProductFx = createEffect(
     }
   }
 )
+
+createUnderstaffedProductFx.finally.watch(data => {
+  if(data.error)
+    setError(`При создании некомплектного товара, произошла ошибка: ${data.error}`)
+})
 
 export const $currentProduct = createStore({})
   .on(fetchProductInfoFx.doneData, (state, productInfo) => productInfo)

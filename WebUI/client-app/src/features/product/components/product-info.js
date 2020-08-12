@@ -18,6 +18,7 @@ export const ProductInfo = () => {
     fetchShopsFx()
   }, [])
   
+
   const product = useStore($currentProduct)
 
   const classes = useStyles()

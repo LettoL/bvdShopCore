@@ -1,5 +1,6 @@
 import {Constants} from "../const";
 import {createEffect, createStore} from "effector";
+import { setError } from "../shared/store/error-store";
 
 const API_URL = Constants.API
 const API_SUPPLIERS = API_URL + 'api/suppliers'
@@ -9,6 +10,11 @@ export const fetchSuppliersFx = createEffect({
     const res = await fetch(API_SUPPLIERS)
     return res.json()
   }
+})
+
+fetchSuppliersFx.finally.watch(data => {
+  if(data.error)
+    setError(`При загрузке списка поставщиков, произошла ошибка: ${data.error}`)
 })
 
 export const createSupplierFx = createEffect({
@@ -25,6 +31,11 @@ export const createSupplierFx = createEffect({
 
     return res.json()
   }
+})
+
+createSupplierFx.finally.watch(data => {
+  if(data.error)
+    setError(`При создании поставщика, произошла ошибка: ${data.error}`)
 })
 
 export const suppliers = createStore([])
