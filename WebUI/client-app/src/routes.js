@@ -11,6 +11,7 @@ import {SupplyProductsList} from "./components/supply-product/list/supply-produc
 import {ManagerList} from "./components/manager/manager-list";
 import {ArchiveSalesList} from "./components/archive-sale/archive-sales-list";
 import {Product} from './features/product/components/product.page'
+import { SaleCreate } from "./features/sale/components/sale-create";
 
 export const useRoutes = () => {
 
@@ -48,6 +49,9 @@ export const useRoutes = () => {
       </Route>
       <Route path='/admin/archiveSales' exact>
         <ArchiveSalesList/>
+      </Route>
+      <Route path='/manager/saleCreate' exact>
+        <SaleCreate/>
       </Route>
       <Redirect to='/admin/product'/>
     </Switch>

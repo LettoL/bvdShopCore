@@ -43,6 +43,11 @@ export const Menu = () => {
           <ListItemText primary={'Архивные продажи'}/>
         </NavLink>
       </ListItem>
+      <ListItem button>
+        <NavLink to={'/manager/saleCreate'}>
+          <ListItemText primary={'Продажа'}/>
+        </NavLink>
+      </ListItem>
     </List>
   )
 
