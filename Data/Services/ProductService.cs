@@ -208,6 +208,7 @@ namespace Data.Services
                 .ToList();
 
             var productsInStock = db.SupplyProducts
+                .Where(x => x.StockAmount > 0)
                 .Where(x => filter.CategoryId == 0 || x.Product.Category.Id == filter.CategoryId)
                 .Where(x => filter.ShopId == 0 || x.Product.Shop.Id == filter.ShopId)
                 .Select(x => new

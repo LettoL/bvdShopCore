@@ -1,4 +1,4 @@
-﻿using System.Linq;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Mvc;

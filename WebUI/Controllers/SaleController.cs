@@ -109,7 +109,8 @@ namespace WebUI.Controllers
                 Partner = x.Partner,
                 PrimeCost = x.PrimeCost,
                 Shop = x.Shop,
-                SaleType = x.SaleType
+                SaleType = x.SaleType,
+                ForRussian = x.ForRussian
             }).First(p => p.Id == id);
             sale.Sum = infoMoneys.Where(z => z.SaleId == sale.Id)
                 .Sum(z => z.Sum);

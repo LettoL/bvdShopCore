@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 using System.Linq;
 using Base.Services.Abstract;
@@ -89,7 +89,20 @@ namespace Data.Services.Concrete
                     sale, shop.Id, obj.MoneyWorkerId);
             else
             {
-                if(obj.PaymentType == PaymentType.Cash)
+                if (obj.CashlessSum > 0)
+                    db.SaleInformations.Add(new SaleInformation()
+                    {
+                        MoneyWorkerForIncomeId = obj.MoneyWorkerId ?? throw new Exception(""),
+                        SaleId = sale.Id,
+                        SaleType = SaleType.DefferedSale
+                    });
+                else
+                    db.SaleInformations.Add(new SaleInformation()
+                    {
+                        SaleId = sale.Id,
+                        SaleType = SaleType.DefferedSale
+                    });
+                /*if(obj.PaymentType == PaymentType.Cash)
                     db.SaleInformations.Add(new SaleInformation()
                     {
                         MoneyWorkerForIncomeId = shop.Id,
@@ -102,7 +115,7 @@ namespace Data.Services.Concrete
                         MoneyWorkerForIncomeId = shop.Id == 0 ? null : obj.MoneyWorkerId,
                         SaleId = sale.Id,
                         SaleType = SaleType.DefferedSale
-                    });
+                    });*/
             }
                 
 

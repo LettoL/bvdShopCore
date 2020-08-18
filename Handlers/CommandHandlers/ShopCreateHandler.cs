@@ -1,6 +1,6 @@
 ﻿using System.Threading.Tasks;
+using Domain.Commands;
 using Domain.Entities;
-using Handlers.Commands;
 using PostgresData;
 
 namespace Handlers.CommandHandlers

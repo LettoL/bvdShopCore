@@ -1,37 +1,41 @@
 ﻿using System;
+using Domain.Commands.Supplies;
 
 namespace Domain.Entities.Supplies
 {
-    public class SuppliedProduct : Entity
+    public class SuppliedProduct
     {
-        public DateTime Date { get; private set; }
-        public int SuppliedAmount { get; private set; }
-        public int StockAmount { get; private set; }
-        public decimal ProcurementCost { get; private set; }
-        public SuppliedType Type { get; private set; }
-        
-        public int ShopId { get; private set; }
-        public Shop Shop { get; private set; }
-        
-        public int ProductId { get; private set; }
-        public Product Product { get; private set; }
+        public Guid Id { get; private set; }
 
-        public int SupplierId { get; private set; }
-        public Supplier Supplier { get; private set; }
+        public Guid ProductId { get; private set; }
 
-        public SuppliedProduct(
-            DateTime date, int suppliedAmount, decimal procurementCost,
-            int shopId, int productId, SuppliedType type, int supplierId) =>
-            (Date, SuppliedAmount, ProcurementCost, ShopId, ProductId, Type, SupplierId) =
-            (date, suppliedAmount, procurementCost, shopId, productId, type, supplierId);
+        public Guid SupplierId { get; private set; }
+
+        public Guid ShopId { get; private set; }
+
+        public int Amount { get; private set; }
+
+        public SupplyType Type { get; private set; }
+
+        public SuppliedProduct(SupplyProduct command)
+        {
+            Id = command.Id;
+            ProductId = command.ProductId;
+            SupplierId = command.SupplierId;
+            ShopId = command.ShopId;
+            Amount = command.Amount;
+            Type = command.Type;
+        }
+        
+        private SuppliedProduct(){}
     }
 
-    public enum SuppliedType
+    public enum SupplyType
     {
-        Payment = 10,
-        
-        ForRealization = 20,
-        
-        DeferredPayment = 30
+        Payment = 1,
+
+        ForRealization = 2,
+
+        DeferredPayment = 3
     }
 }

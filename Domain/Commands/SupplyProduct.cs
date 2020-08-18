@@ -1,7 +1,7 @@
-﻿using Domain.Entities;
-using Domain.Entities.Supplies;
+﻿using System;
+using Domain.Entities.Products;
 
-namespace WebUI.Commands
+namespace Domain.Commands
 {
     public class SupplyProduct
     {
@@ -9,7 +9,6 @@ namespace WebUI.Commands
         public int ShopId { get; set; }
         public int SupplierId { get; set; }
         public int Amount { get; set; }
-        public string ProcurementCost { get; set; }
-        public SuppliedType Type { get; set; }
+        public decimal ProcurementCost { get; set; }
     }
 }

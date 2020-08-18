@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Threading.Tasks;
+using Domain.Commands;
 using Domain.Entities;
-using Handlers.Commands;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PostgresData;
@@ -34,7 +34,7 @@ namespace WebUI.API
             }
         }
 
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> Post([FromBody] CreateIncompleteProduct command)
         {
             try
@@ -54,6 +54,6 @@ namespace WebUI.API
             {
                 return BadRequest(e.Message);
             }
-        }
+        }*/
     }
 }

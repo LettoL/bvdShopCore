@@ -12,6 +12,7 @@ using Data.Entities;
 using Data.Enums;
 using Data.FiltrationModels;
 using Data.ModernServices.Abstract;
+using Data.Services;
 using Data.Services.Abstract;
 using Data.ViewModels;
 using Domain.Entities;
@@ -28,11 +29,13 @@ using WebUI.QueriesHandlers;
 using WebUI.ViewModels;
 using Manager = Domain.Entities.Sales.Manager;
 using Product = Data.Entities.Product;
+using ProductFilterVM = Data.ViewModels.ProductFilterVM;
 using ProductVM = WebUI.ViewModels.ProductVM;
 using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
 using User = Data.Entities.User;
 using Sale = Data.Entities.Sale;
+using SupplyType = Data.Enums.SupplyType;
 
 namespace WebUI.Controllers
 {
@@ -740,7 +743,6 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            var userName = HttpContext.User.Identity.Name;
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Shops = _shopService.All();
             ViewBag.Scores = _db.MoneyWorkers;
@@ -862,12 +864,18 @@ namespace WebUI.Controllers
         [Route("/Admin/GetProductsByShop/{id}")]
         public async Task<IActionResult> GetProductsByShop(int id)
         {
-            var products = _db.Products
+            /*var products = _db.Products
                 .Where(x => x.ShopId == id)
                 .ToList()
                 .GroupBy(x => x.Title)
                 .Select(x => x.FirstOrDefault())
-                .ToList();
+                .ToList();*/
+
+            var products = ProductService.GetProductsInStockFilter(_db, _postgresContext,
+                new Data.ViewModels.ProductFilterVM()
+                {
+                    ShopId = id,
+                });
 
             return Ok(new
             {
@@ -1108,16 +1116,17 @@ namespace WebUI.Controllers
             if (saleFromStockInfo != null)
             {
                 ViewBag.SalesProduct = saleFromStockInfo.Products
-                    .Join(saleProducts,
-                        sp => sp.ProductId,
-                        p => p.ProductId,
-                        (sp, p) => new SaleProductItem()
-                        {
-                            Id = p.ProductId,
-                            Title = p.Product.Title,
-                            Amount = p.Amount,
-                            ProcurementCost = sp.ProcurementCost
-                        }).ToList();
+                    .Select(x => new SaleProductItem()
+                    {
+                        Id = x.ProductId,
+                        Title = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Product?.Title ?? "",
+                        Amount = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Amount ?? 0,
+                        ProcurementCost = x.ProcurementCost
+                    }).ToList();
             
                 var selectedSupplierId = saleFromStockInfo.SupplierId;
 
@@ -1390,7 +1399,6 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            var userName = HttpContext.User.Identity.Name;
             var expenses = _expenseService
                     .All()
                     .Include(x => x.InfoMoney)

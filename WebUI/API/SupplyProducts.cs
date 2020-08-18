@@ -12,6 +12,7 @@ using Microsoft.EntityFrameworkCore;
 using PostgresData;
 using WebUI.Commands;
 using SupplyProduct = Data.Entities.SupplyProduct;
+using SupplyType = Data.Enums.SupplyType;
 
 namespace WebUI.API
 {
@@ -52,14 +53,14 @@ namespace WebUI.API
             return Ok(result);
         }
 
-        [HttpPost]
+       /* [HttpPost]
         public async Task<IActionResult> Post([FromBody] Commands.SupplyProduct command)
         {
             decimal procurementCost = 0;
             if (!Decimal.TryParse(command.ProcurementCost, out procurementCost))
                 return BadRequest("Неверна введена закупочная цена");
             
-            var supplyProduct = new Handlers.Commands.SupplyProduct()
+            var supplyProduct = new Domain.Commands.SupplyProduct()
             {
                 ProductId = command.ProductId,
                 Amount = command.Amount,
@@ -72,7 +73,7 @@ namespace WebUI.API
             var result = await SupplyProductHandler.Handle(supplyProduct, _postgresContext);
             
             return Ok(result);
-        }
+        }*/
 
         [HttpPost]
         [Route("import")]
@@ -98,7 +99,12 @@ namespace WebUI.API
                     decimal procurementCost = 0;
                     decimal a;
                     if (Decimal.TryParse(product.Price.Replace(',', '.'), out a))
+                    {
                         procurementCost = a;
+
+                        if (procurementCost <= 0)
+                            throw new Exception("Закупочная стоимость не может быть равной нулю или меньше его");
+                    }
                     else
                         throw new Exception("Закупочная стоимость неверного формата в товаре: " 
                                             + product.Title);
