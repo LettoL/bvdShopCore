@@ -1,8 +1,11 @@
-import {createEffect, createStore} from "effector";
+import {combine, createEffect, createEvent, createStore} from "effector";
 import {Constants} from "../../const";
 
 const API_URL = Constants.API
 const API_MANAGERS = API_URL + 'api/managers'
+
+export const clickMargin = createEvent()
+export const clickTurnover = createEvent()
 
 export const fetchManagersFx = createEffect({
   async handler() {
@@ -25,19 +28,32 @@ export const filterManagersFx = createEffect({
 
     return res.json()
   }
-  /*async handler(startDate, endDate) {
-    console.log(startDate.toISOString().slice(0,10))
-
-    const res = await fetch(
-      API_MANAGERS + '/filter?' +
-      (startDate != null ? 'startDate=' + startDate.toString() : '') +
-      (endDate != null ? 'endDate=' + endDate.toString() : ''))
-
-    return res.json()
-  }*/
 })
 
 export const $managers = createStore([])
   .on(fetchManagersFx.doneData, (_, managers) => [...managers])
   .on(filterManagersFx.doneData, (_, managers) => [...managers])
+
+export const $marginOrdered = createStore(false)
+    .on(clickMargin, (_) => !_)
+    .on(clickTurnover, (_) => false)
+
+export const $turnoverOrdered = createStore(false)
+    .on(clickTurnover, (_) => !_)
+    .on(clickMargin, (_) => false)
+
+
+export const $orderedManagers = combine(
+    $managers,
+    $marginOrdered,
+    $turnoverOrdered,
+    (managers, margin, turnover) => [...managers
+        .sort((a, b) => {
+          if(margin) return b.margin - a.margin
+          if(turnover) return b.sum - a.sum
+          return 0
+        })]
+)
+
+
 

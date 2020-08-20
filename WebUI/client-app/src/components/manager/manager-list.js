@@ -1,6 +1,12 @@
 import React, {useEffect, useState} from "react";
 import {useStore} from "effector-react";
-import {$managers, fetchManagersFx, filterManagersFx} from "../../models/manager/manager.store";
+import {
+    $orderedManagers,
+    clickMargin,
+    clickTurnover,
+    fetchManagersFx,
+    filterManagersFx
+} from "../../models/manager/manager.store";
 import TableContainer from "@material-ui/core/TableContainer";
 import Table from "@material-ui/core/Table";
 import TableHead from "@material-ui/core/TableHead";
@@ -19,10 +25,9 @@ export const ManagerList = () => {
   const [startDate, setStartDate] = useState(null)
   const [endDate, setEndDate] = useState(null)
 
-  const managers = useStore($managers)
+  const managers = useStore($orderedManagers)
 
   const searchHandler = () => {
-    console.log(startDate, endDate)
     filterManagersFx({startDate, endDate})
   }
 
@@ -74,8 +79,8 @@ export const ManagerList = () => {
           <TableHead>
             <TableRow>
               <TableCell>Имя</TableCell>
-              <TableCell>Маржа</TableCell>
-              <TableCell>Оборот</TableCell>
+              <TableCell onClick={() => clickMargin()}>Маржа</TableCell>
+              <TableCell onClick={() => clickTurnover()}>Оборот</TableCell>
             </TableRow>
           </TableHead>
           <TableBody>

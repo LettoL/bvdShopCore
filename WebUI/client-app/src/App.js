@@ -1,9 +1,9 @@
 import React, {useCallback, useState} from 'react';
 import {BrowserRouter} from 'react-router-dom'
 import {useRoutes} from "./routes";
-import {AdminLayout} from "./components/layouts/admin.layout";
 import {AuthContext} from "./contexts/auth.context";
 import {useCookies} from "react-cookie";
+import {AdminLayout} from "./components/layouts/admin.layout";
 
 function App() {
   const routes = useRoutes()
