@@ -1,4 +1,5 @@
-﻿using System.Linq;
+﻿using System;
+using System.Linq;
 using Base.Services.Abstract;
 using Data.Entities;
 using Microsoft.AspNetCore.Authorization;
@@ -22,7 +23,7 @@ namespace WebUI.Controllers
 
         public IActionResult Index()
         {
-            return View(_supplierService.All().Select(x => new SupplierVM()
+            var result = _supplierService.All().Select(x => new SupplierVM()
             {
                 Id = x.Id,
                 Title = x.Title,
@@ -35,7 +36,13 @@ namespace WebUI.Controllers
                 CostProductOnStock = _supplyProductService.All()
                     .Where(p => p.SupplierId == x.Id)
                     .Sum(p => p.StockAmount * p.ProcurementCost)
-            }));
+            }).ToList();
+
+            ViewBag.Debt = Math.Round(result.Sum(x => x.Debt), 2);
+            ViewBag.RealizationCost = Math.Round(result.Sum(x => x.CostRealizationProductOnStock), 2);
+            ViewBag.CostProductOnStock = Math.Round(result.Sum(x => x.CostProductOnStock), 2);
+            
+            return View(result);
         }
 
         [HttpGet]
