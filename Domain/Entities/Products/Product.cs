@@ -1,7 +1,11 @@
-﻿namespace Domain.Entities.Products
+﻿using System;
+
+namespace Domain.Entities.Products
 {
-    public class Product : Entity
+    public class Product
     {
+        public Guid Id { get; private set; }
+        
         public string Code { get; private set; }
         
         public string Title { get; private set; }
@@ -11,14 +15,16 @@
         public int CategoryId { get; private set; }
         public ProductCategory Category { get; private set; }
 
-        public Product(string title, int categoryId, string code, decimal price) =>
-            (Title, CategoryId, Code, Price) = (title, categoryId, code, price);
+        public Product(Guid id, string title, int categoryId, string code, decimal price) =>
+            (Id, Title, CategoryId, Code, Price) = (id, title, categoryId, code, price);
     }
 
-    public class ProductCategory : Entity
+    public class ProductCategory
     {
+        public Guid Id { get; private set; }
+        
         public string Title { get; private set; }
 
-        public ProductCategory(string title) => Title = title;
+        public ProductCategory(Guid id, string title) => (Id, Title) = (id, title);
     }
 }

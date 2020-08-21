@@ -10,6 +10,7 @@ namespace Domain.Commands.Supplies
         public Guid SupplierId { get; set; }
         public Guid ShopId { get; set; }
         public int Amount { get; set; }
+        public decimal ProcurementCost { get; set; }
         public SupplyType Type { get; set; }
     }
 }

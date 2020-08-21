@@ -98,7 +98,8 @@ namespace WebUI.Controllers
 
             var infoMoneys = _db.InfoMonies.ToList();
 
-            Sale sale = _saleService.All().Select(x => new Sale()
+            Sale sale = _saleService.All()
+                .Select(x => new Sale()
             {
                 Id = x.Id,
                 Title = x.Title,

@@ -15,6 +15,8 @@ namespace Domain.Entities.Supplies
 
         public int Amount { get; private set; }
 
+        public decimal ProcurementCost { get; set; }
+
         public SupplyType Type { get; private set; }
 
         public SuppliedProduct(SupplyProduct command)
@@ -24,6 +26,7 @@ namespace Domain.Entities.Supplies
             SupplierId = command.SupplierId;
             ShopId = command.ShopId;
             Amount = command.Amount;
+            ProcurementCost = command.ProcurementCost;
             Type = command.Type;
         }
         

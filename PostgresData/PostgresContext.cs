@@ -26,6 +26,7 @@ namespace PostgresData
         public DbSet<IncompleteProduct> IncompleteProducts { get; set; }
 
         public DbSet<SuppliedProduct> SuppliedProducts { get; set; }
+        public DbSet<SoldFromSupply> SoldFromSupplies { get; set; }
         
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 

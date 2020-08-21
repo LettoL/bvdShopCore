@@ -1,34 +1,28 @@
-﻿using Domain.Commands;
-using Domain.Entities.Products;
-using Domain.Entities.Supplies;
+﻿using System;
 
 namespace Domain.Entities.Sales
 {
-    public class SoldProduct : Entity
+    public class SoldProduct
     {
-        public int ProductId { get; private set; }
-        public Product Product { get; private set; }
+        public Guid Id { get; private set; }
 
-        public int SaleId { get; private set; }
-        public Sale Sale { get; private set; }
+        public Guid SaleId { get; private set; }
+
+        public Guid ProductId { get; private set; }
 
         public int Amount { get; private set; }
 
-        public int SuppliedProductId { get; private set; }
-        public SuppliedProduct SuppliedProduct { get; private set; }
-
         public decimal Price { get; private set; }
 
-        public SoldProduct(int productId, int saleId, int amount, int suppliedProductId, decimal price) =>
-            (ProductId, SaleId, Amount, SuppliedProductId, Price) = 
-            (productId, saleId, amount, suppliedProductId, price);
-
-        public SoldProduct(int productId, Sale sale, int amount) =>
-            (ProductId, Sale, Amount) = (productId, sale, amount);
-
-        public static SoldProduct Create(SoldProductCreate command, Sale sale)
+        public SoldProduct(Guid id, Guid saleId, Guid productId, int amount, decimal price)
         {
-            return new SoldProduct(command.ProductId, sale, command.Amount);
+            Id = id;
+            SaleId = saleId;
+            ProductId = productId;
+            Amount = amount;
+            Price = price;
         }
+        
+        private SoldProduct() {}
     }
 }
