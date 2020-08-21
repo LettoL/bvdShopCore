@@ -33,7 +33,7 @@ namespace PostgresData
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(
-                "Host=localhost;Port=5432;Database=prost;Username=postgres;Password=Cfvbhyfchb20",
+                "Host=localhost;Port=5432;Database=bvdSystem;Username=postgres;Password=xxxxxxx",
                 b => b.ProvideClientCertificatesCallback(ProvideClientCertificates)
             );
         }
