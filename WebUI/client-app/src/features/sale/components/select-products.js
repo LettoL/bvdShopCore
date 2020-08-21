@@ -14,7 +14,7 @@ import TableCell from '@material-ui/core/TableCell';
 import TableContainer from '@material-ui/core/TableContainer';
 import TableHead from '@material-ui/core/TableHead';
 import TableRow from '@material-ui/core/TableRow';
-import { addProductToSale, changeSaleCost } from "./models/sale-create-store";
+import { addProductToSale, changeSaleCost } from "../models/sale-create-store";
 import { makeStyles } from '@material-ui/core';
 import { useStore } from 'effector-react';
 import ListItem from '@material-ui/core/ListItem';

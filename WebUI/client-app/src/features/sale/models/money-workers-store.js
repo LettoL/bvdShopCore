@@ -1,6 +1,6 @@
 import { createEffect, createStore } from "effector"
-import { Constants } from "../../../../const"
-import { setError } from "../../../../shared/store/error-store"
+import { Constants } from "../../../const"
+import { setError } from "../../../shared/store/error-store"
 
 const API_URL = Constants.API
 const API_FETCH_MONEYWORKERS = API_URL + 'не забудь вписать url'
