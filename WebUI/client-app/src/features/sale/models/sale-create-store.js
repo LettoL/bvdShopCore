@@ -12,7 +12,7 @@ export const resetSelectedMoneyWorker = createEvent();
 export const changeSaleCost = createEvent();
 
 
-export const createSaleFx = createEffect(
+export const fxCreateSale = createEffect(
   {
     async handler(sale) {
       const data = sale
@@ -30,7 +30,7 @@ export const createSaleFx = createEffect(
   }
 )
 
-createSaleFx.finally.watch(data => {
+fxCreateSale.finally.watch(data => {
   if(data.error)
     setError(`При создании продажи, произошла ошибка: ${data.error}`)
 })

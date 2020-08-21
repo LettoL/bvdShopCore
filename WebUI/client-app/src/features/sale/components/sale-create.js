@@ -12,34 +12,13 @@ import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
 import { useStore } from 'effector-react';
-import { $saleCreate, addProductToSale, removeProductFromSale, updateSaleCreateState, createSaleFx, resetSelectedMoneyWorker, changeSaleCost } from '../models/sale-create-store';
+import { $saleCreate, addProductToSale, removeProductFromSale, updateSaleCreateState, fxCreateSale, resetSelectedMoneyWorker, changeSaleCost } from '../models/sale-create-store';
 import { fetchMoneyWorkersFx, $moneyWorkers } from '../models/money-workers-store';
 import { categories, fetchCategoriesFx } from '../../../store/category-store';
 import { $managers, fetchManagersFx } from '../../../models/manager/manager.store';
 import { SelectProducts } from './select-products';
+import {$products, $productsInStock, fxFetchProducts} from "../../product/models/store";
 
-const useStyles = makeStyles((theme) => ({
-    formControl: {
-        width: '100%'
-    },
-    root: {
-        flexGrow: 1,
-        padding: theme.spacing(3),
-    },
-    marginDefault: {
-        margin: theme.spacing(1),
-        marginLeft: 0,
-        display: 'block'
-    },
-    productItem: {
-        padding: theme.spacing(1),
-        display: "flex",
-        border: '1px solid #eee',
-        alignItems: 'center',
-        fontSize: 18
-    },
-    
-}));
 
 export const SaleCreate = () => {
     const classes = useStyles();
@@ -65,7 +44,7 @@ export const SaleCreate = () => {
     }
 
     const handleCreateSale = () => {
-        createSaleFx(saleCreateForm);
+        fxCreateSale(saleCreateForm);
     }
 
     const handleFetchMoneyWorkers = (value) => {
@@ -254,3 +233,26 @@ export const SaleCreate = () => {
         </>
     )
 }
+
+const useStyles = makeStyles((theme) => ({
+    formControl: {
+        width: '100%'
+    },
+    root: {
+        flexGrow: 1,
+        padding: theme.spacing(3),
+    },
+    marginDefault: {
+        margin: theme.spacing(1),
+        marginLeft: 0,
+        display: 'block'
+    },
+    productItem: {
+        padding: theme.spacing(1),
+        display: "flex",
+        border: '1px solid #eee',
+        alignItems: 'center',
+        fontSize: 18
+    },
+
+}));
