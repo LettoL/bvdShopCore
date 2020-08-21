@@ -21,40 +21,6 @@ import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { FixedSizeList } from 'react-window';
 
-const useStyles = makeStyles(theme => ({
-    formControl: {
-        width: '100%'
-    },
-    selectProducts: {
-        position: "fixed",
-        right: 0,
-        bottom: 0,
-        top: 0,
-        paddingLeft: '3%',
-        width: '75%',
-        boxSizing: 'border-box',
-        zIndex: 99,
-        backgroundColor: '#fff',
-        boxShadow: '0px 6px 16px 5px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)',
-        marginRight: '-72%',
-        transition: '0.3s',
-    },
-
-    sectionTitle: {
-        fontWeight: 'bold',
-        transform: 'rotate(-90deg)',
-        display: 'block',
-        position: "absolute",
-        top: '50%',
-        left: '-5px',
-        fontSize: '18px',
-    },
-
-    table: {
-        maxHeight: '90vh'
-    }
-}))
-
 export const SelectProducts = () => {
     const classes = useStyles();
 
@@ -80,7 +46,7 @@ export const SelectProducts = () => {
            return;
         }
         else {
-            event.target.style.marginRight = '-72%'
+            event.target.style.marginRight = '-460px'
         }
     }
 
@@ -107,11 +73,11 @@ export const SelectProducts = () => {
         <>
             <div className={classes.selectProducts} onMouseEnter={(event) => handleMouseOverSelectProducts(event)} onMouseLeave={event => handleMouseOutSelectProducts(event)}>
                 <div className={classes.sectionTitle}>Товары</div>
-                <Grid container spacing={2}>
-                    <Grid item xs={2}>
+                <Grid container spacing={5}>
+                    <Grid item xs={6}>
                         <TextField id="standard-required" label="Поиск товара" defaultValue="" />
                     </Grid>
-                    <Grid item xs={2}>
+                    <Grid item xs={6}>
                         <FormControl className={classes.formControl}>
                             <InputLabel id="demo-simple-select-label">Категория</InputLabel>
                             <Select
@@ -128,7 +94,7 @@ export const SelectProducts = () => {
                         </FormControl>
                     </Grid>
                 </Grid>
-                <FixedSizeList height={480} width={480} itemSize={46} itemCount={products.length}>
+                <FixedSizeList className={classes.productList} height={780} width={480} itemSize={46} itemCount={products.length}>
                     {renderRow}
                 </FixedSizeList>
                 
@@ -138,3 +104,36 @@ export const SelectProducts = () => {
 }
 
 
+const useStyles = makeStyles(theme => ({
+    formControl: {
+        width: '100%'
+    },
+    selectProducts: {
+        position: "fixed",
+        right: 0,
+        bottom: 0,
+        top: 0,
+        paddingLeft: '3%',
+        width: '520px',
+        boxSizing: 'border-box',
+        zIndex: 99,
+        backgroundColor: '#fff',
+        boxShadow: '0px 6px 16px 5px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)',
+        marginRight: '-460px',
+        transition: '0.3s',
+    },
+
+    sectionTitle: {
+        fontWeight: 'bold',
+        transform: 'rotate(-90deg)',
+        display: 'block',
+        position: "absolute",
+        top: '50%',
+        left: '-5px',
+        fontSize: '18px',
+    },
+    productList: {
+        marginTop: 20
+    }
+
+}))
