@@ -69,10 +69,6 @@ export const SelectProducts = () => {
     const products = useStore($products);
     const categoriesList = useStore(categories);
 
-    const handleAddProductToSale = product => {
-        addProductToSale(product);
-        changeSaleCost(product.price);
-    }
 
     const handleMouseOverSelectProducts = event => {
         event.target.style.marginRight = 0;
@@ -88,14 +84,21 @@ export const SelectProducts = () => {
         }
     }
 
+
     function renderRow(props) {
         const { index, style } = props;
-      
-        console.log(products[index]);
+
+        const product = products[index];
+
+        const addProduct = (e) => { 
+            e.preventDefault();
+            addProductToSale(product);
+            changeSaleCost(product.price);
+        };
 
         return (
-          <ListItem button key={index}>
-            <ListItemText primary={`${products[index].name} ${index + 1}`} />
+          <ListItem button key={index} style={style} onClick={addProduct}>
+            <ListItemText primary={`${product.title} ${product.amount}`} />
           </ListItem>
         );
       }
@@ -125,7 +128,7 @@ export const SelectProducts = () => {
                         </FormControl>
                     </Grid>
                 </Grid>
-                <FixedSizeList height={480} width={480} itemSize={46} itemCount={200}>
+                <FixedSizeList height={480} width={480} itemSize={46} itemCount={products.length}>
                     {renderRow}
                 </FixedSizeList>
                 
