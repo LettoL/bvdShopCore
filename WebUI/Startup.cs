@@ -30,6 +30,7 @@ namespace WebUI
         {
             string connection =
                 "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
+
             services.AddAuthentication(options =>
                 {
                     options.DefaultScheme = CookieAuthenticationDefaults.AuthenticationScheme;

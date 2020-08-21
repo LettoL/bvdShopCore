@@ -33,8 +33,9 @@ namespace PostgresData
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
             optionsBuilder.UseNpgsql(
-                "Host=localhost;Port=5432;Database=bvdSystem;Username=postgres;Password=xxxxxxx",
-                b => b.ProvideClientCertificatesCallback(ProvideClientCertificates)
+                "Host=localhost;Port=5432;Database=bvdSystem;Username=postgres;Password=565453749"
+                //"Host=db-postgresql-fra1-35076-do-user-6959872-0.a.db.ondigitalocean.com;Port=25060;Database=defaultdb;Username=doadmin;Password=zu0qkbedxe6ma0ot;Ssl Mode=Require;Trust Server Certificate=true"
+                //b => b.ProvideClientCertificatesCallback(ProvideClientCertificates)
             );
         }
         
