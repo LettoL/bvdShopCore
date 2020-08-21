@@ -43,8 +43,8 @@ export const ProductTabs = () => {
         onChange={handleChange}
         centered
       >
-        <Tab label={'One'}/>
-        <Tab label={'Two'}/>
+        <Tab label={'Поставки'}/>
+        <Tab label={'Некомплект'}/>
       </Tabs>
       <TabPanel value={value} index={0}>
           <ProductSupplies />

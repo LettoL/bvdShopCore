@@ -9,6 +9,7 @@ export const addProductToSale = createEvent();
 export const removeProductFromSale = createEvent();
 export const updateSaleCreateState = createEvent();
 export const resetSelectedMoneyWorker = createEvent();
+export const changeSaleCost = createEvent();
 
 
 export const createSaleFx = createEffect(
@@ -75,5 +76,11 @@ $saleCreate
       return {
         ...state,
         moneyWorkerId: 0
+      }
+    })
+    .on(changeSaleCost, (state, cost) => {
+      return {
+        ...state,
+        cost: state.cost + cost
       }
     })

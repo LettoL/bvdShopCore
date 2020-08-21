@@ -11,16 +11,12 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import DeleteIcon from '@material-ui/icons/Delete';
-import Table from '@material-ui/core/Table';
-import TableBody from '@material-ui/core/TableBody';
-import TableCell from '@material-ui/core/TableCell';
-import TableContainer from '@material-ui/core/TableContainer';
-import TableHead from '@material-ui/core/TableHead';
-import TableRow from '@material-ui/core/TableRow';
-import { fetchProductsFx, $products } from '../../../models/product-table/product.store';
 import { useStore } from 'effector-react';
-import { $saleCreate, addProductToSale, removeProductFromSale, updateSaleCreateState, createSaleFx, resetSelectedMoneyWorker } from './models/sale-create-store';
+import { $saleCreate, addProductToSale, removeProductFromSale, updateSaleCreateState, createSaleFx, resetSelectedMoneyWorker, changeSaleCost } from './models/sale-create-store';
 import { fetchMoneyWorkersFx, $moneyWorkers } from './models/money-workers-store';
+import { categories, fetchCategoriesFx } from '../../../store/category-store';
+import { $managers, fetchManagersFx } from '../../../models/manager/manager.store';
+import { SelectProducts } from './select-products';
 
 const useStyles = makeStyles((theme) => ({
     formControl: {
@@ -42,64 +38,26 @@ const useStyles = makeStyles((theme) => ({
         alignItems: 'center',
         fontSize: 18
     },
-    selectProducts: {
-        position: "fixed",
-        right: 0,
-        bottom: 0,
-        top: 0,
-        paddingLeft: '3%',
-        width: '75%',
-        boxSizing: 'border-box',
-        zIndex: 99,
-        backgroundColor: '#fff',
-        boxShadow: '0px 6px 16px 5px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)',
-        marginRight: '-72%',
-        transition: '0.3s',
-        '&:hover': {
-            marginRight: '0'
-        }
-    },
-
-    sectionTitle: {
-        fontWeight: 'bold',
-        transform: 'rotate(-90deg)',
-        display: 'block',
-        position: "absolute",
-        top: '50%',
-        left: '-5px',
-        fontSize: '18px',
-    },
-
+    
 }));
 
 export const SaleCreate = () => {
     const classes = useStyles();
+    
     useEffect(() => {
-        fetchProductsFx()
-    }, []);
+        fetchManagersFx()
+    }, [])
 
-    const products = useStore($products);
+    const managers = useStore($managers);   
     const moneyWorkers = useStore($moneyWorkers);
     const saleCreateForm = useStore($saleCreate);
 
-    if(products.length === 0) {
-        products.push({
-            id: products.length,
-            title: 'test',
-            amount: 1,
-            cost: '14000'
-        })
-    }
-    
     const [cashPayment, setCashPayment] = useState(false);
     const [cashlessPayment, setCashlessPayment] = useState(false);
 
-    const handleAddProductToSale = product => {
-        addProductToSale(product);
-    }
-
-    const handleRemoveProductFromSale = product => {
+    const handleRemoveProductFromSale = product => {   
         removeProductFromSale(product);
+        changeSaleCost(-product.price);
     }
 
     const handleSaleFormChange = (event) => {
@@ -138,7 +96,12 @@ export const SaleCreate = () => {
                                         value={saleCreateForm.managerId}
                                         onChange={handleSaleFormChange}
                                     >
-                                        <MenuItem value={10}>Менеджер 1</MenuItem>
+                                        {
+                                            managers.map(manager => (
+                                                <MenuItem key={manager.id} value={manager.id}>{manager.name}</MenuItem>
+                                            ))
+                                        }
+                                        
                                         <MenuItem value={20}>Менеджер 2</MenuItem>
                                         <MenuItem value={30}>Менеджер 3</MenuItem>
                                     </Select>
@@ -191,7 +154,7 @@ export const SaleCreate = () => {
                         {cashPayment && (
                             <Grid container spacing={1}>
                                 <Grid item xs={4}>
-                                    <TextField className={classes.formControl} required id="standard-required" label="Сумма" name="cashSum" value={saleCreateForm.cashSum} onChange={handleSaleFormChange}/>
+                                    <TextField className={classes.formControl} required id="standard-required" label="Сумма" name="cashSum" value={saleCreateForm.cashSum} onChange={handleSaleFormChange} />
                                 </Grid>
                             </Grid>
                         )}
@@ -204,7 +167,7 @@ export const SaleCreate = () => {
                         />
 
                         {cashlessPayment && (
-                            <Grid container spacing={1}>                              
+                            <Grid container spacing={1}>
                                 <Grid item xs={6}>
                                     <FormControl className={classes.formControl}>
                                         <InputLabel id="demo-simple-select-label">Тип счета</InputLabel>
@@ -235,7 +198,7 @@ export const SaleCreate = () => {
                                                     <MenuItem key={moneyWorker.id} value={moneyWorker.id}>{moneyWorker.title}</MenuItem>
                                                 ))
                                             }
-                                            
+
                                         </Select>
                                     </FormControl>
                                 </Grid>
@@ -287,37 +250,7 @@ export const SaleCreate = () => {
 
             </Paper>
 
-            <div className={classes.selectProducts} >
-                <div className={classes.sectionTitle}>Товары</div>
-                <TableContainer >
-                    <TextField id="standard-required" label="Поиск товара" defaultValue="" />
-                    <Table className={classes.table} aria-label="simple table">
-                        <TableHead>
-                            <TableRow>
-                                <TableCell>Название</TableCell>
-                                <TableCell align="center">Количество</TableCell>
-                                <TableCell align="center">Действие</TableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {products.map((row) => (
-                                <TableRow key={row.title}>
-                                    <TableCell component="th" scope="row">
-                                        {row.title}
-                                    </TableCell>
-                                    <TableCell align="center">{row.amount}</TableCell>
-                                    <TableCell align="center">
-                                        <Button variant="contained" color="primary" onClick={() => handleAddProductToSale(row)}>
-                                            Добавить
-                                        </Button>
-                                    </TableCell>
-
-                                </TableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
-            </div>
+            <SelectProducts />
         </>
     )
 }
