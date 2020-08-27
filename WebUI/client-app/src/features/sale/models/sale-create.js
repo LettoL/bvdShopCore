@@ -7,6 +7,16 @@ const API_SALE_CREATE = API_URL + 'не забудь вписать url'
 
 export const addProductToSale = createEvent();
 export const removeProductFromSale = createEvent();
+
+export const activateCashPayment = createEvent()
+export const deactivateCashPayment = createEvent()
+export const changeCashSum = createEvent()
+
+export const activateCashlessPayment = createEvent()
+export const deactivateCashlessPayment = createEvent()
+export const changeCashlessSum = createEvent()
+export const selectMoneyWorkerId = createEvent()
+
 export const updateSaleCreateState = createEvent();
 export const resetSelectedMoneyWorker = createEvent();
 export const changeSaleCost = createEvent();
@@ -56,12 +66,26 @@ export const $cashPayment = createStore({
   active: false,
   sum: 0
 })
+  .on(activateCashPayment,
+    (state, _) => ({...state, active: true}))
+  .on(deactivateCashPayment,
+    (state, _) => ({...state, active: false}))
+  .on(changeCashSum,
+    (state, sum) => ({...state, sum: sum}))
 
 export const $cashlessPayment = createStore({
   active: false,
   sum: 0,
   moneyWorkerId: 0
 })
+  .on(activateCashlessPayment,
+    (state, _) => ({...state, active: true}))
+  .on(deactivateCashlessPayment,
+    (state, _) => ({...state, active: false}))
+  .on(changeCashlessSum,
+    (state, sum) => ({...state, sum: sum}))
+  .on(selectMoneyWorkerId,
+    (state, id) => ({...state, moneyWorkerId: id}))
 
 $saleCreate
   .on(addProductToSale,

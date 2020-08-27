@@ -18,6 +18,7 @@ import { $managers, fetchManagersFx } from '../../../models/manager/manager.stor
 import { SelectProducts } from './select-products';
 import {SelectedProductItem} from "./selected-product-item";
 import {SelectedProductsList} from "./selected-products-list";
+import {PaymentMethods} from "./payment-methods";
 
 
 export const SaleCreate = () => {
@@ -112,10 +113,7 @@ export const SaleCreate = () => {
                 />
               </Grid>
             </Grid>
-
-
-
-
+            <PaymentMethods/>
           </Grid>
           <Grid item xs={7}>
             <h3>Выбранные товары</h3>
