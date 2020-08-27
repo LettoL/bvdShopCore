@@ -20,11 +20,9 @@ export const SelectProducts = () => {
 
   useEffect(() => {
     fxFetchProducts()
-    fetchCategoriesFx()
   }, [])
 
   const products = useStore($availableProducts)
-  const categoriesList = useStore(categories)
 
   const handleMouseOverSelectProducts = event => {
     event.target.style.marginRight = 0;
@@ -49,7 +47,6 @@ export const SelectProducts = () => {
     const addProduct = (e) => {
       e.preventDefault();
       addProductToSale(product);
-      changeSaleCost(product.price);
     };
 
     return (
@@ -66,22 +63,6 @@ export const SelectProducts = () => {
         <Grid container spacing={5}>
           <Grid item xs={6}>
             <TextField id="standard-required" label="Поиск товара" defaultValue="" />
-          </Grid>
-          <Grid item xs={6}>
-            <FormControl className={classes.formControl}>
-              <InputLabel id="demo-simple-select-label">Категория</InputLabel>
-              <Select
-                labelId="demo-simple-select-label"
-                id="demo-simple-select"
-                name="managerId"
-              >
-                {
-                  categoriesList.map(category => (
-                    <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>
-                  ))
-                }
-              </Select>
-            </FormControl>
           </Grid>
         </Grid>
         <FixedSizeList className={classes.productList} height={780} width={480} itemSize={46} itemCount={products.length}>

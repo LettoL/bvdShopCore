@@ -21,7 +21,19 @@ export const SelectedProductItem = (props) => {
         <b>{product.title}</b>
       </Grid>
       <Grid item xs={2}>
-        <TextField required id="standard-required" label="Количество" defaultValue="1" />
+        <TextField
+          required
+          id="standard-required"
+          label="Количество"
+          defaultValue="1"
+        />
+      </Grid>
+      <Grid item xs={3}>
+        <TextField
+          id="standard-required"
+          label="Цена"
+          value={product.price}
+        />
       </Grid>
       <Grid item xs={2}>
         <Button

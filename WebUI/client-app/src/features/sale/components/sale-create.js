@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react'
+import React, { useEffect } from 'react'
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import Paper from '@material-ui/core/Paper';
@@ -10,13 +10,10 @@ import TextField from '@material-ui/core/TextField';
 import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
-import DeleteIcon from '@material-ui/icons/Delete';
 import { useStore } from 'effector-react';
-import { $saleCreate, removeProductFromSale, updateSaleCreateState, fxCreateSale, resetSelectedMoneyWorker, changeSaleCost } from '../models/sale-create';
-import { fetchMoneyWorkersFx, $moneyWorkers } from '../models/money-workers-store';
+import { $saleCreate, updateSaleCreateState, fxCreateSale } from '../models/sale-create';
 import { $managers, fetchManagersFx } from '../../../models/manager/manager.store';
 import { SelectProducts } from './select-products';
-import {SelectedProductItem} from "./selected-product-item";
 import {SelectedProductsList} from "./selected-products-list";
 import {PaymentMethods} from "./payment-methods";
 
@@ -29,11 +26,7 @@ export const SaleCreate = () => {
   }, [])
 
   const managers = useStore($managers);
-  const moneyWorkers = useStore($moneyWorkers);
   const saleCreateForm = useStore($saleCreate);
-
-  const [cashPayment, setCashPayment] = useState(false);
-  const [cashlessPayment, setCashlessPayment] = useState(false);
 
   const handleSaleFormChange = (event) => {
     updateSaleCreateState(event);
@@ -41,11 +34,6 @@ export const SaleCreate = () => {
 
   const handleCreateSale = () => {
     fxCreateSale(saleCreateForm);
-  }
-
-  const handleFetchMoneyWorkers = (value) => {
-    fetchMoneyWorkersFx(value)
-    resetSelectedMoneyWorker();
   }
 
   return (
@@ -151,5 +139,4 @@ const useStyles = makeStyles((theme) => ({
     alignItems: 'center',
     fontSize: 18
   },
-
 }));
