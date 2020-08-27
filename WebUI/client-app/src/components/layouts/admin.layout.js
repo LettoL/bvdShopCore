@@ -8,14 +8,8 @@ import DialogContent from '@material-ui/core/DialogContent';
 import DialogTitle from '@material-ui/core/DialogTitle';
 import Button from '@material-ui/core/Button';
 import { useStore } from "effector-react";
-import { setError, $errorStore, clearError } from "../../shared/store/error-store";
-import { DialogContentText } from "@material-ui/core";
+import { $errorStore, clearError } from "../../shared/store/error-store";
 
-const useStyles = makeStyles((theme) => ({
-  root: {
-    flexGrow: 1,
-  }
-}));
 
 export const AdminLayout = props => {
   const classes = useStyles();
@@ -57,3 +51,9 @@ export const AdminLayout = props => {
     </>
   )
 }
+
+const useStyles = makeStyles((theme) => ({
+  root: {
+    flexGrow: 1,
+  }
+}));

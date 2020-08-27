@@ -1,4 +1,4 @@
-import { createEffect, createStore, createEvent } from "effector";
+import {createEffect, createStore, createEvent, forward} from "effector";
 import { Constants } from "../../../const";
 import { setError } from "../../../shared/store/error-store";
 
@@ -43,29 +43,31 @@ export const $saleCreate = createStore({
   forRussia: false,
   cashSum: 0,
   moneyWorkerId: 0,
-  cashlessSum: 0,
-  saleProducts: []
+  cashlessSum: 0
 });
 
+export const $saleProducts = createStore([])
+  .on(addProductToSale,
+    (state, product) => [...state, product])
+  .on(removeProductFromSale,
+    (state, product) => state.filter(x => x.id !== product.id))
+
+export const $cashPayment = createStore({
+  active: false,
+  sum: 0
+})
+
+export const $cashlessPayment = createStore({
+  active: false,
+  sum: 0,
+  moneyWorkerId: 0
+})
+
 $saleCreate
-  .on(addProductToSale, (state, product) => {
-    return {
-      ...state,
-      saleProducts: [...state.saleProducts, product]
-    }
-  })
-  .on(removeProductFromSale, (state, product) => {
-
-    const index = state.saleProducts.findIndex(item => item.id === product.id);
-
-    return {
-      ...state,
-      saleProducts: [
-        ...state.saleProducts.slice(0, index),
-        ...state.saleProducts.slice(index + 1)
-      ]
-    }
-  })
+  .on(addProductToSale,
+    (state, product) => ({...state, cost: state.cost + product.price}))
+  .on(removeProductFromSale,
+    (state, product) => ({...state, cost: state.cost - product.price}))
   .on(updateSaleCreateState, (state, event) => {
     return {
       ...state,
@@ -76,11 +78,5 @@ $saleCreate
     return {
       ...state,
       moneyWorkerId: 0
-    }
-  })
-  .on(changeSaleCost, (state, cost) => {
-    return {
-      ...state,
-      cost: state.cost + cost
     }
   })
