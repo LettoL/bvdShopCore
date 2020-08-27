@@ -12,7 +12,7 @@ namespace Handlers.CommandHandlers
 {
     public static class SaleCreateHandler
     {
-       /* public static async Task<Sale> Execute(this SaleCreate command, PostgresContext db)
+        /*public static async Task<Sale> Execute(this SaleCreate command, PostgresContext db)
         {
             var saleId = Guid.NewGuid();
 
@@ -22,95 +22,120 @@ namespace Handlers.CommandHandlers
                 command.ShopId,
                 db);
             
-            
+            var soldProducts = SoldProducts(
+                saleId, command.SellingProducts, suppliedProductsAvailableForSale.Result);
+            //deposited moneys
+            //sale
         }*/
 
-        private static (ICollection<SoldProduct>, ICollection<SoldFromSupply>) SoldProducts (
+        private static ICollection<SoldProduct> SoldProducts (
+            Guid saleId,
             ICollection<SellingProduct> sellingProducts,
             ICollection<SuppliedProductAvailableForSale> suppliedProducts)
         {
             var soldProducts = new HashSet<SoldProduct>();
-            var soldFromSupplies = new HashSet<SoldFromSupply>();
 
             foreach (var sellingProduct in sellingProducts)
             {
-                //var sold =
+                var soldProductId = Guid.NewGuid();
+
+                var soldFromSupplies =
+                    SoldProduct(sellingProduct.ProductId, soldProductId, sellingProduct.Amount, suppliedProducts);
+
+                soldProducts.Add(new SoldProduct(
+                    soldProductId, saleId, sellingProduct.ProductId, sellingProduct.Amount,
+                    sellingProduct.Price, soldFromSupplies.Item1));
+
+                suppliedProducts = soldFromSupplies.Item2;
             }
 
-            var result = (soldProducts, soldFromSupplies);
+            var result = soldProducts;
 
             return result;
         }
 
-       /* private static (SoldProduct, ICollection<SoldFromSupply>, ICollection<SuppliedProductAvailableForSale>) SoldProduct(
-            Guid saleId, SellingProduct sellingProduct, ICollection<SuppliedProductAvailableForSale> suppliedProducts)
+        private static (ICollection<SoldFromSupply>, ICollection<SuppliedProductAvailableForSale>) SoldProduct(
+            Guid productId, Guid soldProductId, int amount, ICollection<SuppliedProductAvailableForSale> suppliedProducts)
         {
-            if (AvailableSoldForRealization(sellingProduct.ProductId, suppliedProducts))
+            var soldFromSupplies = new List<SoldFromSupply>();
+
+            if (AvailableSoldForRealization(productId, suppliedProducts))
             {
+                //Получаем поставку под реализацию
                 var suppliedForSold = suppliedProducts
-                    .Where(x => x.ProductId == sellingProduct.ProductId
+                    .Where(x => x.ProductId == productId
                                 && x.ForRealization)
                     .OrderBy(x => x.AvailableAmount)
                     .FirstOrDefault();
-                
-                if (sellingProduct.Amount <= suppliedForSold.AvailableAmount)
-                {
-                    var soldProduct = new SoldProduct(
-                        Guid.NewGuid(), saleId, sellingProduct.ProductId, sellingProduct.Amount, sellingProduct.Price);
 
-                    suppliedForSold.AvailableAmount -= soldProduct.Amount;//проверить изменится ли значение в коллекции
-                    sellingProduct.Amount -= soldProduct.Amount;
+                if (amount <= suppliedForSold.AvailableAmount)
+                {
+                    var soldFromSupply = new SoldFromSupply(
+                        Guid.NewGuid(), soldProductId, suppliedForSold.SuppliedProductId,
+                        suppliedForSold.ProcurementCost, amount);
                     
-                    if(sellingProduct.Amount != 0)
-                        throw new Exception("");
+                    //вычесть проданные товары из доступных для продажи
+
+                    soldFromSupplies.Add(soldFromSupply);
+
+                    return (soldFromSupplies, suppliedProducts);
                 }
                 else
                 {
-                    var soldProduct = new SoldProduct(
-                        Guid.NewGuid(), saleId, sellingProduct.ProductId, suppliedForSold.AvailableAmount, sellingProduct.Price);
-
-                    suppliedForSold.AvailableAmount -= soldProduct.Amount;
-                    sellingProduct.Amount -= soldProduct.Amount;
+                    var soldFromSupply = new SoldFromSupply(
+                        Guid.NewGuid(), soldProductId, suppliedForSold.SuppliedProductId,
+                        suppliedForSold.ProcurementCost, suppliedForSold.AvailableAmount);
                     
-                    if(suppliedForSold.AvailableAmount != 0)
-                        throw new Exception("");
+                    soldFromSupplies.Add(soldFromSupply);
 
-                    var test = SoldProduct(saleId, sellingProduct, suppliedProducts);
+                    amount -= soldFromSupply.Amount;
+
+                    var result = 
+                        SoldProduct(productId, soldProductId, amount, suppliedProducts);
+
+                    soldFromSupplies = soldFromSupplies.Concat(result.Item1).ToList();
+
+                    return (soldFromSupplies, result.Item2);
                 }
             }
             else
             {
                 var suppliedForSold = suppliedProducts
-                    .Where(x => x.ProductId == sellingProduct.ProductId)
+                    .Where(x => x.ProductId == productId)
                     .OrderBy(x => x.AvailableAmount)
                     .FirstOrDefault();
                 
-                if (sellingProduct.Amount <= suppliedForSold.AvailableAmount)
+                if (amount <= suppliedForSold.AvailableAmount)
                 {
-                    var soldProduct = new SoldProduct(
-                        Guid.NewGuid(), saleId, sellingProduct.ProductId, sellingProduct.Amount, sellingProduct.Price);
-
-                    suppliedForSold.AvailableAmount -= soldProduct.Amount;//проверить изменится ли значение в коллекции
-                    sellingProduct.Amount -= soldProduct.Amount;
+                    var soldFromSupply = new SoldFromSupply(
+                        Guid.NewGuid(), soldProductId, suppliedForSold.SuppliedProductId,
+                        suppliedForSold.ProcurementCost, amount);
                     
-                    if(sellingProduct.Amount != 0)
-                        throw new Exception("");
+                    //вычесть проданные товары из доступных для продажи
+
+                    soldFromSupplies.Add(soldFromSupply);
+
+                    return (soldFromSupplies, suppliedProducts);
                 }
                 else
                 {
-                    var soldProduct = new SoldProduct(
-                        Guid.NewGuid(), saleId, sellingProduct.ProductId, suppliedForSold.AvailableAmount, sellingProduct.Price);
-
-                    suppliedForSold.AvailableAmount -= soldProduct.Amount;
-                    sellingProduct.Amount -= soldProduct.Amount;
+                    var soldFromSupply = new SoldFromSupply(
+                        Guid.NewGuid(), soldProductId, suppliedForSold.SuppliedProductId,
+                        suppliedForSold.ProcurementCost, suppliedForSold.AvailableAmount);
                     
-                    if(suppliedForSold.AvailableAmount != 0)
-                        throw new Exception("");
+                    soldFromSupplies.Add(soldFromSupply);
 
-                    var test = SoldProduct(saleId, sellingProduct, suppliedProducts);
+                    amount -= soldFromSupply.Amount;
+
+                    var result = 
+                        SoldProduct(productId, soldProductId, amount, suppliedProducts);
+
+                    soldFromSupplies = soldFromSupplies.Concat(result.Item1).ToList();
+
+                    return (soldFromSupplies, result.Item2);
                 }
             }
-        }*/
+        }
 
         private static bool AvailableSoldForRealization(
             Guid productId, ICollection<SuppliedProductAvailableForSale> suppliedProductAvailableForSales)
@@ -120,35 +145,6 @@ namespace Handlers.CommandHandlers
                           && x.ForRealization && x.AvailableAmount > 0);
 
             return result;
-        }
-
-        private static void SoldForRealization(
-            Guid saleId, SellingProduct sellingProduct, ICollection<SuppliedProductAvailableForSale> suppliedProducts)
-        {
-            var suppliedForSold = suppliedProducts
-                .Where(x => x.ProductId == sellingProduct.ProductId
-                            && x.ForRealization)
-                .OrderBy(x => x.AvailableAmount)
-                .FirstOrDefault();
-
-            if (sellingProduct.Amount <= suppliedForSold.AvailableAmount)
-            {
-                var soldProduct = new SoldProduct(
-                    Guid.NewGuid(), saleId, sellingProduct.ProductId, sellingProduct.Amount, sellingProduct.Price);
-
-                suppliedForSold.AvailableAmount -= soldProduct.Amount;//проверить изменится ли значение в коллекции
-                sellingProduct.Amount -= soldProduct.Amount;
-            }
-
-        }
-
-        private static void Sold(
-            SellingProduct sellingProduct, ICollection<SuppliedProductAvailableForSale> suppliedProducts)
-        {
-            var suppliedForSold = suppliedProducts
-                .Where(x => x.ProductId == sellingProduct.ProductId)
-                .OrderBy(x => x.AvailableAmount)
-                .FirstOrDefault();
         }
     }
 }
