@@ -25,13 +25,13 @@ export const SelectedProductItem = (props) => {
           required
           id="standard-required"
           label="Количество"
-          defaultValue="1"
+          value={product.amount}
         />
       </Grid>
       <Grid item xs={3}>
         <TextField
           id="standard-required"
-          label="Цена"
+          label="Цена за шт."
           value={product.price}
         />
       </Grid>

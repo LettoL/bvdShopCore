@@ -43,8 +43,19 @@ export const $saleInfo = createStore({
     (state, value) => ({...state, forRussia: value}))
 
 export const $saleProducts = createStore([])
-  .on(addProductToSale,
-    (state, product) => [...state, product])
+  .on(addProductToSale, (state, product) => {
+    const index = state.findIndex(x => x.id === product.id)
+    if(index !== (-1)) {
+      const curProduct = state.find(x => x.id === product.id)
+
+      return [
+        ...state.slice(0, index),
+        {...curProduct, amount: curProduct.amount + 1},
+        ...state.slice(index + 1)
+      ]
+    }
+    else return [...state, {...product, amount: 1}]
+  })
   .on(removeProductFromSale,
     (state, product) => state.filter(x => x.id !== product.id))
 
@@ -52,7 +63,7 @@ export const $cost = sample({
   source: $saleProducts,
   fn: (products) => (
     products.length > 0
-      ? products.map(x => x.price).reduce((acc, value) => (acc + value))
+      ? products.map(x => x.price * x.amount).reduce((acc, value) => (acc + value))
       : 0
   )
 })
