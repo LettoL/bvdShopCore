@@ -87,7 +87,7 @@ const useStyles = makeStyles(theme => ({
     paddingLeft: '3%',
     width: '520px',
     boxSizing: 'border-box',
-    zIndex: 99,
+    zIndex: 99999,
     backgroundColor: '#fff',
     boxShadow: '0px 6px 16px 5px rgba(0,0,0,0.2), 0px 1px 1px 0px rgba(0,0,0,0.14), 0px 1px 3px 0px rgba(0,0,0,0.12)',
     marginRight: '-460px',
