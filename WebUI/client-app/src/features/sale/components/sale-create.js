@@ -11,11 +11,12 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import { useStore } from 'effector-react';
-import { $saleCreate, updateSaleCreateState, fxCreateSale } from '../models/sale-create';
+import { $saleInfo, updateSaleInfo, fxCreateSale } from '../models/sale-create';
 import { $managers, fetchManagersFx } from '../../../models/manager/manager.store';
 import { SelectProducts } from './select-products';
 import {SelectedProductsList} from "./selected-products-list";
 import {PaymentMethods} from "./payment-methods";
+import {SaleInfo} from "./sale-info";
 
 
 export const SaleCreate = () => {
@@ -26,10 +27,10 @@ export const SaleCreate = () => {
   }, [])
 
   const managers = useStore($managers);
-  const saleCreateForm = useStore($saleCreate);
+  const saleCreateForm = useStore($saleInfo);
 
   const handleSaleFormChange = (event) => {
-    updateSaleCreateState(event);
+    updateSaleInfo(event);
   }
 
   const handleCreateSale = () => {
@@ -46,61 +47,7 @@ export const SaleCreate = () => {
         <Grid container spacing={4}>
           <Grid item xs={5}>
             <h3>Основная информация по продаже</h3>
-            <Grid container spacing={1}>
-              <Grid item xs={12}>
-                <FormControl className={classes.formControl}>
-                  <InputLabel id="demo-simple-select-label">Менеджер</InputLabel>
-                  <Select
-                    labelId="demo-simple-select-label"
-                    id="demo-simple-select"
-                    name="managerId"
-                    value={saleCreateForm.managerId}
-                    onChange={handleSaleFormChange}
-                  >
-                    {
-                      managers.map(manager => (
-                        <MenuItem key={manager.id} value={manager.id}>{manager.name}</MenuItem>
-                      ))
-                    }
-                    <MenuItem value={20}>Менеджер 2</MenuItem>
-                    <MenuItem value={30}>Менеджер 3</MenuItem>
-                  </Select>
-                </FormControl>
-              </Grid>
-              <Grid item xs={6}>
-                <TextField className={classes.formControl} name="discount" value={saleCreateForm.discount} required id="standard-required" label="Скидка" onChange={handleSaleFormChange} />
-              </Grid>
-              <Grid item xs={6}>
-                <TextField required InputProps={{
-                  readOnly: true,
-                }}
-                           className={classes.formControl}
-                           id="standard-required"
-                           label="Стоимость"
-                           name="cost"
-                           value={saleCreateForm.cost}
-                           onChange={handleSaleFormChange} />
-              </Grid>
-              <Grid item xs={4}>
-                <FormControlLabel
-                  control={<Checkbox name="deferred" />}
-                  label="Отложенная"
-                  value={saleCreateForm.deferred}
-                  onChange={handleSaleFormChange}
-                  labelPlacement="start"
-                />
-              </Grid>
-              <Grid item xs={4}>
-                <FormControlLabel
-                  control={<Checkbox />}
-                  label="По России"
-                  name="forRussia"
-                  value={saleCreateForm.forRussia}
-                  onChange={handleSaleFormChange}
-                  labelPlacement="start"
-                />
-              </Grid>
-            </Grid>
+            <SaleInfo/>
             <PaymentMethods/>
           </Grid>
           <Grid item xs={7}>
