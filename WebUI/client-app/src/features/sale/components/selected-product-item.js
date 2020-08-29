@@ -4,7 +4,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {makeStyles} from "@material-ui/core/styles";
-import {removeProductFromSale} from "../models/sale-create";
+import {changeProductAmount, changeProductPrice, removeProductFromSale} from "../models/sale-create";
 
 export const SelectedProductItem = (props) => {
   const classes = useStyles()
@@ -13,6 +13,14 @@ export const SelectedProductItem = (props) => {
 
   const removeProductHandler = () => {
     removeProductFromSale(product)
+  }
+
+  const changePrice = e => {
+    changeProductPrice({id: product.id, price: e.target.value})
+  }
+
+  const changeAmount = e => {
+    changeProductAmount({id: product.id, amount: e.target.value})
   }
 
   return (
@@ -26,6 +34,7 @@ export const SelectedProductItem = (props) => {
           id="standard-required"
           label="Количество"
           value={product.amount}
+          onChange={changeAmount}
         />
       </Grid>
       <Grid item xs={3}>
@@ -33,6 +42,7 @@ export const SelectedProductItem = (props) => {
           id="standard-required"
           label="Цена за шт."
           value={product.price}
+          onChange={changePrice}
         />
       </Grid>
       <Grid item xs={2}>

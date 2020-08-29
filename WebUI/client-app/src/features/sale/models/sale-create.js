@@ -5,8 +5,10 @@ import { setError } from "../../../shared/store/error-store";
 const API_URL = Constants.API
 const API_SALE_CREATE = API_URL + 'не забудь вписать url'
 
-export const addProductToSale = createEvent();
-export const removeProductFromSale = createEvent();
+export const addProductToSale = createEvent()
+export const removeProductFromSale = createEvent()
+export const changeProductPrice = createEvent()
+export const changeProductAmount = createEvent()
 
 export const activateCashPayment = createEvent()
 export const deactivateCashPayment = createEvent()
@@ -21,6 +23,9 @@ export const selectManagerId = createEvent()
 export const changeDiscount = createEvent()
 export const changeDeferred = createEvent()
 export const changeForRussia = createEvent()
+
+export const addError = createEvent()
+export const removeError = createEvent()
 
 export const updateSaleInfo = createEvent();
 export const resetSelectedMoneyWorker = createEvent();
@@ -58,6 +63,26 @@ export const $saleProducts = createStore([])
   })
   .on(removeProductFromSale,
     (state, product) => state.filter(x => x.id !== product.id))
+  .on(changeProductPrice,(state, product) => {
+    const index = state.findIndex(x => x.id === product.id)
+    const curProduct = state.find(x => x.id === product.id)
+
+    return [
+      ...state.slice(0, index),
+      {...curProduct, price: product.price},
+      ...state.slice(index + 1)
+    ]
+  })
+  .on(changeProductAmount, (state, product) => {
+    const index = state.findIndex(x => x.id === product.id)
+    const curProduct = state.find(x => x.id === product.id)
+
+    return [
+      ...state.slice(0, index),
+      {...curProduct, amount: product.amount},
+      ...state.slice(index + 1)
+    ]
+  })
 
 export const $cost = sample({
   source: $saleProducts,
