@@ -23,6 +23,7 @@ export const selectManagerId = createEvent()
 export const changeDiscount = createEvent()
 export const changeDeferred = createEvent()
 export const changeForRussia = createEvent()
+export const selectBuyerId = createEvent()
 
 export const addError = createEvent()
 export const removeError = createEvent()
@@ -41,6 +42,7 @@ export const $saleInfo = createStore({
   discount: 0,
   deferred: false,
   forRussia: false,
+  buyerId: 0
 })
   .on(selectManagerId,
     (state, id) => ({...state, managerId: id}))
@@ -50,6 +52,8 @@ export const $saleInfo = createStore({
     (state, value) => ({...state, deferred: value}))
   .on(changeForRussia,
     (state, value) => ({...state, forRussia: value}))
+  .on(selectBuyerId,
+    (state, value) => ({...state, buyerId: value}))
 
 export const $saleProducts = createStore([])
   .on(addProductToSale, (state, product) => {

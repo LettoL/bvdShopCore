@@ -15,7 +15,7 @@ import {
   $saleInfo,
   changeDeferred,
   changeDiscount,
-  changeForRussia,
+  changeForRussia, selectBuyerId,
   selectManagerId
 } from "../models/sale-create";
 
@@ -48,6 +48,21 @@ export const SaleInfo = () => {
               ))}
               <MenuItem value={20}>Менеджер 2</MenuItem>
               <MenuItem value={30}>Менеджер 3</MenuItem>
+            </Select>
+          </FormControl>
+          <FormControl className={classes.formControl}>
+            <InputLabel id='label-select-buyer'>Покупатель</InputLabel>
+            <Select
+              labelId={'label-select-buyer'}
+              id={'select-buyer'}
+              name={'buyerId'}
+              value={state.buyerId}
+              onChange={e => selectBuyerId(e.target.value)}
+            >
+              <MenuItem key={0} value={0}>Обычный покупатель</MenuItem>
+              <MenuItem key={1} value={1}>Необычный покупатель 1</MenuItem>
+              <MenuItem key={2} value={2}>Необычный покупатель 2</MenuItem>
+              <MenuItem key={3} value={3}>Необычный покупатель 3</MenuItem>
             </Select>
           </FormControl>
         </Grid>
