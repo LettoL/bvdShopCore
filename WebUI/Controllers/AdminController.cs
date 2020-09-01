@@ -787,7 +787,7 @@ namespace WebUI.Controllers
                 Amount = ip.Amount,
                 Date = ip.Date,
                 Type = ip.Type
-            }).OrderByDescending(ip => ip.Id));
+            }).OrderByDescending(ip => ip.Id).Take(100));
         }
 
         [HttpPost]
