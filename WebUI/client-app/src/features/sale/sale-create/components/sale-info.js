@@ -9,7 +9,7 @@ import FormControlLabel from "@material-ui/core/FormControlLabel";
 import Checkbox from "@material-ui/core/Checkbox";
 import {makeStyles} from "@material-ui/core/styles";
 import {useStore} from "effector-react";
-import {$managers, fetchManagersFx} from "../../../models/manager/manager.store";
+import {$managers, fetchManagersFx} from "../../../../models/manager/manager.store";
 import {
   $cost,
   $saleInfo,
@@ -17,7 +17,7 @@ import {
   changeDiscount,
   changeForRussia, selectBuyerId,
   selectManagerId
-} from "../models/sale-create";
+} from "../model/sale-create";
 
 export const SaleInfo = () => {
   const classes = useStyles()

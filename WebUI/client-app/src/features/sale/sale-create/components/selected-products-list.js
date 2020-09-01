@@ -1,6 +1,6 @@
 import React from "react";
 import {useStore} from "effector-react";
-import {$saleProducts} from "../models/sale-create";
+import {$saleProducts} from "../model/sale-create";
 import {SelectedProductItem} from "./selected-product-item";
 
 export const SelectedProductsList = () => {

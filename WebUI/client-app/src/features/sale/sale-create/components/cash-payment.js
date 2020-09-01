@@ -5,7 +5,7 @@ import Grid from "@material-ui/core/Grid";
 import TextField from "@material-ui/core/TextField";
 import {makeStyles} from "@material-ui/core/styles";
 import {useStore} from "effector-react";
-import {$cashPayment, activateCashPayment, changeCashSum, deactivateCashPayment} from "../models/sale-create";
+import {$cashPayment, activateCashPayment, changeCashSum, deactivateCashPayment} from "../model/sale-create";
 
 export const CashPayment = () => {
   const classes = useStyles()

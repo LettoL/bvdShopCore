@@ -1,6 +1,6 @@
 import React from "react";
 import {useStore} from "effector-react";
-import {$errors} from "../models/sale-create";
+import {$errors} from "../model/sale-create";
 
 export const Errors = () => {
 

@@ -1,5 +1,5 @@
 import {combine} from "effector";
-import {$productsInStock} from "../../product/models/store";
+import {$productsInStock} from "../../../product/models/store";
 
 export const $availableProducts = combine(
   $productsInStock,

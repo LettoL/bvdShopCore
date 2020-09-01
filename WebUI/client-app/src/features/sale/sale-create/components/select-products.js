@@ -1,19 +1,19 @@
 import React, { useEffect } from 'react'
-import { categories, fetchCategoriesFx } from "../../../store/category-store";
+import { categories, fetchCategoriesFx } from "../../../../store/category-store";
 import InputLabel from '@material-ui/core/InputLabel';
 import MenuItem from '@material-ui/core/MenuItem';
 import FormControl from '@material-ui/core/FormControl';
 import Select from '@material-ui/core/Select';
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import { addProductToSale, changeSaleCost } from "../models/sale-create";
+import { addProductToSale, changeSaleCost } from "../model/sale-create";
 import { makeStyles } from '@material-ui/core';
 import { useStore } from 'effector-react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { FixedSizeList } from 'react-window';
-import {$availableProducts} from "../models/store";
-import {fxFetchProducts} from "../../product/models/store";
+import {$availableProducts} from "../model/store";
+import {fxFetchProducts} from "../../../product/models/store";
 
 export const SelectProducts = () => {
   const classes = useStyles();

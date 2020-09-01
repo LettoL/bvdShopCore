@@ -4,7 +4,7 @@ import TextField from "@material-ui/core/TextField";
 import Button from "@material-ui/core/Button";
 import DeleteIcon from "@material-ui/icons/Delete";
 import {makeStyles} from "@material-ui/core/styles";
-import {changeProductAmount, changeProductPrice, removeProductFromSale} from "../models/sale-create";
+import {changeProductAmount, changeProductPrice, removeProductFromSale} from "../model/sale-create";
 
 export const SelectedProductItem = (props) => {
   const classes = useStyles()

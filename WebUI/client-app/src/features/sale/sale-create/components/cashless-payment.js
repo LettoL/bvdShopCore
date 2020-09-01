@@ -13,8 +13,8 @@ import {
   $cashlessPayment,
   activateCashlessPayment, changeCashlessSum,
   deactivateCashlessPayment, selectMoneyWorkerId,
-} from "../models/sale-create";
-import {$moneyWorkers, fetchMoneyWorkersFx} from "../models/money-workers-store";
+} from "../model/sale-create";
+import {$moneyWorkers, fetchMoneyWorkersFx} from "../model/money-workers-store";
 
 export const CashlessPayment = () => {
   const classes = useStyles()
