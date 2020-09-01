@@ -11,12 +11,13 @@ import FormControlLabel from '@material-ui/core/FormControlLabel';
 import Checkbox from '@material-ui/core/Checkbox';
 import Button from '@material-ui/core/Button';
 import { useStore } from 'effector-react';
-import { $saleInfo, updateSaleInfo, fxCreateSale } from '../models/sale-create';
+import {$saleInfo, updateSaleInfo, fxCreateSale, $errors} from '../models/sale-create';
 import { $managers, fetchManagersFx } from '../../../models/manager/manager.store';
 import { SelectProducts } from './select-products';
 import {SelectedProductsList} from "./selected-products-list";
 import {PaymentMethods} from "./payment-methods";
 import {SaleInfo} from "./sale-info";
+import {Errors} from "./errors";
 
 
 export const SaleCreate = () => {
@@ -26,8 +27,8 @@ export const SaleCreate = () => {
     fetchManagersFx()
   }, [])
 
-  const managers = useStore($managers);
   const saleCreateForm = useStore($saleInfo);
+  const errors = useStore($errors)
 
   const handleSaleFormChange = (event) => {
     updateSaleInfo(event);
@@ -44,6 +45,7 @@ export const SaleCreate = () => {
           <h2>Новая продажа</h2>
         </div>
         <hr />
+        <Errors/>
         <Grid container spacing={4}>
           <Grid item xs={5}>
             <h3>Основная информация по продаже</h3>
@@ -57,7 +59,13 @@ export const SaleCreate = () => {
             </Grid>
           </Grid>
         </Grid>
-        <Button className={classes.marginDefault} variant="contained" color="primary" onClick={() => handleCreateSale()}>
+        <Button
+          className={classes.marginDefault}
+          variant="contained"
+          color="primary"
+          onClick={() => handleCreateSale()}
+          disabled={errors.length > 0}
+        >
           Создать
         </Button>
       </Paper>

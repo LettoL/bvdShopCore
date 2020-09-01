@@ -1,4 +1,4 @@
-import {createEffect, createStore, createEvent, sample} from "effector";
+import {createEffect, createStore, createEvent, sample, combine} from "effector";
 import { Constants } from "../../../const";
 import { setError } from "../../../shared/store/error-store";
 
@@ -30,6 +30,10 @@ export const removeError = createEvent()
 export const updateSaleInfo = createEvent();
 export const resetSelectedMoneyWorker = createEvent();
 export const changeSaleCost = createEvent();
+
+const notEnoughMoney = 'Не достаточно средств внесено'
+const notSelectedManager = 'Не выбран менеджер'
+const incorrectProductPrice = 'Некорректная стоимость товара'
 
 
 export const $saleInfo = createStore({
@@ -118,6 +122,32 @@ export const $cashlessPayment = createStore({
   .on(selectMoneyWorkerId,
     (state, id) => ({...state, moneyWorkerId: id}))
 
+export const $erIncorrectProductPrice = sample({
+  source: $saleProducts,
+  fn: (products) => (products.length > 0 && products.map(x => +(x.price)).some(x => x <= 0))
+})
+
+export const $errors = combine(
+  $saleProducts,
+  $cashPayment,
+  $cashlessPayment,
+  $saleInfo,
+  $cost,
+  (saleProducts, cash, cashless, sale, cost) => {
+    let result = []
+
+    if(saleProducts.length > 0 && saleProducts.map(x => +(x.price)).some(x => x <= 0))
+      result.push(incorrectProductPrice)
+
+    if(sale.managerId === 0)
+      result.push(notSelectedManager)
+
+    if(((cash.active ? +cash.sum : 0) + (cashless.active ? +cashless.sum : 0)) < (cost - sale.discount))
+      result.push(notEnoughMoney)
+
+    return result
+  }
+)
 
 $saleInfo
   .on(addProductToSale,
