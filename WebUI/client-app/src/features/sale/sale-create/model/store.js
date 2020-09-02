@@ -1,15 +1,21 @@
-import {combine, createEvent, createStore} from "effector";
+import {combine, createEffect, createEvent, createStore} from "effector";
 import {$productsInStock} from "../../../product/models/store";
+import {Constants} from "../../../../const";
 
 export const changeFilterProductTitle = createEvent()
 export const selectProductCategory = createEvent()
 
-export const $availableProducts = combine(
+export const fxFetchAvailableProducts = createEffect()
+
+export const $availableProducts = createStore([])
+  .on(fxFetchAvailableProducts.doneData,
+    (_, data) => [...data.map(x => ({...x, availableAmount: x.stockAmount, id: x.productId}))])
+/*combine(
   $productsInStock,
   (products) => products
     .map(x => ({...x, availableAmount: x.stockAmount - x.incompleteAmount - x.bookingAmount}))
     .filter(x => x.availableAmount > 0)
-)
+)*/
 
 export const $filterProductTitle = createStore('')
   .on(changeFilterProductTitle, (_, value) => value)
@@ -29,3 +35,10 @@ export const $filteredProducts = combine(
       ? x.categoryId === category
       : true)
 )
+
+const API_AVAILABLE_PRODUCTS = Constants.API + 'api/products/availableForSaleOld'
+
+fxFetchAvailableProducts.use(async () => {
+  const res = await fetch(API_AVAILABLE_PRODUCTS)
+  return res.json()
+})

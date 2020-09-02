@@ -1,8 +1,9 @@
-﻿using System;
+using System;
 using Base;
 using Base.Services.Abstract;
 using Data.Entities;
 using Data.Enums;
+using Data.ViewModels.Olds;
 using Microsoft.EntityFrameworkCore;
 
 namespace Data
@@ -32,7 +33,17 @@ namespace Data
         public DbSet<ExpenseCategory> ExpenseCategories { get; set; }
         public DbSet<Expense> Expenses { get; set; }
         public DbSet<MoneyTransfer> MoneyTransfers { get; set; }
+        
+        
+        public DbSet<AvailableProduct> AvailableProducts { get; set; }
 
         public ShopContext(DbContextOptions<ShopContext> options) : base(options) { }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<AvailableProduct>().HasNoKey();
+            
+            base.OnModelCreating(modelBuilder);
+        }
     }
 }

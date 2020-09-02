@@ -46,5 +46,27 @@ namespace WebUI.API
                 return BadRequest(e.Message);
             }
         }
+
+        [HttpGet]
+        [Route("availableForSaleOld")]
+        public IActionResult GetAvailableForSaleOld(int shopId)
+        {
+            try
+            {
+                var products = _db.AvailableProducts.FromSqlRaw(
+                    "SELECT ProductId, SUM(StockAmount) AS StockAmount, Title, p.Cost AS Price, ShopId, CategoryId \n" +
+                    "FROM SupplyProducts AS sp \n" +
+                    "JOIN Products p ON sp.ProductId = p.Id \n" +
+                    "WHERE p.ShopId = 1 AND sp.StockAmount > 0\n" +
+                    "GROUP BY sp.ProductId, p.Title, p.Cost, p.ShopId, CategoryId")
+                    .ToList();
+
+                return Ok(products);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
     }
 }

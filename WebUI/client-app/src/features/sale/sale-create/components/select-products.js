@@ -11,7 +11,7 @@ import {
   $filteredProducts,
   $filterProductCategory,
   $filterProductTitle,
-  changeFilterProductTitle
+  changeFilterProductTitle, fxFetchAvailableProducts
 } from "../model/store";
 import {fxFetchProducts} from "../../../product/models/store";
 
@@ -19,7 +19,7 @@ export const SelectProducts = () => {
   const classes = useStyles();
 
   useEffect(() => {
-    fxFetchProducts()
+    fxFetchAvailableProducts()
   }, [])
 
   const products = useStore($filteredProducts)
