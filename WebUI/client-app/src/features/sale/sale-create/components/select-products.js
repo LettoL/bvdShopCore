@@ -1,18 +1,18 @@
-import React, { useEffect } from 'react'
-import { categories, fetchCategoriesFx } from "../../../../store/category-store";
-import InputLabel from '@material-ui/core/InputLabel';
-import MenuItem from '@material-ui/core/MenuItem';
-import FormControl from '@material-ui/core/FormControl';
-import Select from '@material-ui/core/Select';
+import React, {useEffect} from 'react'
 import Grid from '@material-ui/core/Grid';
 import TextField from '@material-ui/core/TextField';
-import { addProductToSale, changeSaleCost } from "../model/sale-create";
-import { makeStyles } from '@material-ui/core';
+import { addProductToSale } from "../model/sale-create";
+import {makeStyles} from '@material-ui/core';
 import { useStore } from 'effector-react';
 import ListItem from '@material-ui/core/ListItem';
 import ListItemText from '@material-ui/core/ListItemText';
 import { FixedSizeList } from 'react-window';
-import {$availableProducts} from "../model/store";
+import {
+  $filteredProducts,
+  $filterProductCategory,
+  $filterProductTitle,
+  changeFilterProductTitle
+} from "../model/store";
 import {fxFetchProducts} from "../../../product/models/store";
 
 export const SelectProducts = () => {
@@ -22,7 +22,9 @@ export const SelectProducts = () => {
     fxFetchProducts()
   }, [])
 
-  const products = useStore($availableProducts)
+  const products = useStore($filteredProducts)
+  const filterTitle = useStore($filterProductTitle)
+  const filterCategory = useStore($filterProductCategory)
 
   const handleMouseOverSelectProducts = event => {
     event.target.style.marginRight = 0;
@@ -57,20 +59,22 @@ export const SelectProducts = () => {
   }
 
   return (
-    <>
-      <div className={classes.selectProducts} onMouseEnter={(event) => handleMouseOverSelectProducts(event)} onMouseLeave={event => handleMouseOutSelectProducts(event)}>
-        <div className={classes.sectionTitle}>Товары</div>
-        <Grid container spacing={5}>
-          <Grid item xs={6}>
-            <TextField id="standard-required" label="Поиск товара" defaultValue="" />
-          </Grid>
+    <div className={classes.selectProducts} onMouseEnter={(event) => handleMouseOverSelectProducts(event)} onMouseLeave={event => handleMouseOutSelectProducts(event)}>
+      <div className={classes.sectionTitle}>Товары</div>
+      <Grid container spacing={5}>
+        <Grid item xs={6}>
+          <TextField
+            id="standard-required"
+            label="Поиск товара"
+            value={filterTitle}
+            onChange={e => changeFilterProductTitle(e.target.value)}
+          />
         </Grid>
-        <FixedSizeList className={classes.productList} height={780} width={480} itemSize={46} itemCount={products.length}>
-          {renderRow}
-        </FixedSizeList>
-
-      </div>
-    </>
+      </Grid>
+      <FixedSizeList className={classes.productList} height={780} width={480} itemSize={46} itemCount={products.length}>
+        {renderRow}
+      </FixedSizeList>
+    </div>
   )
 }
 
