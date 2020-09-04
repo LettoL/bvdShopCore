@@ -11,18 +11,21 @@ import {
   $filteredProducts,
   $filterProductCategory,
   $filterProductTitle,
-  changeFilterProductTitle, fxFetchAvailableProducts
+  changeFilterProductTitle, fxFetchAvailableProducts, selectProductCategory
 } from "../model/store";
-import {fxFetchProducts} from "../../../product/models/store";
+import FormControl from "@material-ui/core/FormControl";
+import {$categoriesFilter, fetchCategoriesFx} from "../../../../models/filter/filter.store";
 
 export const SelectProducts = () => {
   const classes = useStyles();
 
   useEffect(() => {
     fxFetchAvailableProducts()
+    fetchCategoriesFx()
   }, [])
 
   const products = useStore($filteredProducts)
+  const categories = useStore($categoriesFilter)
   const filterTitle = useStore($filterProductTitle)
   const filterCategory = useStore($filterProductCategory)
 
@@ -53,7 +56,7 @@ export const SelectProducts = () => {
 
     return (
       <ListItem button key={index} style={style} onClick={addProduct}>
-        <ListItemText primary={`${product.title} ${product.availableAmount}`} />
+        <ListItemText primary={`${product.availableAmount} / ${product.title}`} />
       </ListItem>
     );
   }
@@ -62,13 +65,27 @@ export const SelectProducts = () => {
     <div className={classes.selectProducts} onMouseEnter={(event) => handleMouseOverSelectProducts(event)} onMouseLeave={event => handleMouseOutSelectProducts(event)}>
       <div className={classes.sectionTitle}>Товары</div>
       <Grid container spacing={5}>
-        <Grid item xs={6}>
+        <Grid item xs={5}>
           <TextField
             id="standard-required"
             label="Поиск товара"
             value={filterTitle}
             onChange={e => changeFilterProductTitle(e.target.value)}
           />
+        </Grid>
+        <Grid item xs={5}>
+          <FormControl className={classes.formControl}>
+            <span>Категория</span>
+            <select
+              value={filterCategory}
+              onChange={e => selectProductCategory(e.target.value)}
+            >
+              <option value={0}>Все категории</option>
+              {categories.map(category => (
+                <option value={category.id}>{category.title}</option>
+              ))}
+            </select>
+          </FormControl>
         </Grid>
       </Grid>
       <FixedSizeList className={classes.productList} height={780} width={480} itemSize={46} itemCount={products.length}>

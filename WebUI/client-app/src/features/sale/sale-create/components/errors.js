@@ -8,6 +8,7 @@ export const Errors = () => {
 
   return (
     <>
+      {errors.length > 0 && <span style={{color: "red"}}>Ошибки:</span>}
       {errors.map(error => (
         <p>{error}</p>
       ))}

@@ -14,12 +14,16 @@ export const fetchMoneyWorkersFx = createEffect(
         setTimeout(() => {
           resolve([{
               id: 1,
-              title: 'Тайтл',
+              title: 'Первый счёт',
             },
             {
               id: 2,
-              title: 'calculatedScore',
-            }
+              title: 'Второй счёт',
+            },
+            {
+              id: 3,
+              title: 'Третий счёт',
+            },
           ])
         }, 100)
       })

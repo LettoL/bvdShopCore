@@ -1,5 +1,4 @@
 import {combine, createEffect, createEvent, createStore} from "effector";
-import {$productsInStock} from "../../../product/models/store";
 import {Constants} from "../../../../const";
 
 export const changeFilterProductTitle = createEvent()
@@ -31,8 +30,8 @@ export const $filteredProducts = combine(
     .filter(x => title !== ''
       ? x.title.toLowerCase().includes(title.toLowerCase())
       : true)
-    .filter(x => category !== 0
-      ? x.categoryId === category
+    .filter(x => +(category) !== 0
+      ? x.categoryId === +(category)
       : true)
 )
 
