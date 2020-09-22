@@ -329,5 +329,28 @@ namespace WebUI.Controllers
         {
             _productOperationService.Supply(obj);
         }
+
+        [HttpPost]
+        public IActionResult RemoveWriteOff(int id)
+        {
+            var infoProduct = _db.InfoProducts.FirstOrDefault(x => x.Id == id);
+            if(infoProduct == null)
+                throw new Exception("Информация о удалении не найден");
+
+            var supplyProduct = _db.SupplyProducts.FirstOrDefault(x => x.Id == infoProduct.SupplyProductId);
+            if(supplyProduct == null)
+                throw new Exception("Поставка не найдена");
+
+            supplyProduct.StockAmount += infoProduct.Amount;
+            supplyProduct.TotalAmount += infoProduct.Amount;
+            if (supplyProduct.RealizationAmount > 0)
+                supplyProduct.RealizationAmount += infoProduct.Amount;
+
+            _db.InfoProducts.Remove(infoProduct);
+
+            _db.SaveChanges();
+
+            return RedirectToAction("ProductHistory", "Admin");
+        }
     }
 }

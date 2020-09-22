@@ -22,15 +22,10 @@ import AppBar from '@material-ui/core/AppBar';
 import Toolbar from '@material-ui/core/Toolbar';
 import MenuIcon from '@material-ui/icons/Menu';
 import Typography from '@material-ui/core/Typography';
-import Badge from '@material-ui/core/Badge';
-import NotificationsIcon from '@material-ui/icons/Notifications';
 import Container from '@material-ui/core/Container';
 
 export const mainListItems = (
   <div>
-    <ListItem button component={Link} to="/admin/product">
-      <ListItemText primary="Товар" />
-    </ListItem>
     <ListItem button component={Link} to="/admin/import">
       <ListItemText primary="Импорт" />
     </ListItem>
@@ -55,9 +50,7 @@ export const secondListItems = (
       <ListItem button component={Link} to="/manager/saleCreate">
         <ListItemText primary="Продажа" />
       </ListItem>
-      <ListItem button component={Link} to="/">
-        <ListItemText primary="Старый интерфейс" />
-      </ListItem>
+      <button><a href={'/'}>Старый интерфейс</a></button>
   </div>
 );
 

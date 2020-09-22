@@ -79,13 +79,26 @@
                                         <td>Перенос</td>
                                     }
                                     <td>@o.Shop?.Title</td>
-                                    <td>
-                                        <form class="deleteForm" style="display: inline-block" action="/Admin/SupplyAnnulment/@o.Id" method="post">
-                                            <button class="btn btn-danger">
-                                                <i class="fa fa-trash" aria-hidden="true"></i>
-                                            </button>
-                                        </form>
-                                    </td>
+                                    @if (o.Type.ToString() == "Writeoff")
+                                    {
+                                        <td>
+                                            <form class="deleteForm" style="display: inline-block" action="/Product/RemoveWriteOff/@o.Id" method="post">
+                                                <button class="btn btn-danger">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    }
+                                    else
+                                    {
+                                        <td>
+                                            <form class="deleteForm" style="display: inline-block" action="/Admin/SupplyAnnulment/@o.Id" method="post">
+                                                <button class="btn btn-danger">
+                                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                                </button>
+                                            </form>
+                                        </td>
+                                    }
                                 </tr>
                             }
                         </tbody>
