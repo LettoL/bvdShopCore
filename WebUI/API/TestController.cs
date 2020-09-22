@@ -58,27 +58,48 @@ namespace WebUI.API
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var supplies1 = new Dictionary<int, int>();
+            var productInf = _shopContext.ProductInformations
+                .GroupBy(x => x.SaleId)
+                .Select(x => new
+                {
+                    SaleId = x.Key,
+                    Count = x.Count()
+                }).ToList();
+
+            var saleProducts = _shopContext.SalesProducts
+                .GroupBy(x => x.SaleId)
+                .Select(x => new
+                {
+                    SaleId = x.Key,
+                    Count = x.Count()
+                }).ToList();
+
+            var test = new List<int>();
+
+            foreach (var product in productInf)
+            {
+                if(product.Count != (saleProducts
+                    .FirstOrDefault(x => x.SaleId == product.SaleId)?.Count ?? 0))
+                    test.Add(product.SaleId);
+            }
+            
+            
+            
+            
+            
+            
+            
+            
+            /*var supplies1 = new Dictionary<int, int>();
             var supplies2 = new Dictionary<int, (int, int)>();
             
-            supplies1.Add(8495, 19755);
-            supplies1.Add(8494, 4320);
-            supplies1.Add(8492, 3285);
-            supplies1.Add(8490, 3285);
-            
-            supplies2.Add(8496, (21915, 14886));
-            supplies2.Add(8493, (4320, 14942));
-            //supplies2.Add(8493, (4320, 15045));
-            //supplies2.Add(8491, (5490, 15196));
-            supplies2.Add(8491, (5490, 15310));
-            supplies2.Add(8489, (21915, 14789));
-            supplies2.Add(8488, (21915, 15087));
-            supplies2.Add(8487, (21915, 14897));
+            supplies2.Add(7641, (4772, 15959));
 
-            supplies1.Select(x => helper1(_shopContext, x.Key, x.Value)).ToList();
+            //supplies1.Select(x => helper1(_shopContext, x.Key, x.Value)).ToList();
             supplies2.Select(x => helper2(_shopContext, x.Key, x.Value.Item1, x.Value.Item2)).ToList();
 
-            _shopContext.SaveChanges();
+            _shopContext.SaveChanges();*/
+            
             
             /*var saleId = 13504;
             var productInformation = _shopContext.ProductInformations
