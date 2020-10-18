@@ -60,16 +60,21 @@
                 <div class="table-responsive">
                     <table id="result" class="table table-striped">
                         <thead>
-                            <tr>
-                                <th>Дата</th>
-                                <th>Сумма</th>
-                                <th>Тип оплаты</th>
-                                <th>Тип операции</th>
-                                <th>Счета</th>
-                                <th>Магазин</th>
-                                <th>Комментарий</th>
-                                <th>Подробно</th>
-                            </tr>
+                        <tr>
+                          <th colspan="6">
+                            <span>Всего расходов на сумму: @Math.Abs(ViewBag.Sum) рублей</span>
+                          </th>
+                        </tr>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Тип оплаты</th>
+                            <th>Тип операции</th>
+                            <th>Счета</th>
+                            <th>Магазин</th>
+                            <th>Комментарий</th>
+                            <th>Подробно</th>
+                        </tr>
                         </thead>
                         <tbody>
                             @foreach (var o in Model)

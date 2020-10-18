@@ -749,6 +749,8 @@ namespace WebUI.Controllers
 
             var result = MoneyHistoryHandlers.GetMoneyHistory(_postgresContext, _db);
 
+            ViewBag.Sum = result.Sum(x => x.Sum);
+
             return View(result);
         }
 
@@ -765,6 +767,8 @@ namespace WebUI.Controllers
                 _db,
                 new MoneyHistoryFilterQuery(date1, date2, shopId, score, type));
 
+            ViewBag.Sum = result.Sum(x => x.Sum);
+            
             return PartialView(result);
         }
 
