@@ -48,6 +48,10 @@ export const ArchiveSaleListItem = props => {
                       <br/>
                     </>
                   ))}
+                  <span>
+                    Дата удаления: {sale.deletedDate !== null ? sale.deletedDate : "Не указана" }
+                  </span>
+                  <br/>
                 </Grid>
                 <Grid item xs={9}>
                   {sale.products.map(product => (

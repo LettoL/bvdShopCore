@@ -256,6 +256,7 @@ namespace WebUI.Controllers
             {
                 Buyer = sale.Partner?.Title ?? "Обычный покупатель",
                 Date = sale.Date,
+                DeletedDate = DateTime.Now.AddHours(3),
                 Discount = sale.Discount,
                 Margin = sale.Margin,
                 Number = sale.Id,

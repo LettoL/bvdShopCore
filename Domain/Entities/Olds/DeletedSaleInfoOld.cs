@@ -14,6 +14,7 @@ namespace Domain.Entities.Olds
     {
         public int Number { get; set; }
         public DateTime Date { get; set; }
+        public DateTime? DeletedDate { get; set; }
         public decimal Sum { get; set; }
         public decimal Discount { get; set; }
         public decimal Margin { get; set; }
