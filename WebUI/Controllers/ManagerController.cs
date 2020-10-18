@@ -739,7 +739,7 @@ namespace WebUI.Controllers
             var userName = HttpContext.User.Identity.Name;
             var userId = _userService.All().First(u => u.Login == userName).Id;
 
-            _moneyOperationService.Expense(expense.MoneyWorkerId, expense.Sum,
+            _moneyOperationService.Expense(_postgresContext, expense.MoneyWorkerId, expense.Sum,
                 _moneyOperationService.PaymentTypeByMoneyWorker(expense.MoneyWorkerId),
                 expense.ExpenseCategory, expense.Comment, _shopService.ShopByUserId(_db, userId).Id);
 

@@ -10,7 +10,7 @@ namespace Handlers.QueryHandlers
 {
     public static class GetSuppliedProductsAvailableForSale
     {
-        public static async Task<ICollection<SuppliedProductAvailableForSale>> Execute
+        /*public static async Task<ICollection<SuppliedProductAvailableForSale>> Execute
             (ICollection<Guid> productsId, Guid shopId, PostgresContext db)
         {
             var suppliedProducts = await db.SuppliedProducts
@@ -40,7 +40,7 @@ namespace Handlers.QueryHandlers
                 .ToList();
 
             return result;
-        }
+        }*/
     }
 
     public class SuppliedProductAvailableForSale

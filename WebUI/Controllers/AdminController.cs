@@ -991,6 +991,7 @@ namespace WebUI.Controllers
                 return RedirectToAction("Login", "Account");
             
             ViewBag.CategoryExpense = _expenseCategoryService.All();
+            ViewBag.Shops = _db.Shops.ToList();
 
             return View();
         }
@@ -998,9 +999,9 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult Expense(ExpenseVM expense)
         {
-            _moneyOperationService.Expense(expense.MoneyWorkerId, expense.Sum,
+            _moneyOperationService.Expense(_postgresContext, expense.MoneyWorkerId, expense.Sum,
                 _moneyOperationService.PaymentTypeByMoneyWorker(expense.MoneyWorkerId),
-                expense.ExpenseCategory, expense.Comment);
+                expense.ExpenseCategory, expense.Comment, expense.For);
 
             return RedirectToAction("Index");
         }
@@ -1410,12 +1411,14 @@ namespace WebUI.Controllers
             ViewBag.Categories = _expenseCategoryService.All();
             ViewBag.Scores = _moneyWorkerService.All();
             ViewBag.ExpenseSum = expenses.Sum(x => x.InfoMoney.Sum);
+            ViewBag.Shops = _db.Shops.ToList();
 
             return View(expenses.Take(300));
         }
 
         [HttpPost]
-        public IActionResult ExpenseListFilter(int category, string date1, string date2, int userId, int score)
+        public IActionResult ExpenseListFilter(int category, string date1, string date2,
+            int userId, int score, int forId)
         {
             var user = _userService.All().FirstOrDefault(u => u.Id == userId);
             ViewBag.User = user;
@@ -1454,6 +1457,16 @@ namespace WebUI.Controllers
 
             if (score > 0)
                 result = result.Where(x => x.InfoMoney.MoneyWorkerId == score);
+
+            if (forId > -1)
+            {
+                var expensesId = _postgresContext.ExpensesOld
+                    .Where(x => x.ForId == forId)
+                    .Select(x => x.Id)
+                    .ToList();
+
+                result = result.Where(x => expensesId.Contains(x.Id));
+            }
 
             result = result
                 .Include(x => x.ExpenseCategory)

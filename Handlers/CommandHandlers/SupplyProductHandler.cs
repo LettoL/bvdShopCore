@@ -7,7 +7,7 @@ namespace Handlers.CommandHandlers
 {
     public static class SupplyProductHandler
     {
-        public static async Task<SuppliedProduct> Execute(this SupplyProduct command, PostgresContext db)
+       /* public static async Task<SuppliedProduct> Execute(this SupplyProduct command, PostgresContext db)
         {
             var create = await db.SuppliedProducts
                 .AddAsync(new SuppliedProduct(command));
@@ -15,6 +15,6 @@ namespace Handlers.CommandHandlers
             await db.SaveChangesAsync();
 
             return create.Entity;
-        }
+        }*/
     }
 }

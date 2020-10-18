@@ -35,6 +35,14 @@
                             <option value="@category.Id">@category.Title</option>
                         }
                     </select><br />
+                    <label>Расход для:</label>
+                    <select name="for" class="form-control">
+                        <option value="0">Офис</option>
+                        @foreach (var shop in ViewBag.Shops)
+                        {
+                            <option value="@shop.Id">@shop.Title</option>
+                        }
+                    </select>
                     <label>Коментарий</label>
                     <input type="text" class="form-control" name="comment" /><br />
                     <button id="netroj" class="btn btn-submit">Сохранить</button>

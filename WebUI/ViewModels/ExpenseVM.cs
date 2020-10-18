@@ -7,5 +7,6 @@
         public int ExpenseCategory { get; set; }
         public decimal Sum { get; set; }
         public string Comment { get; set; }
+        public int For { get; set; }
     }
 }

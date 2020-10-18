@@ -34,6 +34,16 @@
                         </select>
                     </form>
                     <form style="display: inline-block">
+                        <select name="forId" id="forId" onchange="filterByFor(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="-1">Выбрать цель</option>
+                            <option value="0">Офис</option>
+                            @foreach (var shop in ViewBag.Shops)
+                            {
+                                <option value="@shop.Id">@shop.Title</option>
+                            }
+                        </select>
+                    </form>
+                    <form style="display: inline-block">
                         <input placeholder="Дата с:" type="text" name="value" id="dateFilter1" onchange="filterByDate1(event.target)" class="form-control" style="width: 200px; display: inline-block" />
                     </form>
                     <form style="display: inline-block">
@@ -140,32 +150,39 @@
     let category = null;
     let score = null;
     let userId = @ViewBag.UserId;
-
+    let forId = null;
+    
     function filterByDate1(value) {
         date1 = value.value;
 
-        loadData(category, date1, date2, userId, score);
+        loadData(category, date1, date2, userId, score, forId);
     }
 
     function filterByDate2(value) {
         date2 = value.value;
 
-        loadData(category, date1, date2, userId, score);
+        loadData(category, date1, date2, userId, score, forId);
     }
 
     function filterByCategory(value) {
         category = value.srcElement.value;
 
-        loadData(category, date1, date2, userId, score);
+        loadData(category, date1, date2, userId, score, forId);
     }
 
     function filterByScore(value) {
         score = value.srcElement.value;
 
-        loadData(category, date1, date2, userId, score);
+        loadData(category, date1, date2, userId, score, forId);
+    }
+    
+    function filterByFor(value) {
+      forId = value.srcElement.value;
+      
+      loadData(category, date1, date2, userId, score, forId);
     }
 
-    function loadData(category, date1, date2, userId, score) {
+    function loadData(category, date1, date2, userId, score, forId) {
         $('#result').load(
             "/Admin/ExpenseListFilter",
             {
@@ -173,7 +190,8 @@
                 date1: date1,
                 date2: date2,
                 userId: userId,
-                score: score
+                score: score,
+                forId: forId
             }
         );
     }

@@ -5,6 +5,8 @@ using Base.Services.Abstract;
 using Data.Entities;
 using Data.Enums;
 using Data.Services.Abstract;
+using Domain.Entities.Olds;
+using PostgresData;
 
 namespace Data.Services.Concrete
 {
@@ -48,8 +50,8 @@ namespace Data.Services.Concrete
                 });
         }
 
-        public void Expense(int moneyWorkerId, decimal sum, PaymentType paymentType,
-            int categoryId, string comment)
+        public void Expense(PostgresContext postgresContext, int moneyWorkerId, decimal sum, PaymentType paymentType,
+            int categoryId, string comment, int forId)
         {
             var createdInfoMoney = _infoMoneyService.Create(new InfoMoney()
             {
@@ -60,15 +62,18 @@ namespace Data.Services.Concrete
                 Comment = comment
             });
 
-            _expenseService.Create(new Expense()
+            var expense = _expenseService.Create(new Expense()
             {
                 InfoMoneyId = createdInfoMoney.Id,
                 ExpenseCategoryId = categoryId,
             });
+
+            postgresContext.ExpensesOld.Add(new ExpenseOld(expense.Id, forId));
+            postgresContext.SaveChanges();
         }
 
-        public void Expense(int moneyWorkerId, decimal sum, PaymentType paymentType,
-            int categoryId, string comment, int shopId)
+        public void Expense(PostgresContext postgresContext, int moneyWorkerId, decimal sum, PaymentType paymentType,
+            int categoryId, string comment, int shopId, int forId)
         {
             var createdInfoMoney = _infoMoneyService.Create(new InfoMoney()
             {
@@ -79,12 +84,15 @@ namespace Data.Services.Concrete
                 Comment = comment
             });
 
-            _expenseService.Create(new Expense()
+            var expense = _expenseService.Create(new Expense()
             {
                 InfoMoneyId = createdInfoMoney.Id,
                 ExpenseCategoryId = categoryId,
                 ShopId = shopId
             });
+
+            postgresContext.ExpensesOld.Add(new ExpenseOld(expense.Id, forId));
+            postgresContext.SaveChanges();
         }
 
         public PaymentType PaymentTypeByMoneyWorker(int moneyWorkerId)
