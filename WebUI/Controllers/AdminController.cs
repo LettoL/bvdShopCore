@@ -146,6 +146,7 @@ namespace WebUI.Controllers
                 return RedirectToAction("Login", "Account");
             
             var saleManagers = await _postgresContext.SaleManagersOld.ToListAsync();
+            var bookingManagers = await _postgresContext.BookingManagersOld.ToListAsync();
 
             var salesId = saleManagers.Select(x => x.SaleId).ToList();
             var sales = await _db.Sales
@@ -174,16 +175,41 @@ namespace WebUI.Controllers
                 ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
             });
 
-            var result = managers.Select(x => new ManagerDto()
+            var managers1 = managers.Select(x => new
+            {
+                Id = x.Id,
+                Name = x.Name,
+                SaleIds = saleManagers
+                    .Where(z => z.ManagerId == x.Id)
+                    .Select(z => z.SaleId).ToList(),
+                BookingIds = bookingManagers
+                    .Where(z => z.ManagerId == x.Id)
+                    .Select(z => z.BookingId).ToList()
+            }).ToList();
+
+            var infoMoneys = _db.InfoMonies
+                .Where(x => x.SaleId != null || x.BookingId != null)
+                .ToList();
+
+            var a = infoMoneys
+                .Where(x => x.SaleId != null && (x.SaleId == 699 || x.SaleId == 700))
+                .Sum(x => x.Sum);
+            
+            var result = managers1.Select(x => new ManagerDto()
             {
                 Id = x.Id,
                 Name = x.Name,
                 Margin = salesWithManager
                     .Where(z => z.ManagerId == x.Id)
                     .Sum(z => z.Margin),
-                Sum = salesWithManager
-                    .Where(z => z.ManagerId == x.Id)
+                Sum = infoMoneys
+                    .Where(z => z.SaleId != null && x.SaleIds.Contains((int)z.SaleId))
                     .Sum(z => z.Sum)
+                    + infoMoneys
+                        .Where(z => z.SaleId == null
+                                    && z.BookingId != null
+                                    && x.BookingIds.Contains((int)z.BookingId))
+                        .Sum(z => z.Sum)
             }).ToList();
             
             return View(result);
@@ -1382,6 +1408,7 @@ namespace WebUI.Controllers
             sale.PrimeCost = finalCost;
             sale.Payment = true;
             sale.Sum = paymentsCash + paymentsCashless;
+            sale.Date = DateTime.Now.AddHours(3);
 
             if (realization == true)
             {
@@ -1462,11 +1489,11 @@ namespace WebUI.Controllers
             if (score > 0)
                 result = result.Where(x => x.InfoMoney.MoneyWorkerId == score);
 
-            if (forId > -1)
+            if (forId > -100)
             {
                 var expensesId = _postgresContext.ExpensesOld
                     .Where(x => x.ForId == forId)
-                    .Select(x => x.Id)
+                    .Select(x => x.ExpenseId)
                     .ToList();
 
                 result = result.Where(x => expensesId.Contains(x.Id));
@@ -1666,6 +1693,10 @@ namespace WebUI.Controllers
                 .Include(x => x.Sale)
                 .Where(x => x.Sale.Payment == true
                             && x.Sale.Date.Date >= fromDate)
+                .ToList();
+
+            var infoMoneys = _db.InfoMonies
+                .Where(x => x.SaleId != null || x.BookingId != null)
                 .ToList();
 
             var productInfromations = _db.ProductInformations

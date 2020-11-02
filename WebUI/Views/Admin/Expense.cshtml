@@ -37,11 +37,12 @@
                     </select><br />
                     <label>Расход для:</label>
                     <select name="for" class="form-control">
-                        <option value="0">Офис</option>
-                        @foreach (var shop in ViewBag.Shops)
-                        {
-                            <option value="@shop.Id">@shop.Title</option>
-                        }
+                      @foreach (var shop in ViewBag.Shops)
+                      {
+                        <option value="@shop.Id">@shop.Title</option>
+                      }
+                      <option value="0">Офис</option>
+                      <option value="-1">РФ</option>
                     </select>
                     <label>Коментарий</label>
                     <input type="text" class="form-control" name="comment" /><br />

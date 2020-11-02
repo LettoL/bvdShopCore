@@ -319,7 +319,8 @@ namespace WebUI.Controllers
                 var createdSale = _saleService.Create(_db, saleCreate, json.UserId);
 
 
-                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                _postgresContext.SaleManagersOld.Add(
+                    new SaleManagerOld(managerId, createdSale.Id, DateTime.Now.AddHours(3)));
                 _postgresContext.SaveChanges();
                 
 
@@ -628,7 +629,8 @@ namespace WebUI.Controllers
                 var managerId = _postgresContext.BookingManagersOld
                     .FirstOrDefault(x => x.BookingId == id).ManagerId;
 
-                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSaleId));
+                _postgresContext.SaleManagersOld.Add(
+                    new SaleManagerOld(managerId, createdSaleId, booking.Date));
                 _postgresContext.SaveChanges();
             }
             
@@ -729,6 +731,7 @@ namespace WebUI.Controllers
 
             ViewBag.ShopId = _shopService.All().FirstOrDefault(s => s.Id == user.ShopId);
             ViewBag.CategoryExpense = _expenseCategoryService.All();
+            ViewBag.Shops = _db.Shops.ToList();
 
             return View();
         }
@@ -741,7 +744,7 @@ namespace WebUI.Controllers
 
             _moneyOperationService.Expense(_postgresContext, expense.MoneyWorkerId, expense.Sum,
                 _moneyOperationService.PaymentTypeByMoneyWorker(expense.MoneyWorkerId),
-                expense.ExpenseCategory, expense.Comment, _shopService.ShopByUserId(_db, userId).Id);
+                expense.ExpenseCategory, expense.Comment, _shopService.ShopByUserId(_db, userId).Id, expense.For);
 
             return RedirectToAction("Index");
         }
@@ -871,7 +874,8 @@ namespace WebUI.Controllers
                 
                 _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
 
-                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                _postgresContext.SaleManagersOld.Add(
+                    new SaleManagerOld(managerId, createdSale.Id, DateTime.Now.AddHours(3)));
                 
                 _postgresContext.SaveChanges();
                 
@@ -948,7 +952,6 @@ namespace WebUI.Controllers
 
                 var managerId = _postgresContext.Managers.FirstOrDefault(x => x.Name == sale.Manager)?.Id
                                 ?? throw new Exception("Не указан менеджер");
-                
 
                 var user = _userService.All().FirstOrDefault(x => x.Id == sale.UserId);
 
@@ -1014,7 +1017,8 @@ namespace WebUI.Controllers
                 
                 _postgresContext.SalesFromStockOld.Add(saleFromStockOld);
 
-                _postgresContext.SaleManagersOld.Add(new SaleManagerOld(managerId, createdSale.Id));
+                _postgresContext.SaleManagersOld.Add(
+                    new SaleManagerOld(managerId, createdSale.Id, DateTime.Now.AddHours(3)));
                 
                 _postgresContext.SaveChanges();
 
