@@ -62,13 +62,15 @@ export const Products = () => {
     {label: "Категория", key: 'category'}
   ]
 
+  console.log(products)
+
   const data = products.map(product => (
     {
       code: product.code,
       title: product.title,
       amount: product.amount,
-      price: product.price,
-      primeCost: product.primeCost,
+      price: (product.price + '').replace('.', ','),
+      primeCost: (product.primeCost + '').replace('.', ','),
       shop: product.shop,
       category: product.category
     }
