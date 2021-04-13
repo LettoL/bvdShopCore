@@ -1,0 +1,173 @@
+﻿@{
+    ViewData["Title"] = "List";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Ожидаемые поставки</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet" id="list">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список ожидаемых поставок
+                </div>
+                <div id="filters" class="portlet-filters">
+                    <input type="text" v-model="productTitle" class="form-control" placeholder="Название товара">
+                    <select v-model="curSupplier" class="form-control">
+                        <option value="0">Выбрать поставщика</option>
+                        <option v-for="supplier in suppliers" :value="supplier.id">{{supplier.title}}</option>
+                    </select>
+                    <select v-model="curShop" class="form-control">
+                        <option value="-1">Выбрать магазин</option>
+                        <option value="0">Магазин не выбран</option>
+                        <option v-for="shop in shops" v-bind:value="shop.id">{{shop.title}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Товар</th>
+                            <th>Кол-во</th>
+                            <th>Поставщик</th>
+                            <th>Магазин</th>
+                            <th>Закупочная</th>
+                            <th>Подтвердить</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr v-for="supply in filteredSupplies">
+                            <td>{{supply.title}}</td>
+                            <td>{{supply.amount}}</td>
+                            <td>{{supply.supplier}}</td>
+                            <td>
+                                <select 
+                                    v-model="supply.shopId" 
+                                >
+                                    <option value="0">Магазин не выбран</option>
+                                    <option
+                                        v-for="shop in shops"
+                                        v-bind:value="shop.id"
+                                    >
+                                        {{shop.title}}
+                                    </option>
+                                </select>
+                            </td>
+                            <td>{{supply.procurementCost}}</td>
+                            <td>
+                                <a href="/ScheduledSupply/ConfirmSupply" class="btn btn-dark">
+                                    <i class="fa fa fa-check" aria-hidden="true"></i>
+                                </a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+    
+    /*var filters = new Vue({
+        el: '#filters',
+        data: {
+          shops: [],
+          suppliers: [],
+          curShop: 0,
+          curSupplier: 0,
+          productTitle: ''
+        },
+        created: function () {
+          fetch('/ScheduledSupply/getfilters', {
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+          })
+          .then((res) => {
+            return res.json()
+          })
+          .then((res) => {
+            this.shops.push(...res.shops)
+            this.suppliers.push(...res.suppliers)
+          })
+        }
+    })*/
+
+    var list = new Vue({
+        el: '#list',
+        data: {
+          supplies: [],
+          shops: [],
+          suppliers: [],
+          curShop: 0,
+          curSupplier: 0,
+          productTitle: ''
+        },
+        computed: {
+          filteredSupplies: function () {
+            return this.supplies
+                .filter(x => +this.curShop !== -1
+                    ? x.shopId === +this.curShop
+                    : true)
+                .filter(x => +this.curSupplier !== 0
+                    ? x.supplierId === +this.curSupplier
+                    : true)
+                .filter(x => this.productTitle !== ''
+                    ? x.title.includes(this.productTitle)
+                    : true)
+          }
+        },
+        created: function () {
+          
+          fetch('/ScheduledSupply/getfilters', {
+                      headers: {'Content-Type': 'application/json'},
+                      credentials: 'include'
+                    })
+                    .then((res) => {
+                      return res.json()
+                    })
+                    .then((res) => {
+                      this.shops.push(...res.shops)
+                      this.suppliers.push(...res.suppliers)
+                    })
+          
+          fetch('/ScheduledSupply/getlist', {
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+          })
+          .then((res) => {
+            return res.json()
+          })
+          .then((res) => {
+            console.log(res)
+            this.supplies.push(...res)
+          })
+        }
+    })
+    
+    function changeShop(id, shopId){
+      console.log(id, shopId)
+      var data = {
+        scheduledSupplyId: id, 
+        shopId: shopId
+      }
+      
+      fetch("/ScheduledSupply/ChangeShop",
+        {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          //redirect: 'follow',
+          credentials: 'include',
+          body: JSON.stringify(data)
+        }
+      )
+    }
+
+</script>

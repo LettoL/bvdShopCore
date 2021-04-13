@@ -1,0 +1,28 @@
+﻿<table id="result" class="table table-striped">
+    <thead>
+        <tr>
+            <th>Номер</th>
+            <th>Дата</th>
+            <th>Сумма</th>
+            <th>Остаток</th>
+            <th>Всего</th>
+            <th>Магазин</th>
+            <th>Товар</th>
+        </tr>
+    </thead>
+    <tbody>
+        @foreach (var s in Model)
+        {
+        <tr>
+            <td>@s.Id</td>
+            <td>@s.Date</td>
+            <td>@s.Sum</td>
+            <td>@s.Rest</td>
+            <td>@s.Total</td>
+            <td>@s.ShopTitle</td>
+            <td>@s.ProductTitle</td>
+        </tr>
+        }
+    </tbody>
+</table>
+

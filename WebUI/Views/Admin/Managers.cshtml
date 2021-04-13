@@ -24,6 +24,7 @@
                             <th>Имя</th>
                             <th>Маржа</th>
                             <th>Оборот</th>
+                            <th>Действия</th>
                         </tr>
                     </thead>
                     <tbody>
@@ -33,6 +34,14 @@
                             <td>@m.Name</td>
                             <td>@m.Margin</td>
                             <td>@m.Sum</td>
+                            <td>
+                                <a href="/Admin/EditManager/@m.Id" class="btn btn-dark">
+                                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                                </a>
+                                <a href="/Admin/DeleteManager/@m.Id" class="btn btn-danger deleteForm">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </a>
+                            </td>
                         </tr>
                         }
                     </tbody>

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using Data;
 using Data.Entities;
 using Data.Enums;
+using Domain.Entities.Olds;
 using Domain.Entities.Supplies;
 using Handlers.CommandHandlers;
 using Microsoft.AspNetCore.Mvc;
@@ -161,6 +162,19 @@ namespace WebUI.API
                                 Date = date,
                                 SupplyProduct = supplyProduct.Entity
                             });
+
+                        _db.SaveChanges();
+
+                        _postgresContext.ProductOperations.Add(new ProductOperation(
+                            createProduct.Entity.Id,
+                            product.Amount,
+                            DateTime.Now.AddHours(3),
+                            procurementCost,
+                            (SupplyType) realization == SupplyType.ForRealization,
+                            supplierId,
+                            StorageType.Shop));
+                        
+                        _postgresContext.SaveChanges();
                     }
                     else
                     {
@@ -197,10 +211,20 @@ namespace WebUI.API
                                 Date = date,
                                 SupplyProduct = supplyProduct.Entity
                             });
+
+                        _db.SaveChanges();
+
+                        _postgresContext.ProductOperations.Add(new ProductOperation(
+                            existingProduct.Id,
+                            product.Amount,
+                            DateTime.Now.AddHours(3),
+                            procurementCost,
+                            (SupplyType) realization == SupplyType.ForRealization,
+                            supplierId,
+                            StorageType.Shop));
+                        _postgresContext.SaveChanges();
                     }
                 }
-
-                _db.SaveChanges();
 
                 return Ok(result);
             }

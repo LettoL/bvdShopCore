@@ -1,0 +1,22 @@
+﻿<table id="result" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Менеджер</th>
+                            <th>Комментарий</th>
+                        </tr>
+                        </thead>
+                        <tbody>                           
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>@c.DateTime.ToString("dd.MM.yyyy")</td>
+                                <td>@Math.Abs(c.Sum)</td>
+                                <td>@c.ManagerName</td>
+                                <td>@c.Comment</td>
+                            </tr>
+                        }
+                        </tbody>
+</table>
+

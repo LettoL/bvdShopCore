@@ -12,6 +12,8 @@ namespace Data.FiltrationModels
         public string periodEnd { get; set; }
         public DateTime? startDate { get; set; }
         public DateTime? endDate { get; set; }
+        public string marginPercent { get; set; }
+        public int saleId { get; set; }
     }
 }
 

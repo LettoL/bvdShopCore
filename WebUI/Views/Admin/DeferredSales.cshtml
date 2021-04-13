@@ -1,0 +1,86 @@
+﻿@{
+    ViewData["Title"] = "DeferredSales";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<h3 class="page-title">Продажи <small>Просмотр продаж</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список Продаж
+                </div>
+                <div class="portlet-filters">
+                    <form id="filter" style="display: inline-block">
+                        <select name="shopId" id="shopId" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать Магазин</option>
+                            @foreach (var s in ViewBag.Shops)
+                            {
+                                <option value="@s.Id">@s.Title</option>
+                            }
+                        </select>
+                        <button class="btn btn-dark" style="position: relative; top: -3px">Поиск</button>
+                    </form>
+                </div>
+                <div class="clearfix"></div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Номер</th>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Остаток</th>
+                            <th>Всего</th>
+                            <th>Магазин</th>
+                            <th>Товар</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        @foreach (var s in Model)
+                        {
+                            <tr>
+                                <td>@s.Id</td>
+                                <td>@s.Date</td>
+                                <td>@s.Sum</td>
+                                <td>@s.Rest</td>
+                                <td>@s.Total</td>
+                                <td>@s.ShopTitle</td>
+                                <td>@s.ProductTitle</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    let shopId = null;
+
+    let formSubmit = document.getElementById('filter')
+
+    formSubmit.addEventListener('submit', loadData)
+
+    function loadData(event) {
+        event.preventDefault();        
+        
+        shopId = document.getElementById('shopId').value;
+
+        var filterBody = {
+            shopId: +shopId
+        }
+        
+        $('#result').load(
+            "/Admin/DeferredSalesFilter",
+            filterBody
+        );
+    }
+
+</script>

@@ -16,6 +16,9 @@
             <div class="portlet-body">
                 <div id="form">
                     <div id="first_step">
+                        <div class="steps">
+                            <button class="nextStep btn btn-dark" onclick="changeStep('second'); saleForm.costInit(); saleForm.initProps(); saleProduct.amountCheck()">Далее</button>
+                        </div>
                         <div class="row">
                             <div class="col-md-3" style="max-height: 520px; overflow: auto;">
                                 <div id="category">
@@ -63,9 +66,6 @@
                                 }
                             </select>
                         </div>
-                    </div>
-                    <div class="steps">
-                        <button class="nextStep btn btn-dark" onclick="changeStep('second'); saleForm.costInit(); saleForm.initProps(); saleProduct.amountCheck()">Далее</button>
                     </div>
                 </div>
                 <div id="second_step" style="display: none">
@@ -136,7 +136,12 @@
                     </div>
                     <div class="steps">
                         <button class="prevStep btn btn-dark" onclick="changeStep('first')">Назад</button>
-                        <button class="nextStep btn btn-dark" onclick="changeStep('third'); saleForm.cashlessCheck(); confirmForm.initProps()">Далее</button>
+                        <button
+                            class="nextStep btn btn-dark"
+                            onclick="changeStep('third'); saleForm.cashlessCheck(); confirmForm.initProps()"
+                        >
+                            Далее
+                        </button>
                     </div>
                 </div>
                 <div id="third_step" style="display: none">
@@ -164,7 +169,14 @@
                     </div>
                     <div class="steps">
                         <button class="prevStep btn btn-dark" onclick="changeStep('second')">Назад</button>
-                        <button class="btn btn-dark" onclick="send(); this.disabled=true;">Отправить</button>
+                        <button
+                            id="confirm_form_button"
+                            class="btn btn-dark"
+                            onclick="send(); this.disabled=true;"
+                        >
+                            Отправить
+                        </button>
+                        <span id="confirm_form_error" class="error" style="padding: 25px 10px">Внесённая сумма плюс скидка не равна стоимости товара</span>
                     </div>
                 </div>
             </div>
@@ -182,6 +194,8 @@
     var curStep = "first";
     var userId = @ViewBag.userId;
     console.log("Пользователь с ID: " + userId);
+    
+    var sumEqualCost = false;
 
     var productSearch = new Vue({
         el: "#product_search",
@@ -345,7 +359,7 @@
             error: null,
             payment: "true",
             forRussian: "false",
-            manager: ""      
+            manager: "" 
         },
         methods: {
             initProps: function() {
@@ -417,7 +431,7 @@
         },
         created: 
             function() {
-                fetch('/api/managers', {
+                fetch('/api/managers/getlist', {
                     headers: { 'Content-Type': 'application/json'},
                     credentials: 'include'
                 })
@@ -527,6 +541,18 @@
         document.getElementById(curStep + "_step").style.display = "none";
         this.curStep = step;
         document.getElementById(step + "_step").style.display = "block";
+        
+        if (step === "third"){
+          this.sumEqualCost = +saleForm.pay + +saleForm.discount === +saleForm.cost
+          
+          if (this.sumEqualCost === false) {
+            document.getElementById("confirm_form_button").style.display = "none"
+            document.getElementById("confirm_form_error").style.display = "inline-block"
+          } else {
+            document.getElementById("confirm_form_button").style.display = "inline-block"
+            document.getElementById("confirm_form_error").style.display = "none"
+          }  
+        }
     }
 
     function send() {

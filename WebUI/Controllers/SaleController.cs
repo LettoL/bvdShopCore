@@ -209,8 +209,20 @@ namespace WebUI.Controllers
                     : "Обычный покупатель",
                 ProductTitle = _db.SalesProducts
                     .FirstOrDefault(z => z.SaleId == s.Id).Product.Title,
-                PrimeCost = s.PrimeCost
+                PrimeCost = s.PrimeCost,
+                MarginPercent = Convert.ToInt32(Math.Round((s.Margin == 0 || s.Sum  == 0) ? 0 : s.Margin/(s.Sum/100)))
             }).ToList();
+
+            var marginPercent = saleFilterVM.SaleFiltrationModel.marginPercent;
+            if (marginPercent != "")
+            {
+                if (marginPercent == "17")
+                    response = response.Where(x => x.MarginPercent <= 17).ToList();
+                if (marginPercent == "28")
+                    response = response.Where(x => x.MarginPercent >= 28).ToList();
+                if (marginPercent == "1728")
+                    response = response.Where(x => x.MarginPercent > 17 && x.MarginPercent < 28).ToList();
+            }
 
             return PartialView(response);
         }

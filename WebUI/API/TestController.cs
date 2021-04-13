@@ -58,7 +58,23 @@ namespace WebUI.API
         [HttpGet]
         public async Task<IActionResult> Get()
         {
-            var productInf = _shopContext.ProductInformations
+            var dateFirstOperation = new DateTime(2020, 11, 12);
+
+            var a = _db.DeletedSalesInfoOld
+                .Where(x => x.Sale.DeletedDate.Value.Date >= dateFirstOperation.Date
+                    && x.Sale.Date >= dateFirstOperation.Date)
+                .ToList();
+
+            var b = a.Select(x => x.Sale)
+                //.Select(x => x.Products.Sum(z => z.Amount * z.ProcurementCost))
+                .Sum(x => x.ProcurementCost);
+
+            var c = _shopContext.SupplyProducts
+                .Sum(x => x.ProcurementCost * x.StockAmount);
+            
+            
+            
+            /*var productInf = _shopContext.ProductInformations
                 .GroupBy(x => x.SaleId)
                 .Select(x => new
                 {
@@ -81,7 +97,7 @@ namespace WebUI.API
                 if(product.Count != (saleProducts
                     .FirstOrDefault(x => x.SaleId == product.SaleId)?.Count ?? 0))
                     test.Add(product.SaleId);
-            }
+            }*/
             
             
             

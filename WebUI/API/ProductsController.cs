@@ -36,9 +36,39 @@ namespace WebUI.API
                         Shop = x.Shop.Title,
                         ShopId = x.Shop.Id,
                         Category = x.Category.Title,
-                        CategoryId = x.Category.Id
+                        CategoryId = x.Category.Id,
+                        PrimeCost = x.PrimeCost
                     });
 
+                return Ok(result);
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        [Route("GetBySupplier/{id}")]
+        public IActionResult GetBySupplier(int id)
+        {
+            try
+            {
+                var result = ProductService.GetAllProductsBySupplier(_db, id)
+                    .Select(x => new ProductsAdmin()
+                    {
+                        Id = x.Id,
+                        Code = x.Code,
+                        Title = x.Title,
+                        Amount = x.Amount,
+                        Price = x.Cost,
+                        Shop = x.Shop.Title,
+                        ShopId = x.Shop.Id,
+                        Category = x.Category.Title,
+                        CategoryId = x.Category.Id,
+                        PrimeCost = x.PrimeCost
+                    });
+                
                 return Ok(result);
             }
             catch (Exception e)

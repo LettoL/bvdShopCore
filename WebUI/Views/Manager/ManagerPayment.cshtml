@@ -1,0 +1,90 @@
+﻿@{
+    ViewData["Title"] = "Оплата менеджеру";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Создание новой оплаты</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/Admin/ManagerPayment" method="post">
+                    <h3 class="title">Новая оплата</h3>
+                    <label for="">Расход c:</label>
+                    <select id="chooseMoneyWorker" name="moneyWorkerType" class="form-control" onchange="selectMoneyWorkers()">
+                        <option>Выбрать откуда списать оплату</option>
+                        <option value="1">Держатель карты</option>
+                        <option value="2">Рассчетный счет</option>
+                        <option value="3">Касса магазина</option>
+                    </select><br />
+                    <select id="moneyWorker" name="moneyWorkerId" class="form-control">
+                        <option>Выбрать опцию</option>
+                    </select><br />
+                    <label>Сумма</label>
+                    <input type="text" class="form-control" name="sum" /><br />
+                    <label>Менеджер</label>
+                    <select name="managerId" class="form-control">
+                        <option>Выбрать менеджера</option>
+                        @foreach (var manager in ViewBag.Managers)
+                        {
+                            <option value="@manager.Id">@manager.Name</option>
+                        }
+                    </select>
+                    <label>Расход для:</label>
+                    <select name="forId" class="form-control">
+                      @foreach (var shop in ViewBag.Shops)
+                      {
+                        <option value="@shop.Id">@shop.Title</option>
+                      }
+                      <option value="0">Офис</option>
+                      <option value="-1">РФ</option>
+                    </select>
+                    <label>Коментарий</label>
+                    <input type="text" class="form-control" name="comment" /><br />
+                    <button id="netroj" class="btn btn-submit">Сохранить</button>
+                    <a href="/Manager/Index" class="btn btn-dark">Назад</a>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script type="text/javascript">
+
+    function selectMoneyWorkers() {
+        let moneyWorkerSelect = document.getElementById('chooseMoneyWorker');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Manager/GetMoneyWorkersForSale/' + moneyWorkerValue,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#moneyWorker').html('');
+
+                json.forEach(json => {
+                    $('#moneyWorker').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+    }
+    
+    $('form').submit(() => {
+      $('#netroj').prop('disabled', true)
+      return true
+    })
+
+</script>

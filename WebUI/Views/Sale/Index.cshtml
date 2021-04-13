@@ -35,8 +35,16 @@
                             <option value="-1">Все</option>
                             <option value="0">Обычный покупатель</option>
                         </select>
+                        <select name="marginPercent" id="marginPercent" class="form-control" style="width: 200px; display: inline-block">
+                            <option disabled selected value="0">Процент маржи</option>
+                            <option value="17">Меньше 17%</option>
+                            <option value="28">Больше 28%</option>
+                            <option value="1728">Больше 17% и меньше 28%</option>
+                            <option value="0">Все</option>
+                        </select>
                         <input placeholder="Дата с:" type="text" name="value" id="dateFilter1"  class="form-control" style="width: 200px; display: inline-block"/>
                         <input placeholder="Дата по:" type="text" name="value" id="dateFilter2"  class="form-control" style="width: 200px; display: inline-block"/>
+                        <input placeholder="Номер продажи" id="saleId" type="number" class="form-control" style="width: 200px; display: inline-block">
                         <button class="btn btn-dark" style="position: relative; top: -3px">Поиск</button>
                     </form>
                 </div>
@@ -51,6 +59,7 @@
                                 <th>Дата</th>
                                 <th>Сумма</th>
                                 <th>Себестоимость</th>
+                                <th>Маржа</th>
                                 <th>Магазин</th>
                                 <th>Тип платежа</th>
                                 <th>Доп. Товары</th>
@@ -67,6 +76,18 @@
                                     <td>@s.Date</td>
                                     <td>@s.Sum</td>
                                     <td>@s.PrimeCost</td>
+                                    @if (s.MarginPercent <= 17)
+                                    {
+                                        <td style="background-color: #cd4545">@s.MarginPercent %</td>
+                                    }
+                                    @if (s.MarginPercent >= 28)
+                                    {
+                                        <td style="background-color: #1c8e1c">@s.MarginPercent %</td>
+                                    }
+                                    @if (s.MarginPercent > 17 && s.MarginPercent < 28)
+                                    {
+                                        <td>@s.MarginPercent %</td>
+                                    }
                                     <td>@s.ShopTitle</td>
                                     @if (s.PaymentType.ToString() == "Cash")
                                     {
@@ -179,6 +200,8 @@
     let shopId = null;
     let date1 = null;
     let date2 = null;
+    let marginPercent = null;
+    let saleId = null;
     let userId = @ViewBag.UserId;
 
     form.addEventListener('submit', filter)
@@ -190,6 +213,8 @@
         shopId = document.getElementById('shopId').value;
         typeOfSales = document.getElementById('typeOfSales').value;
         typeOfBuyers = document.getElementById('typeOfBuyers').value;
+        marginPercent = document.getElementById('marginPercent').value;
+        saleId = document.getElementById('saleId').value;
 
         var filterBody = {
             saleFiltrationModel: {
@@ -197,7 +222,9 @@
                 buyer: +typeOfBuyers,
                 shopId: +shopId,
                 periodStart: date1,
-                periodEnd: date2
+                periodEnd: date2,
+                marginPercent: marginPercent + '',
+                saleId: +saleId
             },
             userId: userId
         }

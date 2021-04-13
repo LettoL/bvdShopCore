@@ -1,0 +1,274 @@
+﻿@{
+    ViewData["Title"] = "Create";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-2">
+        <div class="portlet" id="productsImport">
+            <label>Список товаров</label>
+            <textarea class="form-control" v-model="products"></textarea>
+            <button class="btn btn-submit" v-on:click="handle()">Обработать</button>
+        </div>
+    </div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Создать запланированную поставку</h4>
+                </div>
+            </div>
+            <div id="scheduledSupply" class="portlet-body">
+                <h3 class="title">Создание</h3>
+                
+                <label asp-for="Supplier">Поставщик</label>
+                <select v-model="supplierId" class="form-control" name="supplierId">
+                    @foreach (var s in ViewBag.Suppliers)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select>
+                
+                <label>Категория для импортируемых товаров</label>
+                <select v-model="categoryId" class="form-control" name="categoryId">
+                    @foreach (var c in ViewBag.Categories)
+                    {
+                        <option value="@c.Id">@c.Title</option>
+                    }
+                </select>
+                
+                <label>Магазин для поставки</label>
+                <select v-model="shopId" class="form-control" name="shopId">
+                    <option value="0">Не выбран</option>
+                    @foreach (var s in ViewBag.Shops)
+                    {
+                        <option value="@s.Id">@s.Title</option>
+                    }
+                </select>
+                
+                <label asp-for="Sum">Внесённая сумма</label>
+                <input v-model="sum" class="form-control" type="number" name="Sum">
+                
+                <label for="">Списать с:</label>
+                <select class="form-control" name="moneyWorkerType" onchange="selectMoneyWorkers()" id="chooseMoneyWorker">
+                     <option>Выбрать откуда списать оплату</option>
+                     <option value="1">Держатель карты</option>
+                     <option value="2">Рассчетный счет</option>
+                </select>
+                <br/>
+                <select v-model="moneyWorkerId" class="form-control" name="moneyWorkerId" id="moneyWorker">
+                    <option value="0">Выбрать опцию</option>
+                </select>
+                <br/>
+                                    
+                <div>
+                    <div v-for="product in products">
+                        <b>{{product.title}}</b>
+                        <input type="number" v-model="product.amount" placeholder="Кол-во" class="form-control" style="width: 100px; display: inline-block">
+                        <input type="number" v-model="product.procurementCost" placeholder="Закупочная за шт." class="form-control" style="margin-bottom: 10px; width: 150px; display: inline-block">
+                        <span class="btn btn-danger" v-on:click="deleteProduct(product.productId)">
+                            <i class="fa fa-trash" aria-hidden="true"></i>
+                        </span>
+                    </div>
+                </div>
+                
+                <button onclick="send(); this.disabled=true;" class="btn btn-submit">Сохранить</button>
+                <a href="/ScheduledSupply/Index" class="btn btn-dark">Назад</a>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-4" style="max-height: 600px; overflow: auto;">
+        <div class="portlet" id="productsList">
+            <input v-model="filterTitle" type="text" class="form-control" placeholder="Название">
+            <select v-model="filterCategory" class="form-control">
+                <option value="0">Все категории</option>
+                <option v-for="category in categories" :value="category.id">{{category.title}}</option>
+            </select>
+            <ul class="list-group">
+                <li class="list-group-item" style="text-align: center" 
+                    v-for="product in productsSort" 
+                    v-on:click="productClick(product)"
+                >
+                    <b>{{product.title}}</b>
+                </li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+
+    var scheduledSupply = new Vue({
+        el: '#scheduledSupply',
+        data: {
+          products: [],
+          supplierId: 0,
+          sum: 0,
+          categoryId: 1,
+          moneyWorkerId: 0,
+          shopId: 0
+        },
+        methods: {
+          sendData: function () {
+            var scheduledDelivery = {
+              products: this.products.map(product => (
+                {
+                  productId: +product.productId, 
+                  amount: +product.amount, 
+                  procurementCost: +product.procurementCost,
+                  title: product.title,
+                  code: product.code == null ? product.title : product.code,
+                }
+              )),
+              depositedSum: +this.sum, 
+              supplierId: +this.supplierId,
+              moneyWorkerId: +this.moneyWorkerId,
+              categoryId: +this.categoryId,
+              shopId: +this.shopId
+            }
+            
+            console.log(scheduledDelivery)
+            
+            return fetch("/ScheduledSupply/Create", {
+              method: "POST",
+              headers: {
+                'Content-Type': 'application/json',
+              },
+              redirect: "follow",
+              credentials: 'include',
+              body: JSON.stringify(scheduledDelivery)
+            })
+          },
+          deleteProduct: function (productId) {
+            let index = this.products.findIndex(x => x.productId === productId)
+            
+            this.products.splice(index, 1)
+          }
+        } 
+    })
+    
+    var productsList = new Vue({
+      el: '#productsList',
+      data: {
+        products: [],
+        filterTitle: '',
+        filterCategory: 0, 
+        categories: []
+      },
+      methods: {
+        productClick: function (product) {
+          scheduledSupply.products.push({productId: product.id,  title: product.title})
+        }
+      },
+      computed: {
+        productsSort: function() {
+          return this.products
+            .filter(x => +this.filterCategory !== 0
+                ? x.categoryId === +this.filterCategory
+                : true)
+            .filter(x => this.filterTitle !== ''
+                ? x.title.includes(this.filterTitle)
+                : true)
+        }
+      },
+      created: function () {
+        fetch('/ScheduledSupply/GetProducts', {
+          headers: { 'Content-Type': 'application/json'},
+          credentials: 'include'
+        })
+        .then((res) => {
+          return res.json()
+        })
+        .then((json) => {
+          json.products.forEach(item => {
+            if (item.title != null) {
+              this.products.push({
+                id: item.id, 
+                title: item.title, 
+                category: item.category.title,
+                categoryId: item.category.id
+              })
+            }
+          })
+          
+          json.categories.forEach(item => {
+            this.categories.push({
+              id: item.id, 
+              title: item.title
+            })
+          })
+        })
+      }
+    })
+    
+    var productsImport = new Vue({
+      el: '#productsImport',
+      data: {
+        products: ''
+      },
+      methods: {
+        handle: function () {
+          let productsText = this.products
+          
+          if(productsText.length <= 0)
+            return
+          
+          const productsProperties = productsText.split('\n').map(x => x.split('\t'));
+          
+          const products = productsProperties.map(x => {
+            return {
+              number: +(x[0].replace(',', '.').replace(/\s+/g,'')),
+              code: x[1],
+              title: x[2],
+              amount: +(x[3].replace(',', '.').replace(/\s+/g,'')),
+              price: +(x[5].replace(',', '.').replace(/\s+/g,'')),
+              sum: +(x[6].replace(',', '.').replace(/\s+/g,''))
+            }
+          });
+          products.map(x => scheduledSupply.products.push({
+            productId: 0, amount: x.amount, procurementCost: x.price, title: x.title
+          }))
+          this.products = ''
+        }
+      }    
+    })
+    
+    function send() {
+      this.scheduledSupply.sendData().then(res => window.location.href = res.url)
+    }
+    
+    function selectMoneyWorkers() {
+            let moneyWorkerSelect = document.getElementById('chooseMoneyWorker');
+            let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+    
+            fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+                    {
+                        headers: { "Content-Type": "application/json" },
+                        credentials: 'include'
+                    })
+                .then((res) => {
+                    return res.json();
+                })
+                .then((json) => {
+    
+                    $('#moneyWorker').html('');
+    
+                    json.forEach(json => {
+                        $('#moneyWorker').append('<option value="' +
+                            json.id +
+                            '">' +
+                            json.title +
+                            '</option>');
+                    });
+                });
+        }
+        
+        $('form').submit(() => {
+              $('#netroj').prop('disabled', true)
+              return true
+            })
+
+</script>
+

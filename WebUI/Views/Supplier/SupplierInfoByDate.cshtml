@@ -1,0 +1,31 @@
+﻿<table class="table table-striped" id="result">
+    <thead>
+    <tr>
+        <th>Название</th>
+        <th>Телефон</th>
+        <th>Email</th>
+        <th>Долг (@ViewBag.Debt)</th>
+        <th>Стоимость товаров под реализацию на складе (@ViewBag.RealizationCost)</th>
+        <th>Стоимость товаров на складе (@ViewBag.CostProductOnStock)</th>
+        <th>Действие</th>
+    </tr>
+    </thead>
+    <tbody>
+    @foreach (var s in Model)
+    {
+        <tr>
+            <td>@s.Title</td>
+            <td>@s.Phone</td>
+            <td>@s.Email</td>
+            <td>@s.Debt</td>
+            <td>@s.CostRealizationProductOnStock</td>
+            <td>@s.CostProductOnStock</td>
+            <td>
+                <a href="/Supplier/Edit/@s.Id" class="btn btn-dark">
+                    <i class="fa fa-pencil" aria-hidden="true"></i>
+                </a>
+            </td>
+        </tr>
+    }
+    </tbody>
+</table>

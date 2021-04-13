@@ -7,7 +7,9 @@ using Data.Enums;
 using Data.FiltrationModels;
 using Data.Services.Abstract;
 using Data.ViewModels;
+using Domain.Entities.Olds;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 
 namespace Data.Services.Concrete
 {
@@ -20,6 +22,7 @@ namespace Data.Services.Concrete
         private readonly IBaseObjectService<Supplier> _supplierService;
         private readonly IBaseObjectService<ProductInformation> _productInformationService;
         private readonly IBaseObjectService<BookingProduct> _bookingProductService;
+        private readonly PostgresContext _postgresContext;
                                                                     
         public ProductService(ShopContext context,
             IInfoMoneyService infoMoneyService,
@@ -27,7 +30,8 @@ namespace Data.Services.Concrete
             IBaseObjectService<Supplier> supplierService,
             IBaseObjectService<BookingProduct> bookingProductsService,
             IBaseObjectService<ProductInformation> productInformationService,
-            IBaseObjectService<Booking> bookingService) : base(context)
+            IBaseObjectService<Booking> bookingService,
+            PostgresContext postgresContext) : base(context)
         {
             _context = context;
             _infoMoneyService = infoMoneyService;
@@ -36,6 +40,7 @@ namespace Data.Services.Concrete
             _productInformationService = productInformationService;
             _bookingProductService = bookingProductsService;
             _bookingService = bookingService;
+            _postgresContext = postgresContext;
         }
 
         public Booking Booking(BookingVM booking, int userId)
@@ -218,6 +223,15 @@ namespace Data.Services.Concrete
             {
                 foreach (var supplyProduct in supplyHistory.SupplyProducts)
                 {
+                    _postgresContext.ProductOperations.Add(
+                        new ProductOperation(
+                            supplyProduct.ProductId,
+                            -supplyProduct.TotalAmount,
+                            DateTime.Now.AddHours(3),
+                            supplyProduct.FinalCost,
+                            supplyProduct.RealizationAmount > 0,
+                            supplyProduct.SupplierId ?? 0,
+                            StorageType.Shop));
                     _context.SupplyProducts.Remove(supplyProduct);
                 }
 

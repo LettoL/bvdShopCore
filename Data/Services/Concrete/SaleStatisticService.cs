@@ -95,7 +95,8 @@ namespace Data.Services.Concrete
                     BuyerTitle = x.PartnerId != null
                         ? x.Partner.Title
                         : "Обычный покупатель",
-                    HasAdditionalProduct = x.SalesProducts.Any(x => x.Additional)
+                    HasAdditionalProduct = x.SalesProducts.Any(x => x.Additional),
+                    MarginPercent = Math.Round((x.Margin == 0 || x.Sum  == 0) ? 0 : x.Margin/(x.Sum/100))
                 })
                 .ToList()
                 .Select(x => new SaleListVM()
@@ -109,6 +110,7 @@ namespace Data.Services.Concrete
                     BuyerTitle = x.BuyerTitle,
                     ProductTitle = x.ProductTitle,
                     PaymentType = _saleInfoService.PaymentType(x.Id, infoMoneys),
+                    MarginPercent = Math.Round(x.MarginPercent)
                 }).AsQueryable();
 
             return query;

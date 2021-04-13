@@ -28,8 +28,7 @@ namespace WebUI
         private readonly IConfiguration Configuration;
         public void ConfigureServices(IServiceCollection services)
         {
-            string connection =
-                "Data Source=(LocalDB)\\MSSQLLocalDB;AttachDbFilename=C:\\Users\\Admin\\Documents\\bvd7.mdf;Integrated Security=True;Connect Timeout=30";
+            string connection = "";
 
             services.AddAuthentication(options =>
                 {

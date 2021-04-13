@@ -12,7 +12,7 @@ import InputLabel from "@material-ui/core/InputLabel";
 import {makeStyles} from "@material-ui/core/styles";
 import FormControl from "@material-ui/core/FormControl";
 import {
-  $filteredProducts,
+  $filteredProducts, fetchProductsBySupplierFx,
   fetchProductsFx
 } from "../../models/product-table/product.store";
 import {useStore} from "effector-react";
@@ -22,6 +22,7 @@ export const Products = () => {
   const classes = useStyles()
 
   const products = useStore($filteredProducts)
+  const productsLoading = useStore(fetchProductsBySupplierFx.pending)
 
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
@@ -56,6 +57,7 @@ export const Products = () => {
     {label: "Наименование", key: 'title'},
     {label: "Кол-во", key: 'amount'},
     {label: "Цена", key: 'price'},
+    {label: "Себестоимость", key: 'primeCost'},
     {label: "Магазин", key: 'shop'},
     {label: "Категория", key: 'category'}
   ]
@@ -66,10 +68,13 @@ export const Products = () => {
       title: product.title,
       amount: product.amount,
       price: product.price,
+      primeCost: product.primeCost,
       shop: product.shop,
       category: product.category
     }
   ));
+
+  console.log(productsLoading)
 
   return (
     <>
@@ -77,12 +82,15 @@ export const Products = () => {
         Download me
       </CSVLink>;
       <ProductTableFilters/>
-      <ProductsTable
+      {productsLoading
+        ? "Загрузка"
+        : <ProductsTable
         products={products}
         page={page}
         rowsPerPage={rowsPerPage}
         handleOpenDialog={handleOpenDialog}
-      />
+        />
+      }
       <ProductsTablePaginator
         products={products}
         rowsPerPage={rowsPerPage}

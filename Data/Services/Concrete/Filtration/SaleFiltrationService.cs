@@ -10,14 +10,27 @@ namespace Data.Services.Concrete.Filtration
         public static IQueryable<Sale> Filtration(this IQueryable<Sale> query,
             SaleFiltrationModel model)
         {
+            //if (model.saleId > 0)
+            //    return query.Where(x => x.Id == model.saleId);
+            
             query = query.IsShopId(model.shopId)
                 .IsType(model.type)
                 .IsBuyer(model.buyer)
                 .IsPeriod(model.startDate, model.endDate)
-                .IsForRF(model.forRF);
+                .IsForRF(model.forRF)
+                .IsSaleId(model.saleId);
             
             return query;
         }
+
+        private static IQueryable<Sale> IsSaleId(this IQueryable<Sale> query, int saleId)
+        {
+            if (saleId != 0)
+                query = query.Where(x => x.Id == saleId);
+
+            return query;
+        }
+        
 
         private static IQueryable<Sale> IsShopId(this IQueryable<Sale> query, int shopId)
         {

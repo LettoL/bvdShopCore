@@ -5,21 +5,23 @@
 <h3 class="page-title">Поставщики <small>Просмотр и редактирование поставщиков</small></h3>
 <div class="row">
     <div class="col-md-12">
-
+        <form style="display: inline-block">
+            <input placeholder="Дата:" type="text" name="value" id="dateFilter" onchange="filterByDate(event.target)" class="form-control" style="width: 200px; display: inline-block" />
+        </form>
         <div class="portlet">
             <div class="portlet-title">
                 <div class="portlet-head">
                     Список поставщиков
-                </div>   
+                </div>
                 <div class="portlet-action">
                     <a href="/Supplier/Create" class="btn add-button">Новый Поставщик</a>
                 </div>
                 <div class="clearfix"></div>
             </div>
             <div class="portlet-body">
-               <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
+                <div class="table-responsive">
+                    <table class="table table-striped" id="result">
+                        <thead>
                         <tr>
                             <th>Название</th>
                             <th>Телефон</th>
@@ -29,8 +31,8 @@
                             <th>Стоимость товаров на складе (@ViewBag.CostProductOnStock)</th>
                             <th>Действие</th>
                         </tr>
-                    </thead>
-                    <tbody>
+                        </thead>
+                        <tbody>
                         @foreach (var s in Model)
                         {
                             <tr>
@@ -47,11 +49,79 @@
                                 </td>
                             </tr>
                         }
-                    </tbody>
-                </table>
-               </div>
-             </div>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
         </div>
     </div>
 </div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter").datepicker();
+    });
+</script>
+
+<script type="text/javascript">
+
+    let date = null;
+    
+    function filterByDate(value) {
+        date = value.value;
+
+        loadData(date);
+    }
+
+    function loadData(date) {
+      console.log(date)
+      
+        $('#result').load(
+            "/Supplier/SupplierInfoByDate",
+            {
+                date: date
+            }
+        );
+    }
+
+</script>
 

@@ -21,6 +21,7 @@ namespace Data.ViewModels
         public decimal PrimeCost { get; set; }
         public decimal Rest { get; set; }
         public decimal Total { get; set; }
+        public decimal MarginPercent { get; set; }
         public ICollection<SaleProduct> SalesProducts { get; set; } = new HashSet<SaleProduct>();
     }
 }

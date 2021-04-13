@@ -13,6 +13,7 @@ namespace WebUI.ViewModels
         public PaymentType PaymentType { get; set; }
         public SaleType SaleType { get; set; }
         public bool HasAdditionalProduct { get; set; }
+        public int MarginPercent { get; set; }
 
         public string Comment { get; set; }
         public string BuyerTitle { get; set; }

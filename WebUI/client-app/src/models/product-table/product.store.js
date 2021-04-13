@@ -1,5 +1,5 @@
 import {Constants} from "../../const";
-import {combine, createEffect, createEvent, createStore} from "effector";
+import {combine, createEffect, createEvent, createStore, sample} from "effector";
 
 const API_URL = Constants.API
 const API_PRODUCTS = API_URL + 'api/products'
@@ -8,6 +8,7 @@ export const setShopFilter = createEvent()
 export const setCategoryFilter = createEvent()
 export const setTitleFilter = createEvent()
 export const setMinAmountFilter = createEvent()
+export const setSupplierFilter = createEvent()
 
 export const fetchProductsFx = createEffect({
   async handler() {
@@ -16,14 +17,25 @@ export const fetchProductsFx = createEffect({
   }
 })
 
+export const fetchProductsBySupplierFx = createEffect({
+  async handler(id) {
+    const res = await fetch(API_PRODUCTS + "/GetBySupplier/" + id)
+    return res.json()
+  }
+})
+
 export const $products = createStore([])
   .on(fetchProductsFx.doneData, (state, products) => [...products])
+  .on(fetchProductsBySupplierFx.doneData, (state, products) => [...products])
 
 export const $filterShopId = createStore(0)
   .on(setShopFilter, (_, shopId) => shopId)
 
 export const $filterCategoryId = createStore(0)
   .on(setCategoryFilter, (_, categoryId) => categoryId)
+
+export const $filterSupplierId = createStore(0)
+  .on(setSupplierFilter, (_, supplierId) => supplierId)
 
 export const $filterTitle = createStore('')
   .on(setTitleFilter, (_, title) => title)

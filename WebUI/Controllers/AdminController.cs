@@ -139,6 +139,156 @@ namespace WebUI.Controllers
           return Ok(test);
         }
 
+        public IActionResult ManagerPayment()
+        {
+            var userName = HttpContext.User.Identity.Name;
+            var user = _userService.All().First(u => u.Login == userName);
+            
+            ViewBag.Layout = "~/Views/Shared/AdminLayout.cshtml";
+            if (user.Role == Role.Manager)
+                ViewBag.Layout = "~/Views/Shared/ManagerLayout.cshtml";
+            
+            
+            ViewBag.Managers = _postgresContext.Managers.ToList();
+            ViewBag.Shops = _db.Shops.ToList();
+            
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult ManagerPayment(int managerId, int sum, int moneyWorkerId, int forId, string comment)
+        {
+            var createdInfoMoney = _db.InfoMonies.Add(
+                new InfoMoney()
+                {
+                    MoneyWorkerId = moneyWorkerId,
+                    Sum = -sum,
+                    MoneyOperationType = MoneyOperationType.Expense,
+                    PaymentType = _moneyOperationService.PaymentTypeByMoneyWorker(moneyWorkerId),
+                    Comment = comment,
+                    Date = DateTime.Now.AddHours(3)
+                });
+            _db.SaveChanges();
+
+            var createdExpense = _db.Expenses.Add(
+                new Expense()
+                {
+                    InfoMoneyId = createdInfoMoney.Entity.Id,
+                    ExpenseCategoryId = 3
+                });
+            _db.SaveChanges();
+
+            _postgresContext.ExpensesOld.Add(new ExpenseOld(createdExpense.Entity.Id, forId));
+            _postgresContext.ManagerPayments.Add(
+                new ManagerPayment(
+                    managerId,
+                    DateTime.Now.AddHours(3),
+                    sum, comment,
+                    createdInfoMoney.Entity.Id));
+            _postgresContext.SaveChanges();
+            
+            return RedirectToAction("ManagersPayments");
+        }
+
+        public IActionResult ManagersPayments()
+        {
+            var userName = HttpContext.User.Identity.Name;
+            var user = _userService.All().First(u => u.Login == userName);
+            
+            ViewBag.Layout = "~/Views/Shared/AdminLayout.cshtml";
+            if (user.Role == Role.Manager)
+                ViewBag.Layout = "~/Views/Shared/ManagerLayout.cshtml";
+            
+            
+            var managers = _postgresContext.Managers
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToList();
+
+            ViewBag.Managers = _postgresContext.Managers.ToList();
+            
+            var result = _postgresContext.ManagerPayments
+                .OrderByDescending(x => x.Id)
+                .ToList()
+                .Join(managers,
+                    x => x.ManagerId,
+                    m => m.Id,
+                    (x, m) => new ManagerPaymentVM()
+                    {
+                        ManagerName = m.Name,
+                        Comment = x.Comment,
+                        DateTime = x.DateTime,
+                        Sum = x.Sum
+                    })
+                .ToList();
+            
+            return View(result);
+        }
+
+        public IActionResult ManagersPaymentsFilter(int manager, string date1, string date2)
+        {
+            var managers = _postgresContext.Managers
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                }).ToList();
+
+            var filteredManagerPayments = _postgresContext.ManagerPayments.ToList();
+
+            if (manager > 0)
+                filteredManagerPayments = filteredManagerPayments
+                    .Where(x => x.ManagerId == manager)
+                    .ToList();
+            
+            if (date1 != null)
+            {
+                Console.WriteLine(date1);
+                var buf = date1.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                filteredManagerPayments = filteredManagerPayments
+                    .Where(x => x.DateTime >= date)
+                    .ToList();
+            }
+
+            if (date2 != null)
+            {
+                Console.WriteLine(date1);
+                var buf = date2.Split('.');
+                var date = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+                
+                filteredManagerPayments = filteredManagerPayments
+                    .Where(x => x.DateTime <= date.AddDays(1))
+                    .ToList();
+            }
+            
+            var result = filteredManagerPayments
+                .OrderByDescending(x => x.Id)
+                .ToList()
+                .Join(managers,
+                    x => x.ManagerId,
+                    m => m.Id,
+                    (x, m) => new ManagerPaymentVM()
+                    {
+                        ManagerName = m.Name,
+                        Comment = x.Comment,
+                        DateTime = x.DateTime,
+                        Sum = x.Sum
+                    })
+                .ToList();
+            
+            return View(result);
+        }
+        
         public async Task<IActionResult> Managers()
         {
             var userName = HttpContext.User.Identity.Name;
@@ -159,7 +309,12 @@ namespace WebUI.Controllers
                 })
                 .ToListAsync();
 
+            var deletedManagersId = await _postgresContext.DeletedManagers
+                .Select(x => x.Id)
+                .ToListAsync();
+            
             var managers = await _postgresContext.Managers
+                .Where(x => !deletedManagersId.Contains(x.Id))
                 .Select(x => new
                 {
                     Id = x.Id,
@@ -228,6 +383,120 @@ namespace WebUI.Controllers
             await _postgresContext.SaveChangesAsync();
             
             return RedirectToAction("Managers");
+        }
+
+        [HttpGet]
+        public IActionResult EditManager(int id)
+        {
+            var manager = _postgresContext.Managers.FirstOrDefault(x => x.Id == id);
+            
+            if(manager == null)
+                throw new Exception("Менеджер не найден");
+            
+            return View(manager);
+        }
+
+        [HttpPost]
+        public IActionResult EditManager(int id, string name)
+        {
+            var manager = _postgresContext.Managers.FirstOrDefault(x => x.Id == id);
+            
+            if(manager == null)
+                throw new Exception("Менеджер не найден");
+
+            manager.ChangeName(name);
+
+            _postgresContext.SaveChanges();
+            
+            return RedirectToAction("Managers");
+        }
+
+        public IActionResult DeleteManager(int id)
+        {
+            _postgresContext.DeletedManagers.Add(new DeletedManager(id));
+            _postgresContext.SaveChanges();
+            
+            return RedirectToAction("Managers");
+        }
+
+        public IActionResult DeferredSales()
+        {
+            var deferredSalesId = _db.SaleInformations
+                .Where(x => x.SaleType == SaleType.DefferedSaleFromStock)
+                .Select(x => x.SaleId)
+                .ToList();
+
+            var infoMonies = _db.InfoMonies
+                .Where(x => x.SaleId != null && deferredSalesId.Contains((int)x.SaleId))
+                .ToList();
+
+            var saleProducts = _db.SalesProducts
+                .Include(x => x.Product)
+                .Where(x => deferredSalesId.Contains(x.SaleId))
+                .ToList();
+
+            var deferredSales = _db.Sales
+                .Include(x => x.Shop)
+                .Where(x => x.Payment == false && deferredSalesId.Contains(x.Id))
+                .ToList()
+                .Where(x => x.Sum - infoMonies
+                    .Where(z => z.SaleId == x.Id)
+                    .Sum(z => z.Sum) > 0)
+                .Select(x => new SaleVM()
+                {
+                    Id = x.Id,
+                    Date = x.Date.ToString("dd.MM.yyyy"),
+                    Sum = infoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    ShopTitle = x.Shop.Title,
+                    ProductTitle = saleProducts
+                        .FirstOrDefault(z => z.SaleId == x.Id)?.Product.Title ?? "",
+                    Rest = x.Sum - infoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    Total = x.Sum
+                })
+                .ToList();
+
+            ViewBag.Shops = _db.Shops.ToList();
+            
+            return View(deferredSales);
+        }
+
+        public IActionResult DeferredSalesFilter(int shopId)
+        {
+            var deferredSalesId = _db.SaleInformations
+                .Where(x => x.SaleType == SaleType.DefferedSaleFromStock)
+                .Select(x => x.SaleId)
+                .ToList();
+
+            var infoMonies = _db.InfoMonies
+                .Where(x => x.SaleId != null && deferredSalesId.Contains((int)x.SaleId))
+                .ToList();
+
+            var saleProducts = _db.SalesProducts
+                .Include(x => x.Product)
+                .Where(x => deferredSalesId.Contains(x.SaleId))
+                .ToList();
+
+            var deferredSales = _db.Sales
+                .Include(x => x.Shop)
+                .Where(x => x.Payment == false && deferredSalesId.Contains(x.Id) && x.ShopId == shopId)
+                .ToList()
+                .Where(x => x.Sum - infoMonies
+                    .Where(z => z.SaleId == x.Id)
+                    .Sum(z => z.Sum) > 0)
+                .Select(x => new SaleVM()
+                {
+                    Id = x.Id,
+                    Date = x.Date.ToString("dd.MM.yyyy"),
+                    Sum = infoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    ShopTitle = x.Shop.Title,
+                    ProductTitle = saleProducts
+                        .FirstOrDefault(z => z.SaleId == x.Id)?.Product.Title ?? "",
+                    Rest = x.Sum - infoMonies.Where(z => z.SaleId == x.Id).Sum(z => z.Sum),
+                    Total = x.Sum
+                })
+                .ToList();
+            
+            return View(deferredSales);
         }
         
         public IActionResult Index()
@@ -703,12 +972,61 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            return View(_supplierService.All().Where(s => s.Debt != 0).Select(x => new Supplier
+            var suppliersInfoInit = _postgresContext.SupplierInfoInits.ToList();
+            
+            var operations = _postgresContext.ProductOperations
+                .ToList()
+                .GroupBy(x => x.SupplierId)
+                .Select(x => new
+                {
+                    SupplierId = x.Key,
+                    Debt = x.Where(z => z.ForRealization && z.Amount < 0)
+                        .Sum(z => z.Cost * z.Amount * -1)
+                }).ToList();
+            
+            var repayments = _postgresContext.SupplierPayments.ToList()
+                .GroupBy(x => x.SupplierId)
+                .Select(x => new
+                {
+                    SupplierId = x.Key,
+                    RepaymentsSum = x.Sum(z => z.Sum)
+                }).ToList();
+            
+            var result = _supplierService.All().Select(x => new Supplier()
+            {
+                Id = x.Id,
+                Title = x.Title,
+                Debt = 0
+            }).ToList();
+            
+            foreach (var supplierVm in result)
+            {
+                var supplierInfoInit = suppliersInfoInit
+                    .FirstOrDefault(x => x.SupplierId == supplierVm.Id);
+                if (supplierInfoInit != null)
+                    supplierVm.Debt += supplierInfoInit.Debt;
+
+                var operation = operations
+                    .FirstOrDefault(x => x.SupplierId == supplierVm.Id);
+                if (operation != null)
+                    supplierVm.Debt += operation.Debt;
+
+                var repayment = repayments
+                    .FirstOrDefault(x => x.SupplierId == supplierVm.Id);
+                if (repayment != null)
+                    supplierVm.Debt -= repayment.RepaymentsSum;
+            }
+
+            return View(result.Where(x => x.Debt > 0).ToList());
+
+            /*return View(_supplierService.All()
+                .Where(s => s.Debt != 0)
+                .Select(x => new Supplier
             {
                 Id = x.Id,
                 Title = x.Title,
                 Debt = x.Debt
-            }));
+            }));*/
         }
 
         [HttpPost]
@@ -726,6 +1044,8 @@ namespace WebUI.Controllers
                 MoneyOperationType = MoneyOperationType.SupplierRepayment
             });
 
+            _postgresContext.SupplierPayments.Add(
+                new SupplierPayment(sum, supplier.Id, DateTime.Now.AddHours(3)));
             _postgresContext.RepaidDebtsOld.Add(
                 new RepaidDebtOld(supplier.Id, infoMoney.Id));
             _postgresContext.SaveChanges();
@@ -995,10 +1315,30 @@ namespace WebUI.Controllers
                 Type = InfoProductType.Transfer
             });
 
+            var forRealization = prevSupplyProduct.RealizationAmount > 0;
+
             if (prevSupplyProduct.RealizationAmount >= amount)
                 prevSupplyProduct.RealizationAmount -= amount;
 
             _supplyProduct.Update(prevSupplyProduct);
+            
+            _postgresContext.ProductOperations.Add(new ProductOperation(
+                productId,
+                -amount,
+                DateTime.Now.AddHours(3),
+                prevSupplyProduct.FinalCost,
+                forRealization,
+                prevSupplyProduct.SupplierId ?? 0,
+                StorageType.Shop));
+            _postgresContext.ProductOperations.Add(new ProductOperation(
+                nextProduct.Id,
+                amount,
+                DateTime.Now.AddHours(3),
+                prevSupplyProduct.FinalCost,
+                forRealization,
+                prevSupplyProduct.SupplierId ?? 0,
+                StorageType.Shop));
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }
@@ -1036,19 +1376,46 @@ namespace WebUI.Controllers
             return RedirectToAction("Index");
         }
 
+        public IActionResult DeleteExpense(int id)
+        {
+            var expense = _db.Expenses.FirstOrDefault(x => x.Id == id);
+            var infoMoney = _db.InfoMonies.FirstOrDefault(x => x.Id == expense.InfoMoneyId);
+
+            var expenseOld = _postgresContext.ExpensesOld.FirstOrDefault(x => x.ExpenseId == id);
+
+            _db.Expenses.Remove(expense);
+            _db.InfoMonies.Remove(infoMoney);
+
+            if (expenseOld != null)
+                _postgresContext.ExpensesOld.Remove(expenseOld);
+
+            _db.SaveChanges();
+            _postgresContext.SaveChanges();
+
+            return RedirectToAction("ExpenseList");
+        }
+
         [HttpGet]
         [Route("/Admin/GetMoneyWorkers/{value}")]
         public async Task<IActionResult> GetMoneyWorkers(int value)
         {
             if (value == 1) //Получить держателей карт
             {
+                var archiveCardKeepers = _postgresContext.ArchiveCardKeepers
+                    .Select(x => x.CardKeeperId).ToList();
+                
                 var cardKeepers = await _db.CardKeepers
+                    .Where(x => !archiveCardKeepers.Contains(x.Id))
                     .ToListAsync();
                 return Ok(cardKeepers);
             }
             if (value == 2) //Получить рассчетные счета
             {
+                var archiveCalculatedScores = _postgresContext.ArchiveCalculatedScores
+                    .Select(x => x.CalculatedScoreId).ToList();
+                
                 var calculatedScores = await _db.CalculatedScores
+                    .Where(x => !archiveCalculatedScores.Contains(x.Id))
                     .ToListAsync();
                 return Ok(calculatedScores);
             }
@@ -1197,6 +1564,15 @@ namespace WebUI.Controllers
                     ProductId = product.Id,
                     ForRealization = realization
                 });
+
+                _postgresContext.ProductOperations.Add(new ProductOperation(
+                    product.Id,
+                    -product.Amount,
+                    DateTime.Now.AddHours(3),
+                    product.Cost,
+                    realization,
+                    supplierId,
+                    StorageType.SupplierWarehouse));
             }
 
             decimal finalCost = products.Sum(x => x.Cost * x.Amount) + AdditionalCost;
@@ -1207,6 +1583,8 @@ namespace WebUI.Controllers
                 supplier.Debt += procurementCosts.Sum();
                 _supplierService.Update(supplier);
             }
+
+            _postgresContext.SaveChanges();
 
             _saleService.ClosePostPayment(saleId, moneyWorkerType, moneyWorkerId, moneyWorkerCashlessId, finalCost);
 
@@ -1395,6 +1773,15 @@ namespace WebUI.Controllers
                     ProductId = product.Id,
                     ForRealization = realization
                 });
+
+                _postgresContext.ProductOperations.Add(new ProductOperation(
+                    product.Id,
+                    -product.Amount,
+                    DateTime.Now.AddHours(3),
+                    product.Cost,
+                    realization,
+                    supplierId,
+                    StorageType.SupplierWarehouse));
             }
 
             decimal finalCost = products.Sum(x => x.Cost * x.Amount) + AdditionalCost;
@@ -1421,6 +1808,7 @@ namespace WebUI.Controllers
             _saleInfromationService.Delete(saleInformation);
 
             _saleService.Update(sale);
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }
@@ -1438,9 +1826,18 @@ namespace WebUI.Controllers
                     .Include(x => x.ExpenseCategory)
                     .OrderByDescending(x => x.Id);
 
+            var archiveCardKeepers = _postgresContext.ArchiveCardKeepers
+                .Select(x => x.CardKeeperId).ToList();
+            var archiveCalculatedScores = _postgresContext.ArchiveCalculatedScores
+                .Select(x => x.CalculatedScoreId).ToList();
+
             ViewBag.UserId = _userService.All().FirstOrDefault(u => u.Login == userName).Id;
             ViewBag.Categories = _expenseCategoryService.All();
-            ViewBag.Scores = _moneyWorkerService.All();
+            ViewBag.Scores = _moneyWorkerService.All()
+                .ToList()
+                .Where(x => 
+                    (x is CalculatedScore ? !archiveCalculatedScores.Contains(x.Id) : true)
+                    && (x is CardKeeper ? !archiveCardKeepers.Contains(x.Id) : true));
             ViewBag.ExpenseSum = expenses.Sum(x => x.InfoMoney.Sum);
             ViewBag.Shops = _db.Shops.ToList();
 
@@ -1546,8 +1943,16 @@ namespace WebUI.Controllers
             var userName = HttpContext.User.Identity.Name;
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
+
+            var archiveCalculatedScores = _postgresContext.ArchiveCalculatedScores
+                .Select(x => x.CalculatedScoreId).ToList();
+            var archiveCardKeepers = _postgresContext.ArchiveCardKeepers
+                .Select(x => x.CardKeeperId).ToList();
             
-            var moneyWorkers = _moneyWorkerService.All();
+            var moneyWorkers = _moneyWorkerService.All().ToList()
+                .Where(x => 
+                    (x is CalculatedScore ? !archiveCalculatedScores.Contains(x.Id) : true)
+                    && (x is CardKeeper ? !archiveCardKeepers.Contains(x.Id) : true));;
             var today = DateTime.Now.AddHours(3).Date;
             var result = new List<MoneyWorkerInfoVM>();
 
@@ -1569,10 +1974,30 @@ namespace WebUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult MoneyWorkerBalanceInfoResult(DateTime date)
+        public IActionResult MoneyWorkerBalanceInfoResult(string date)
         {
-            var moneyWorkers = _moneyWorkerService.All();
+            var archiveCalculatedScores = _postgresContext.ArchiveCalculatedScores
+                .Select(x => x.CalculatedScoreId).ToList();
+            var archiveCardKeepers = _postgresContext.ArchiveCardKeepers
+                .Select(x => x.CardKeeperId).ToList();
+            
+            var moneyWorkers = _moneyWorkerService.All().ToList()
+                .Where(x => 
+                    (x is CalculatedScore ? !archiveCalculatedScores.Contains(x.Id) : true)
+                    && (x is CardKeeper ? !archiveCardKeepers.Contains(x.Id) : true));;
             var result = new List<MoneyWorkerInfoVM>();
+            
+            var filterDate = new DateTime();
+
+            if (date != null)
+            {
+                var buf = date.Split('.');
+
+                filterDate = new DateTime(
+                    Convert.ToInt32(buf[2]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[0]));
+            }
 
             foreach (var worker in moneyWorkers)
             {
@@ -1580,10 +2005,10 @@ namespace WebUI.Controllers
                 {
                     Title = worker.Title,
                     MorningCash = _infoMoneyService.All()
-                        .Where(x => x.MoneyWorkerId == worker.Id && x.Date < date)
+                        .Where(x => x.MoneyWorkerId == worker.Id && x.Date < filterDate)
                         .Sum(x => x.Sum),
                     EveningCash = _infoMoneyService.All()
-                        .Where(x => x.MoneyWorkerId == worker.Id && x.Date < date.AddDays(1))
+                        .Where(x => x.MoneyWorkerId == worker.Id && x.Date < filterDate.AddDays(1))
                         .Sum(x => x.Sum)
                 });
             }
@@ -1675,6 +2100,12 @@ namespace WebUI.Controllers
                 shopId = 29,
                 startDate = fromDate
             };
+            
+            var filtrationModelForEKB = new SaleFiltrationModel()
+            {
+                shopId = 33,
+                startDate = fromDate
+            };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
@@ -1719,10 +2150,12 @@ namespace WebUI.Controllers
                 SumSalesByPetersburg = result.Sum(x => x.SalesByPetersburg),
                 SumSalesBySamara = result.Sum(x => x.SalesBySamara),
                 SumSalesByMoscowSever = result.Sum(x => x.SalesByMoscowSever),
+                SumSalesByEKB = result.Sum(x => x.SalesByEKB),
                 SumChecksByMoscow = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByPetersburg = _saleService.Filtration(filtrationModelForPetersburg).Count(),
                 SumChecksBySamara = _saleService.Filtration(filtrationModelForSamara).Count(),
                 SumChecksByMoscowSever = _saleService.Filtration(filtrationModelForMoscowSever).Count(),
+                SumChecksByEKB = _saleService.Filtration(filtrationModelForEKB).Count(),
                 SumChecksByPartners = _saleService.Filtration(filtrationModelForPartners).Count(),
                 SumChecksByRF = _saleService.Filtration(filtrationModelForRF).Count(),
                 SumMargin = result.Sum(x => x.Margin),
@@ -1733,12 +2166,14 @@ namespace WebUI.Controllers
                 SumTurnOverPetersburg = result.Sum(x => x.TurnOverPetersburg),
                 SumTurnOverSamara = result.Sum(x => x.TurnOverSamara),
                 SumTurnOverMoscowSever = result.Sum(x => x.TurnOverMoscowSever),
+                SumTurnOverEKB = result.Sum(x => x.TurnOverEKB),
                 SumTurnOverRF = result.Sum(x => x.TurnOverRF),
                 SumTurnOverPartner = result.Sum(x => x.TurnOverPartner),
                 SumMarginMoscow = result.Sum(x => x.MarginMoscow),
                 SumMarginPetersburg = result.Sum(x => x.MarginPetersburg),
                 SumMarginSamara = result.Sum(x => x.MarginSamara),
                 SumMarginMoscowSever = result.Sum(x => x.MarginMoscowSever),
+                SumMarginEKB = result.Sum(x => x.MarginEKB),
                 SumMarginPartner = result.Sum(x => x.MarginPartner),
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
@@ -1822,6 +2257,13 @@ namespace WebUI.Controllers
                 startDate = fromD,
                 endDate = forD
             };
+            
+            var filtrationModelForEKB = new SaleFiltrationModel()
+            {
+                shopId = 33,
+                startDate = fromD,
+                endDate = forD
+            };
 
             var filtrationModelForPartners = new SaleFiltrationModel()
             {
@@ -1871,10 +2313,12 @@ namespace WebUI.Controllers
                 SumSalesByMoscowSever = result.Sum(x => x.SalesByMoscowSever),
                 SumSalesByPetersburg = result.Sum(x => x.SalesByPetersburg),
                 SumSalesBySamara = result.Sum(x => x.SalesBySamara),
+                SumSalesByEKB = result.Sum(x => x.SalesByEKB),
                 SumChecksByMoscow = _saleService.Filtration(filtrationModelForMoscow).Count(),
                 SumChecksByMoscowSever = _saleService.Filtration(filtrationModelForMoscowSever).Count(),
                 SumChecksByPetersburg = _saleService.Filtration(filtrationModelForPetersburg).Count(),
                 SumChecksBySamara = _saleService.Filtration(filtrationModelForSamara).Count(),
+                SumChecksByEKB = _saleService.Filtration(filtrationModelForEKB).Count(),
                 SumChecksByPartners = _saleService.Filtration(filtrationModelForPartners).Count(),
                 SumChecksByRF = _saleService.Filtration(filtrationModelForRF).Count(),
                 SumMargin = result.Sum(x => x.Margin),
@@ -1885,12 +2329,14 @@ namespace WebUI.Controllers
                 SumTurnOverMoscowSever = result.Sum(x => x.TurnOverMoscowSever),
                 SumTurnOverPetersburg = result.Sum(x => x.TurnOverPetersburg),
                 SumTurnOverSamara = result.Sum(x => x.TurnOverSamara),
+                SumTurnOverEKB = result.Sum(x => x.TurnOverEKB),
                 SumTurnOverRF = result.Sum(x => x.TurnOverRF),
                 SumTurnOverPartner = result.Sum(x => x.TurnOverPartner),
                 SumMarginMoscow = result.Sum(x => x.MarginMoscow),
                 SumMarginMoscowSever = result.Sum(x => x.MarginMoscowSever),
                 SumMarginPetersburg = result.Sum(x => x.MarginPetersburg),
                 SumMarginSamara = result.Sum(x => x.MarginSamara),
+                SumMarginEKB = result.Sum(x => x.MarginEKB),
                 SumMarginPartner = result.Sum(x => x.MarginPartner),
                 SumMarginRF = result.Sum(x => x.MarginRF)
             };
@@ -1953,10 +2399,10 @@ namespace WebUI.Controllers
                 sales = sales.Where(x => x.ShopId == 29 && x.PartnerId == null && x.ForRussian == false);
             
             if (type == SalesByCategoriesFilterType.ForRF)
-                sales = sales.Where(x => x.ForRussian == true);
+                sales = sales.Where(x => x.ForRussian == true && x.PartnerId == null);
 
             if (type == SalesByCategoriesFilterType.Partner)
-                sales = sales.Where(x => x.PartnerId != null && x.ForRussian == false);
+                sales = sales.Where(x => x.PartnerId != null);
 
             sales = sales
                 .Include(x => x.SalesProducts).ThenInclude(x => x.Product)

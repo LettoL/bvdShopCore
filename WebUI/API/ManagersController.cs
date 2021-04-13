@@ -40,7 +40,12 @@ namespace WebUI.API
                 })
                 .ToListAsync();
 
+            var deletedManagersId = await _postgresContext.DeletedManagers
+                .Select(x => x.Id)
+                .ToListAsync();
+
             var managers = await _postgresContext.Managers
+                .Where(x => !deletedManagersId.Contains(x.Id))
                 .Select(x => new
                 {
                     Id = x.Id,
@@ -69,6 +74,25 @@ namespace WebUI.API
             }).ToList();
             
             return Ok(result);
+        }
+
+        [Route("GetList")]
+        public async Task<IActionResult> GetList()
+        {
+            var deletedManagersId = await _postgresContext.DeletedManagers
+                .Select(x => x.Id)
+                .ToListAsync();
+
+            var managers = await _postgresContext.Managers
+                .Where(x => !deletedManagersId.Contains(x.Id))
+                .Select(x => new ManagerDto
+                {
+                    Id = x.Id,
+                    Name = x.Name
+                })
+                .ToListAsync();
+            
+            return Ok(managers);
         }
 
         [HttpPost]

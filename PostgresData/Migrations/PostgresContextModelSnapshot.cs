@@ -44,6 +44,36 @@ namespace PostgresData.Migrations
                     b.ToTable("IncompleteProducts");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Olds.ArchiveCalculatedScore", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("CalculatedScoreId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ArchiveCalculatedScores");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.ArchiveCardKeeper", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("CardKeeperId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ArchiveCardKeepers");
+                });
+
             modelBuilder.Entity("Domain.Entities.Olds.BookingManagerOld", b =>
                 {
                     b.Property<int>("Id")
@@ -60,6 +90,18 @@ namespace PostgresData.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("BookingManagersOld");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.DeletedManager", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.HasKey("Id");
+
+                    b.ToTable("DeletedManagers");
                 });
 
             modelBuilder.Entity("Domain.Entities.Olds.DeletedSaleInfoOld", b =>
@@ -93,6 +135,87 @@ namespace PostgresData.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("ExpensesOld");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.ManagerPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<string>("Comment")
+                        .HasColumnType("text");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("InfoMoneyId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ManagerId")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Sum")
+                        .HasColumnType("numeric");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ManagerPayments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.ProductAmountInit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Price")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductAmountInits");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.ProductOperation", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("Cost")
+                        .HasColumnType("numeric");
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<bool>("ForRealization")
+                        .HasColumnType("boolean");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("StorageType")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ProductOperations");
                 });
 
             modelBuilder.Entity("Domain.Entities.Olds.RepaidDebtOld", b =>
@@ -193,6 +316,51 @@ namespace PostgresData.Migrations
                     b.ToTable("SoldProductFromStockOld");
                 });
 
+            modelBuilder.Entity("Domain.Entities.Olds.SupplierInfoInit", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<decimal>("Debt")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PriceProducts")
+                        .HasColumnType("numeric");
+
+                    b.Property<decimal>("PriceProductsForRealization")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupplierInfoInits");
+                });
+
+            modelBuilder.Entity("Domain.Entities.Olds.SupplierPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("DateTime")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("Sum")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("SupplierPayments");
+                });
+
             modelBuilder.Entity("Domain.Entities.Products.Product", b =>
                 {
                     b.Property<Guid>("Id")
@@ -271,6 +439,89 @@ namespace PostgresData.Migrations
                     b.HasKey("Id");
 
                     b.ToTable("SoldFromSupplies");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ScheduledDelivery", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<decimal>("DepositedSum")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduledDeliveries");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ScheduledDeliveryPayment", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("InfoMoneyId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("MoneyWorkerId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScheduledDeliveryId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("ScheduledDeliveryPayments");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ScheduledProductDelivery", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("integer")
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn);
+
+                    b.Property<int>("Amount")
+                        .HasColumnType("integer");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("timestamp without time zone");
+
+                    b.Property<int>("DeliveryType")
+                        .HasColumnType("integer");
+
+                    b.Property<decimal>("ProcurementCost")
+                        .HasColumnType("numeric");
+
+                    b.Property<int>("ProductId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ScheduledDeliveryId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("ShopId")
+                        .HasColumnType("integer");
+
+                    b.Property<int>("SupplierId")
+                        .HasColumnType("integer");
+
+                    b.Property<int?>("SupplyProductId")
+                        .HasColumnType("integer");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("ScheduledDeliveryId");
+
+                    b.ToTable("ScheduledProductDeliveries");
                 });
 
             modelBuilder.Entity("Domain.Entities.Shop", b =>
@@ -368,6 +619,15 @@ namespace PostgresData.Migrations
                     b.HasOne("Domain.Entities.Products.ProductCategory", "Category")
                         .WithMany()
                         .HasForeignKey("CategoryId1");
+                });
+
+            modelBuilder.Entity("Domain.Entities.ScheduledProductDelivery", b =>
+                {
+                    b.HasOne("Domain.Entities.ScheduledDelivery", "ScheduledDelivery")
+                        .WithMany("Products")
+                        .HasForeignKey("ScheduledDeliveryId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
                 });
 #pragma warning restore 612, 618
         }

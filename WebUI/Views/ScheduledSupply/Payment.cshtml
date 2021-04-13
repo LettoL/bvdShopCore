@@ -1,0 +1,83 @@
+﻿@{
+    ViewData["Title"] = "Payment";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-3"></div>
+    <div class="col-md-6">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    <h4>Оплата поставки</h4>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <form action="/ScheduledSupply/Payment" method="post">
+                    <input type="hidden" name="supplyId" value="@ViewBag.Id">
+                    
+                    <label for="">Магазин для расхода</label>
+                    <select class="form-control" name="shopId">
+                        @foreach (var shop in ViewBag.Shops)
+                        {
+                            <option value="@shop.Id">@shop.Title</option>
+                        }
+                    </select>
+                    
+                    <label for="">Списать с:</label>
+                    <select class="form-control" name="moneyWorkerType" onchange="selectMoneyWorkers()" id="chooseMoneyWorker">
+                        <option>Выбрать откуда списать оплату</option>
+                        <option value="1">Держатель карты</option>
+                        <option value="2">Рассчетный счет</option>
+                    </select>
+                    <br/>
+                    <select class="form-control" name="moneyWorkerId" id="moneyWorker">
+                        <option>Выбрать опцию</option>
+                    </select>
+                    <br/>
+                    <label>Остаток: @ViewBag.Rest</label>
+                    <input type="text" class="form-control" name="sum"/>
+                    <br/>
+                    <button id="netroj" class="btn btn-submit">Сохранить</button>
+                    <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3"></div>
+</div>
+
+<script type="text/javascript">
+
+    function selectMoneyWorkers() {
+        let moneyWorkerSelect = document.getElementById('chooseMoneyWorker');
+        let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
+
+        fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+                {
+                    headers: { "Content-Type": "application/json" },
+                    credentials: 'include'
+                })
+            .then((res) => {
+                return res.json();
+            })
+            .then((json) => {
+
+                $('#moneyWorker').html('');
+
+                json.forEach(json => {
+                    $('#moneyWorker').append('<option value="' +
+                        json.id +
+                        '">' +
+                        json.title +
+                        '</option>');
+                });
+            });
+    }
+    
+    $('form').submit(() => {
+      $('#netroj').prop('disabled', true)
+      return true
+    })
+
+</script>

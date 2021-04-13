@@ -1,0 +1,143 @@
+﻿
+@{
+    ViewData["Title"] = "Выплаты менеджерам";
+    Layout = ViewBag.Layout;
+}
+
+<h3 class="page-title">Список расходов <small>Просмотр расходов</small></h3>
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список расходов
+                </div>
+                <div class="portlet-filters">
+                    <form style="display: inline-block">
+                        <select name="managerId" id="managerFilter" onchange="filterByManager(event)" class="form-control" style="width: 200px; display: inline-block">
+                            <option value="0" disabled selected>Выбрать менеджера</option>
+                            <option value="0">Все</option>
+                            @foreach(var manager in ViewBag.Managers)
+                            {
+                                <option value="@manager.Id">@manager.Name</option>
+                            }
+                        </select>
+                    </form>
+                    <form style="display: inline-block">
+                        <input placeholder="Дата с:" type="text" name="value" id="dateFilter1" onchange="filterByDate1(event.target)" class="form-control" style="width: 200px; display: inline-block" />
+                    </form>
+                    <form style="display: inline-block">
+                        <input placeholder="Дата по:" type="text" name="value" id="dateFilter2" onchange="filterByDate2(event.target)" class="form-control" style="width: 200px; display: inline-block" />
+                    </form>
+                </div>
+            </div>
+            <div class="portlet-body">             
+                <div class="table-responsive">
+                    <table id="result" class="table table-striped">
+                        <thead>
+                        <tr>
+                            <th>Дата</th>
+                            <th>Сумма</th>
+                            <th>Менеджер</th>
+                            <th>Комментарий</th>
+                        </tr>
+                        </thead>
+                        <tbody>                           
+                        @foreach (var c in Model)
+                        {
+                            <tr>
+                                <td>@c.DateTime.ToString("dd.MM.yyyy")</td>
+                                <td>@Math.Abs(c.Sum)</td>
+                                <td>@c.ManagerName</td>
+                                <td>@c.Comment</td>
+                            </tr>
+                        }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+<script type="text/javascript">
+
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker();
+        $("#dateFilter2").datepicker();
+    });
+</script>
+
+<script type="text/javascript">
+    let date1 = null;
+    let date2 = null;
+    let manager = null;
+
+    function filterByDate1(value) {
+            date1 = value.value;
+    
+            loadData(manager, date1, date2);
+        }
+    
+    function filterByDate2(value) {
+            date2 = value.value;
+    
+            loadData(manager, date1, date2);
+        }
+    
+    function filterByManager(value) {
+            manager = value.srcElement.value;
+    
+            loadData(manager, date1, date2);
+        }
+        
+    function loadData(manager, date1, date2) {
+            $('#result').load(
+                "/Admin/ManagersPaymentsFilter",
+                {
+                    manager: manager,
+                    date1: date1,
+                    date2: date2,
+                }
+            );
+        }
+    
+</script>

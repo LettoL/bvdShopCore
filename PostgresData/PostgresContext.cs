@@ -16,6 +16,7 @@ namespace PostgresData
         public DbSet<Supplier> Suppliers { get; set; }
         public DbSet<RepaidDebtOld> RepaidDebtsOld { get; set; }
         public DbSet<Manager> Managers { get; set; }
+        public DbSet<DeletedManager> DeletedManagers { get; set; }
         
         public DbSet<SaleManagerOld> SaleManagersOld { get; set; }
         public DbSet<BookingManagerOld> BookingManagersOld { get; set; }
@@ -27,15 +28,22 @@ namespace PostgresData
 
         public DbSet<SoldFromSupply> SoldFromSupplies { get; set; }
         public DbSet<ExpenseOld> ExpensesOld { get; set; }
+        public DbSet<ProductOperation> ProductOperations { get; set; }
+        public DbSet<SupplierPayment> SupplierPayments { get; set; }
+        public DbSet<SupplierInfoInit> SupplierInfoInits { get; set; }
+        public DbSet<ProductAmountInit> ProductAmountInits { get; set; }
+        public DbSet<ArchiveCardKeeper> ArchiveCardKeepers { get; set; }
+        public DbSet<ArchiveCalculatedScore> ArchiveCalculatedScores { get; set; }
+        public DbSet<ManagerPayment> ManagerPayments { get; set; }
+        public DbSet<ScheduledProductDelivery> ScheduledProductDeliveries { get; set; }
+        public DbSet<ScheduledDelivery> ScheduledDeliveries { get; set; }
+        public DbSet<ScheduledDeliveryPayment> ScheduledDeliveryPayments { get; set; }
         
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            optionsBuilder.UseNpgsql(
-                ""
-                //b => b.ProvideClientCertificatesCallback(ProvideClientCertificates)
-            );
+            optionsBuilder.UseNpgsql("");
         }
         
         private void ProvideClientCertificates(X509CertificateCollection clientCerts)

@@ -8,20 +8,29 @@ import {makeStyles} from "@material-ui/core/styles";
 import {useStore} from "effector-react";
 import {
   $filterCategoryId, $filterMinAmount,
-  $filterShopId,
+  $filterShopId, $filterSupplierId, fetchProductsBySupplierFx, fetchProductsFx,
   setCategoryFilter, setMinAmountFilter,
-  setShopFilter,
+  setShopFilter, setSupplierFilter,
   setTitleFilter
 } from "../../models/product-table/product.store";
-import {$categoriesFilter, $shopsFilter, fetchCategoriesFx, fetchShopsFx} from "../../models/filter/filter.store";
+import {
+  $categoriesFilter,
+  $shopsFilter,
+  $suppliersFilter,
+  fetchCategoriesFx,
+  fetchShopsFx, fetchSupplierFx
+} from "../../models/filter/filter.store";
+import {fetchSuppliersFx} from "../../store/supplier-store";
 
 export const ProductTableFilters = () => {
   const classes = useStyles()
 
   const shopId = useStore($filterShopId)
   const categoryId = useStore($filterCategoryId)
+  const supplierId = useStore($filterSupplierId)
   const shops = useStore($shopsFilter)
   const categories = useStore($categoriesFilter)
+  const suppliers = useStore($suppliersFilter)
   const minAmount = useStore($filterMinAmount)
 
   const handleChangeMinAmount = event => {
@@ -36,6 +45,17 @@ export const ProductTableFilters = () => {
     setCategoryFilter(event.target.value)
   };
 
+  const handleChangeSupplier = (event) => {
+    const value = event.target.value
+
+    if(value > 0)
+      fetchProductsBySupplierFx(value)
+    else
+      fetchProductsFx()
+
+    setSupplierFilter(value)
+  }
+
   const handleChangeTitle = (event) => {
     setTitleFilter(event.target.value)
   };
@@ -43,6 +63,7 @@ export const ProductTableFilters = () => {
   useEffect(() => {
     fetchCategoriesFx()
     fetchShopsFx()
+    fetchSupplierFx()
   }, [])
 
   return (
@@ -72,6 +93,20 @@ export const ProductTableFilters = () => {
           <MenuItem value={0}>Выбрать категорию</MenuItem>
           {categories.map(category => (
             <MenuItem key={category.id} value={category.id}>{category.title}</MenuItem>
+          ))}
+        </Select>
+      </FormControl>
+      <FormControl className={classes.formControl}>
+        <InputLabel id="demo-simple-select-label">Поставщк</InputLabel>
+        <Select
+          labelId="demo-simple-select-label"
+          id="demo-simple-select"
+          value={supplierId}
+          onChange={handleChangeSupplier}
+        >
+          <MenuItem value={0}>Выбрать поставщика</MenuItem>
+          {suppliers.map(supplier => (
+            <MenuItem key={supplier.id} value={supplier.id}>{supplier.name}</MenuItem>
           ))}
         </Select>
       </FormControl>

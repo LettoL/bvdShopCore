@@ -277,6 +277,15 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
+        public IActionResult ManagerPayment()
+        {
+            ViewBag.Managers = _postgresContext.Managers.ToList();
+            ViewBag.Shops = _db.Shops.ToList();
+            
+            return View();
+        }
+        
+        [HttpGet]
         public IActionResult Realization()
         {
             ViewBag.Partners = _partnerService.All();
@@ -783,22 +792,30 @@ namespace WebUI.Controllers
 
             if (value == 1) //Получить держателей карт
             {
+                var archiveCardKeepers = _postgresContext.ArchiveCardKeepers
+                    .Select(x => x.CardKeeperId).ToList();
                 //TODO: _db???
-                var cardKeepers = await _db.CardKeepers.ToListAsync();
+                var cardKeepers = _db.CardKeepers
+                    .Where(x => !archiveCardKeepers.Contains(x.Id))
+                    .ToList();
                 return Ok(cardKeepers);
             }
 
             if (value == 2) // получить рассчетные счета
             {
+                var archiveCalculatedScores = _postgresContext.ArchiveCalculatedScores
+                    .Select(x => x.CalculatedScoreId).ToList();
                 //TODO: _db???
-                var scores = await _db.CalculatedScores.ToListAsync();
+                var scores = _db.CalculatedScores
+                    .Where(x => !archiveCalculatedScores.Contains(x.Id))
+                    .ToList();
                 return Ok(scores);
             }
 
             if (value == 3) // получить кассу
             {
                 //TODO: _db???
-                var shops = await _db.Shops.Where(x => x.Id == user.ShopId).ToListAsync();
+                var shops = _db.Shops.Where(x => x.Id == user.ShopId).ToList();
                 return Ok(shops);
             }
 
@@ -1111,6 +1128,7 @@ namespace WebUI.Controllers
                         : _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id) != null
                             ? _db.InfoMonies.FirstOrDefault(s => s.SaleId == x.Id).PaymentType
                             : PaymentType.Cash,
+                    MarginPercent = (int)Math.Round((x.Margin == 0 || x.Sum  == 0) ? 0 : x.Margin/(x.Sum/100))
                 }).ToList());
         }
     }

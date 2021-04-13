@@ -1,0 +1,147 @@
+﻿@{
+    ViewData["Title"] = "Detail";
+
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title"></div>
+            <div id="productList" class="portlet-body">
+                <div v-for="product in products">
+                    <b>{{product.title}}</b>
+                    <select v-model="product.shopId" class="form-control" style="width: 250px; display: inline-block">
+                        <option value="0">Магазин не выбран</option>
+                        <option
+                            v-for="shop in shops"
+                            v-bind:value="shop.id"
+                            v-bind:disabled="product.supplyProductId > 0"
+                        >
+                            {{shop.title}}
+                        </option>
+                    </select>
+                    <input 
+                        type="number" 
+                        v-model="product.amount" 
+                        class="form-control" 
+                        style="width: 100px; display: inline-block"
+                        v-bind:disabled="!product.changes || product.supplyProductId > 0"
+                    >
+                    <template v-if="!product.changes && !changes && !product.confirmed && product.supplyProductId == 0">
+                        <span class="btn btn-dark" v-on:click="productAmountChange(product)">
+                            <i class="fa fa-cog" aria-hidden="true"></i>
+                        </span>
+                    </template>
+                    <template v-if="product.changes && !product.confirmed && product.supplyProductId == 0">
+                        <span class="btn btn-dark" v-on:click="productAmountChangeComplete(product)">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
+                        </span>
+                    </template>
+                    <template v-if="!product.confirmed && product.supplyProductId == 0">
+                        <span class="btn btn-dark" v-on:click="productConfirm(product)">
+                            <i class="fa fa-check" aria-hidden="true"></i>
+                        </span>
+                    </template>
+                </div>
+                <button class="btn btn-submit" onclick="send()">Сохранить</button>
+                <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+
+  var ProductList = new Vue({
+    el: '#productList',
+    data: {
+      products: [],
+      shops: [],
+      changes: false,
+      changedProduct: undefined
+    },
+    methods: {
+      productAmountChange: function (product) {
+        this.changes = true
+        this.changedProduct = {...product}
+        
+        product.changes = true
+      },
+      productAmountChangeComplete: function (product) {
+        product.changes = false
+        
+        if (product.amount < this.changedProduct.amount){
+          this.changedProduct.amount -= product.amount 
+          this.products.push({...this.changedProduct, shopId: 0, id: 0, prev: this.changedProduct.id})
+          
+          this.changedProduct = undefined
+        }
+        console.log(this.products)
+        
+        this.changes = false
+      },
+      productConfirm: function (product) {
+        product.confirmed = true
+      },
+      sendData: function () {
+        var data = {
+          deliveryId: @ViewBag.Id,
+          products: this.products.map(product => (
+            {
+              productDeliveryId: +product.id,
+              productTitle: product.title,
+              shopId: +product.shopId,
+              amount: +product.amount,
+              confirmed: product.confirmed,
+              prev: +product.prev                             
+            }
+          ))
+        }
+        
+        return fetch("/ScheduledSupply/Detail", {
+          method: "POST",
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          redirect: "follow",
+          credentials: "include",
+          body: JSON.stringify(data)
+        })
+      }
+    },
+    created: function () {
+      fetch('/ScheduledSupply/Products/@ViewBag.Id', {
+        headers: { 'Content-Type': 'application/json' },
+        credentials: 'include'
+      })
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {        
+        this.shops.push(...res.shops)
+        
+        res.products.forEach(product => {
+          this.products.push({
+            id: product.id, 
+            title: product.title,
+            shop: product.shop,
+            shopId: product.shopId,
+            amount: product.amount,
+            changes: false,
+            confirmed: false,
+            prev: 0,
+            supplyProductId: product.supplyProductId
+          })
+        })
+      })
+    }
+  })
+  
+  function send() {
+    this.ProductList.sendData().then(res => window.location.href = res.url);
+  }
+
+</script>

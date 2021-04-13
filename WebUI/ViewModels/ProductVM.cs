@@ -15,6 +15,6 @@ namespace WebUI.ViewModels
         public decimal Cost { get; set; }
         public Shop Shop { get; set; }
         public Category Category { get; set; }
-        
+        public int CategoryId { get; set; }
     }
 }

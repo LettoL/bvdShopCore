@@ -5,7 +5,9 @@ using Data.Entities;
 using Data.Enums;
 using Data.Services.Abstract;
 using Data.ViewModels;
+using Domain.Entities.Olds;
 using Microsoft.EntityFrameworkCore;
+using PostgresData;
 
 namespace Data.Services.Concrete
 {
@@ -18,6 +20,7 @@ namespace Data.Services.Concrete
         private readonly IBaseObjectService<Supplier> _supplierService;
         private readonly IInfoProductService _infoProductService;
         private readonly IBaseObjectService<ProductInformation> _productInformationService;
+        private readonly PostgresContext _postgresContext;
 
         public ProductOperationService(IProductService productService,
             IBaseObjectService<SupplyHistory> supplyHistory,
@@ -25,7 +28,8 @@ namespace Data.Services.Concrete
             IBaseObjectService<DeferredSupplyProduct> deferredSupplyProductService,
             IInfoProductService infoProductService,
             IBaseObjectService<Supplier> supplierService,
-            IBaseObjectService<ProductInformation> productInformationService)
+            IBaseObjectService<ProductInformation> productInformationService,
+            PostgresContext postgresContext)
         {
             _productService = productService;
             _supplyHistoryService = supplyHistory;
@@ -34,6 +38,7 @@ namespace Data.Services.Concrete
             _infoProductService = infoProductService;
             _supplierService = supplierService;
             _productInformationService = productInformationService;
+            _postgresContext = postgresContext;
         }
 
         public void Supply(SupplyProductVM obj)
@@ -87,6 +92,16 @@ namespace Data.Services.Concrete
                     SupplyHistoryId = supplyHistory.Id
                 };
 
+                _postgresContext.ProductOperations.Add(new ProductOperation(
+                    product.Id,
+                    obj.Amount,
+                    DateTime.Now.AddHours(3),
+                    obj.ProcurementCost / obj.Amount,
+                    obj.Realization == SupplyType.ForRealization,
+                    obj.SupplierId,
+                    StorageType.Shop));
+                _postgresContext.SaveChanges();
+
                 _supplyProductService.Create(supplyProduct);
 
                 if (obj.Realization == SupplyType.DeferredPayment)
@@ -133,8 +148,10 @@ namespace Data.Services.Concrete
             var product = _productService.Get(productId);
             var supply = _supplyProductService.All().FirstOrDefault(x => x.Id == supplyId);
 
+            var forRealization = supply.RealizationAmount > 0;
+            
             supply = SupplyProductWriteOff(supply, amount);
-
+            
             CreateHistory(new InfoProduct
             {
                 Amount = amount,
@@ -146,6 +163,16 @@ namespace Data.Services.Concrete
             });
 
             _supplyProductService.Update(supply);
+
+            _postgresContext.ProductOperations.Add(new ProductOperation(
+                supply.ProductId,
+                -amount,
+                DateTime.Now.AddHours(3),
+                supply.ProcurementCost,
+                forRealization,
+                supply.SupplierId ?? 0,
+                StorageType.Shop));
+            _postgresContext.SaveChanges();
         }
 
         public decimal RealizationProduct(ShopContext db, int productId, int amount, int saleId)
@@ -178,6 +205,15 @@ namespace Data.Services.Concrete
                         FinalCost = supplyProductRealization.FinalCost * amount,
                         ProductId = productId
                     });
+
+                    _postgresContext.ProductOperations.Add(new ProductOperation(
+                        productId,
+                        -amount,
+                        DateTime.Now.AddHours(3),
+                        supplyProductRealization.FinalCost,
+                        true,
+                        supplyProductRealization.SupplierId ?? 0,
+                        StorageType.Shop));
                 }
                 else
                 {
@@ -200,6 +236,15 @@ namespace Data.Services.Concrete
                         FinalCost = supplyProductRealization.FinalCost * bufAmount,
                         ProductId = productId
                     });
+
+                    _postgresContext.ProductOperations.Add(new ProductOperation(
+                        productId,
+                        -bufAmount,
+                        DateTime.Now.AddHours(3),
+                        supplyProductRealization.FinalCost,
+                        true,
+                        supplyProductRealization.SupplierId ?? 0,
+                        StorageType.Shop));
 
                     cost += RealizationProduct(db, productId, buf, saleId);
                 }
@@ -226,6 +271,15 @@ namespace Data.Services.Concrete
                             FinalCost = supplyProduct.FinalCost * amount,
                             ProductId = productId
                         });
+
+                        _postgresContext.ProductOperations.Add(new ProductOperation(
+                            productId,
+                            -amount,
+                            DateTime.Now.AddHours(3),
+                            supplyProduct.FinalCost,
+                            false,
+                            supplyProduct.SupplierId ?? 0,
+                            StorageType.Shop));
                     }
                     else
                     {
@@ -246,10 +300,21 @@ namespace Data.Services.Concrete
                             ProductId = productId
                         });
 
+                        _postgresContext.ProductOperations.Add(new ProductOperation(
+                            productId,
+                            -bufAmount,
+                            DateTime.Now.AddHours(3),
+                            supplyProduct.FinalCost,
+                            false,
+                            supplyProduct.SupplierId ?? 0,
+                            StorageType.Shop));
+
                         cost += RealizationProduct(db, productId, buf, saleId);
                     }
                 }
             }
+
+            _postgresContext.SaveChanges();
 
             return cost;
         }
