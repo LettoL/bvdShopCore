@@ -70,95 +70,102 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult Create([FromBody] CreateScheduledDeliveryVM scheduledDelivery)
         {
-            var products = new List<ScheduledProductDelivery>();
-            
-            foreach (var product in scheduledDelivery.Products)
+            try
             {
-                ScheduledProductDelivery productDelivery;
-                
-                if (product.ProductId != 0)
-                {
-                    productDelivery = new ScheduledProductDelivery(product.ProductId, product.Amount,
-                        scheduledDelivery.SupplierId, product.ProcurementCost);
-                }
-                else
-                {
-                    var existingProduct = _shopContext.Products
-                        .FirstOrDefault(x => x.Title == product.Title);
+                var products = new List<ScheduledProductDelivery>();
 
-                    if (existingProduct == null)
+                foreach (var product in scheduledDelivery.Products)
+                {
+                    ScheduledProductDelivery productDelivery;
+
+                    if (product.ProductId != 0)
                     {
-                        var newProduct = _shopContext.Products.Add(new Product()
-                        {
-                            Title = product.Title,
-                            Code = product.Code,
-                            ShopId = 1,
-                            CategoryId = scheduledDelivery.CategoryId,
-                            Cost = product.ProcurementCost
-                        });
-                        _shopContext.SaveChanges();
-
-                        productDelivery = new ScheduledProductDelivery(newProduct.Entity.Id, product.Amount,
+                        productDelivery = new ScheduledProductDelivery(product.ProductId, product.Amount,
                             scheduledDelivery.SupplierId, product.ProcurementCost);
                     }
                     else
                     {
-                        productDelivery = new ScheduledProductDelivery(existingProduct.Id, product.Amount,
-                            scheduledDelivery.SupplierId, product.ProcurementCost);
+                        var existingProduct = _shopContext.Products
+                            .FirstOrDefault(x => x.Title == product.Title);
+
+                        if (existingProduct == null)
+                        {
+                            var newProduct = _shopContext.Products.Add(new Product()
+                            {
+                                Title = product.Title,
+                                Code = product.Code,
+                                ShopId = 1,
+                                CategoryId = scheduledDelivery.CategoryId,
+                                Cost = product.ProcurementCost
+                            });
+                            _shopContext.SaveChanges();
+
+                            productDelivery = new ScheduledProductDelivery(newProduct.Entity.Id, product.Amount,
+                                scheduledDelivery.SupplierId, product.ProcurementCost);
+                        }
+                        else
+                        {
+                            productDelivery = new ScheduledProductDelivery(existingProduct.Id, product.Amount,
+                                scheduledDelivery.SupplierId, product.ProcurementCost);
+                        }
                     }
+
+                    if (scheduledDelivery.ShopId > 0)
+                        productDelivery.ShopId = scheduledDelivery.ShopId;
+
+                    products.Add(productDelivery);
                 }
 
-                if (scheduledDelivery.ShopId > 0)
-                    productDelivery.ShopId = scheduledDelivery.ShopId;
-                
-                products.Add(productDelivery);
+                var createdSchedulerDelivery = _postgresContext.ScheduledDeliveries
+                    .Add(new ScheduledDelivery(
+                        scheduledDelivery.SupplierId,
+                        scheduledDelivery.DepositedSum,
+                        products));
+
+                var supplier = _shopContext.Suppliers.FirstOrDefault(x => x.Id == scheduledDelivery.SupplierId);
+
+                var infoMoney = _shopContext.InfoMonies.Add(new InfoMoney()
+                {
+                    Sum = -scheduledDelivery.DepositedSum,
+                    PaymentType = PaymentType.Cashless,
+                    MoneyWorkerId = scheduledDelivery.MoneyWorkerId,
+                    MoneyOperationType = MoneyOperationType.Expense,
+                    Date = DateTime.Now.AddHours(3),
+                    Comment = supplier?.Title ?? ""
+                }).Entity;
+
+                var expense = _shopContext.Expenses.Add(new Expense()
+                {
+                    InfoMoney = infoMoney,
+                    ExpenseCategoryId = 4
+                });
+
+                _shopContext.SaveChanges();
+
+                // _postgresContext.SupplierPayments.Add(
+                //     new SupplierPayment(scheduledDelivery.DepositedSum, scheduledDelivery.SupplierId, DateTime.Now.AddHours(3)));
+                _postgresContext.ExpensesOld.Add(
+                    new ExpenseOld(
+                        expense.Entity.Id,
+                        scheduledDelivery.ShopId > 0 ? scheduledDelivery.ShopId : 1));
+
+                _postgresContext.SaveChanges();
+
+                _postgresContext.ScheduledDeliveryPayments.Add(new ScheduledDeliveryPayment()
+                {
+                    InfoMoneyId = infoMoney.Id,
+                    ScheduledDeliveryId = createdSchedulerDelivery.Entity.Id,
+                    MoneyWorkerId = scheduledDelivery.MoneyWorkerId
+                });
+
+                _postgresContext.SaveChanges();
+
+                return RedirectToAction("List");
             }
-            
-            var createdSchedulerDelivery = _postgresContext.ScheduledDeliveries
-                .Add(new ScheduledDelivery(
-                    scheduledDelivery.SupplierId,
-                    scheduledDelivery.DepositedSum,
-                    products));
-            
-            var supplier = _shopContext.Suppliers.FirstOrDefault(x => x.Id == scheduledDelivery.SupplierId);
-            
-            var infoMoney = _shopContext.InfoMonies.Add(new InfoMoney()
+            catch (Exception e)
             {
-                Sum = -scheduledDelivery.DepositedSum,
-                PaymentType = PaymentType.Cashless,
-                MoneyWorkerId = scheduledDelivery.MoneyWorkerId,
-                MoneyOperationType = MoneyOperationType.Expense,
-                Date = DateTime.Now.AddHours(3),
-                Comment = supplier?.Title ?? ""
-            }).Entity;
-
-            var expense = _shopContext.Expenses.Add(new Expense()
-            {
-                InfoMoney = infoMoney,
-                ExpenseCategoryId = 4
-            });
-            
-            _shopContext.SaveChanges();
-
-           // _postgresContext.SupplierPayments.Add(
-           //     new SupplierPayment(scheduledDelivery.DepositedSum, scheduledDelivery.SupplierId, DateTime.Now.AddHours(3)));
-            _postgresContext.ExpensesOld.Add(
-                new ExpenseOld(
-                    expense.Entity.Id,
-                    scheduledDelivery.ShopId > 0 ? scheduledDelivery.ShopId : 1));
-
-            _postgresContext.SaveChanges();
-
-            _postgresContext.ScheduledDeliveryPayments.Add(new ScheduledDeliveryPayment()
-            {
-                InfoMoneyId = infoMoney.Id,
-                ScheduledDeliveryId = createdSchedulerDelivery.Entity.Id,
-                MoneyWorkerId = scheduledDelivery.MoneyWorkerId
-            });
-            
-            _postgresContext.SaveChanges();
-            
-            return RedirectToAction("List");
+                return BadRequest(e.Message);
+            }
         }
 
         [HttpGet]
