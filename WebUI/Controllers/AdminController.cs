@@ -1533,8 +1533,25 @@ namespace WebUI.Controllers
 
             return View(sale);
         }
+        [HttpGet]
+        public IActionResult CloseSaleProducts(int id)
+        {
+            var saleProducts = _saleProductService
+                .All()
+                .Include(x => x.Product)
+                .Where(x => x.SaleId == id)
+                .Select(x => new SaleProductItem()
+                {
+                    Id = x.ProductId,
+                    Title = x.Product.Title,
+                    Amount = x.Amount,
+                    ProcurementCost = 0
+                }).ToList();
 
-        [HttpPost]
+            return Ok(saleProducts);
+        }
+
+        [HttpPost] // сюда теперь прилетает CloseSaleDto
         public IActionResult CloseSale(int saleId, bool realization, int moneyWorkerType, int moneyWorkerId, int moneyWorkerCashlessId, int supplierId, int[] productIds, int[] amounts, decimal[] procurementCosts, decimal AdditionalCost, bool cashExpense)
         {
             var productCosts = productIds.Zip(procurementCosts, (product, cost) => new

@@ -9,40 +9,40 @@
         <div class="portlet">
             <div class="portlet-title"></div>
             <div id="productList" class="portlet-body">
-                <div v-for="product in products">
-                    <b>{{product.title}}</b>
-                    <select v-model="product.shopId" class="form-control" style="width: 250px; display: inline-block">
+                <div v-for="product in products" style="display: flex; align-items: center; justify-content: flex-start">
+                    <b style="margin-right: 10px">{{product.title}}</b>
+                    <select v-model="product.shopId" class="form-control" style="width: 250px; display: inline-block; margin-right: 10px">
                         <option value="0">Магазин не выбран</option>
-                        <option
-                            v-for="shop in shops"
-                            v-bind:value="shop.id"
-                            v-bind:disabled="product.supplyProductId > 0"
-                        >
+                        <option v-for="shop in shops"
+                                v-bind:value="shop.id"
+                                v-bind:disabled="product.supplyProductId > 0">
                             {{shop.title}}
                         </option>
                     </select>
-                    <input 
-                        type="number" 
-                        v-model="product.amount" 
-                        class="form-control" 
-                        style="width: 100px; display: inline-block"
-                        v-bind:disabled="!product.changes || product.supplyProductId > 0"
-                    >
+                    <input type="number"
+                           v-model="product.amount"
+                           class="form-control"
+                           style="width: 100px; display: inline-block; margin-right: 10px"
+                           v-bind:disabled="!product.changes || product.supplyProductId > 0">
                     <template v-if="!product.changes && !changes && !product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productAmountChange(product)">
-                            <i class="fa fa-cog" aria-hidden="true"></i>
+                        <span class="btn btn-dark" v-on:click="productAmountChange(product)" style="margin-right: 10px">
+                            <i class="fa fa-pencil" aria-hidden="true"></i>
                         </span>
                     </template>
                     <template v-if="product.changes && !product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productAmountChangeComplete(product)">
+                        <span class="btn btn-dark" v-on:click="productAmountChangeComplete(product)" style="margin-right: 10px">
                             <i class="fa fa-pencil" aria-hidden="true"></i>
                         </span>
                     </template>
                     <template v-if="!product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productConfirm(product)">
+                        <span class="btn btn-dark" v-on:click="productConfirm(product)" style="margin-right: 10px">
                             <i class="fa fa-check" aria-hidden="true"></i>
                         </span>
                     </template>
+                    <span class="btn btn-danger" style="margin-right: 10px">
+                        <i class="fa fa-trash" aria-hidden="true" v-on:click="productRemove(product.id)"></i>
+                    </span>
+                    
                 </div>
                 <button class="btn btn-submit" onclick="send()">Сохранить</button>
                 <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
@@ -64,6 +64,10 @@
       changedProduct: undefined
     },
     methods: {
+      productRemove: function (id) {    
+        this.products = this.products.filter(product => product.id !== id);
+        console.log(this.products);
+      },
       productAmountChange: function (product) {
         this.changes = true
         this.changedProduct = {...product}
