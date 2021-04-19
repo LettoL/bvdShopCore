@@ -192,7 +192,7 @@ namespace WebUI.Controllers
         public IActionResult Detail([FromBody]EditScheduledDelivery command)
         {
             ScheduledDeliveryEditHandler.Execute(command, _postgresContext);
-            ScheduledDeliveryConfirmHandler.Execute(command.DeliveryId, _postgresContext, _shopContext);
+            //ScheduledDeliveryConfirmHandler.Execute(command.DeliveryId, _postgresContext, _shopContext);
             
             return RedirectToAction("List");
         }

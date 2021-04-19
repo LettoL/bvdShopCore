@@ -236,7 +236,7 @@
     })
     
     function send() {
-      this.scheduledSupply.sendData().then(res => console.log(res) /*window.location.href = res.url*/)
+      this.scheduledSupply.sendData().then(res => window.location.href = res.url)
     }
     
     function selectMoneyWorkers() {
