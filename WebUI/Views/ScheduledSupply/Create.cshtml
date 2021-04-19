@@ -145,6 +145,9 @@
             let index = this.products.findIndex(x => x.productId === productId)
             
             this.products.splice(index, 1)
+          },
+          setMoneyWorkerId: function (moneyWorkerId) {
+            this.moneyWorkerId = moneyWorkerId;
           }
         } 
     })
@@ -254,6 +257,9 @@
                 .then((json) => {
     
                     $('#moneyWorker').html('');
+
+                    if (json.length > 0)
+                        scheduledSupply.setMoneyWorkerId(json[0].id)
     
                     json.forEach(json => {
                         $('#moneyWorker').append('<option value="' +

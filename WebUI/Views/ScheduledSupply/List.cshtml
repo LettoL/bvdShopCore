@@ -49,6 +49,9 @@
                                 <a :href="'/ScheduledSupply/Payment/' + supply.id" v-show="(supply.procurementCost - supply.payment) > 0" class="btn btn-dark">
                                     <i class="fa fa-bookmark" aria-hidden="true"></i>
                                 </a>
+                                <a :href="'/ScheduledSupply/Remove/' + supply.id" class="btn btn-danger" v-on:click="deleteProduct(product.productId)">
+                                    <i class="fa fa-trash" aria-hidden="true"></i>
+                                </a>
                             </td>
                         </tr>
                         </tbody>
