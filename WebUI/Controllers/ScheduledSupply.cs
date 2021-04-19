@@ -304,7 +304,7 @@ namespace WebUI.Controllers
                     .Contains(x.ExpenseId))
                 .ToList();
 
-            var supplyProducts = _shopContext.SupplyProducts
+            /*var supplyProducts = _shopContext.SupplyProducts
                 .Where(x => scheduledDeliveryProducts
                     .Where(z => z.SupplyProductId > 0)
                     .Select(z => z.SupplyProductId)
@@ -323,12 +323,12 @@ namespace WebUI.Controllers
                 .Where(x => supplyHistories
                     .Select(z => z.Id)
                     .Contains((int)x.SupplyHistoryId))
-                .ToList();
+                .ToList();*/
             
             
-            _shopContext.InfoProducts.RemoveRange(infoProducts);
+           /* _shopContext.InfoProducts.RemoveRange(infoProducts);
             _shopContext.SupplyHistories.RemoveRange(supplyHistories);
-            _shopContext.SupplyProducts.RemoveRange(supplyProducts);
+            _shopContext.SupplyProducts.RemoveRange(supplyProducts);*/
             _shopContext.Expenses.RemoveRange(expenses);
             _shopContext.InfoMonies.RemoveRange(infoMoneys);
             
