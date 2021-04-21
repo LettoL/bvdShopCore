@@ -1,7 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
+﻿using System.Collections.Generic;
 using WebUI.Dtos.CloseSale;
 
 namespace WebUI.Dtos
@@ -13,8 +10,7 @@ namespace WebUI.Dtos
         public int MoneyWorkerId { get; set; }
         public int MoneyWorkerCashlessId { get; set; }
         public int SupplierId { get; set; }
-        public IList<SaleProductItem> Products { get; set; }
+        public ICollection<SaleProductItem> Products { get; set; } = new HashSet<SaleProductItem>();
         public decimal AdditionalCost { get; set; }
-
     }
 }

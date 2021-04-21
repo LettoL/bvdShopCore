@@ -17,6 +17,7 @@
             <th>Счет</th>
             <th>Комментарий</th>
             <th>Категория расхода</th>
+            <th>Действие</th>
         </tr>
     </thead>
     <tbody>
@@ -36,6 +37,11 @@
                 <td>@c.InfoMoney.MoneyWorker.Title</td>
                 <td>@c.InfoMoney.Comment</td>
                 <td>@c.ExpenseCategory.Title</td>
+                <td>
+                    <a href="/Admin/DeleteExpense/@c.Id" class="btn btn-danger deleteForm">
+                        <i class="fa fa-trash" aria-hidden="true"></i>
+                    </a>
+                </td>
             </tr>
         }
     </tbody>

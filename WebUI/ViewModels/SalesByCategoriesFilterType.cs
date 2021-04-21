@@ -15,6 +15,9 @@ namespace WebUI.ViewModels
         
         [Description("Магазин Москва Север")]
         MoscowSever = 29,
+        
+        [Description("Магазин в Екатеринбурге")]
+        Yekaterinburg = 33,
 
         [Description("Продажи по России")]
         ForRF = 3,

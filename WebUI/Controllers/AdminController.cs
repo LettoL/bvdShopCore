@@ -1533,6 +1533,7 @@ namespace WebUI.Controllers
 
             return View(sale);
         }
+        
         [HttpGet]
         public IActionResult CloseSaleProducts(int id)
         {
@@ -1540,6 +1541,9 @@ namespace WebUI.Controllers
                 .All()
                 .Include(x => x.Product)
                 .Where(x => x.SaleId == id)
+                .ToList();
+            
+            var result = saleProducts
                 .Select(x => new SaleProductItem()
                 {
                     Id = x.ProductId,
@@ -1547,63 +1551,76 @@ namespace WebUI.Controllers
                     Amount = x.Amount,
                     ProcurementCost = 0
                 }).ToList();
+            
+            var saleFromStockInfo = _postgresContext.SalesFromStockOld
+                .Include(x => x.Products)
+                .FirstOrDefault(x => x.SaleId == id);
 
-            return Ok(saleProducts);
+            if (saleFromStockInfo != null)
+            {
+                result = saleFromStockInfo.Products
+                    .Select(x => new SaleProductItem()
+                    {
+                        Id = x.ProductId,
+                        Title = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Product?.Title ?? "",
+                        Amount = saleProducts
+                            .FirstOrDefault(z => z.ProductId == x.ProductId)?
+                            .Amount ?? 0,
+                        ProcurementCost = x.ProcurementCost
+                    }).ToList(); 
+            }
+
+            return Ok(result);
         }
 
-        [HttpPost] // сюда теперь прилетает CloseSaleDto
-        public IActionResult CloseSale(int saleId, bool realization, int moneyWorkerType, int moneyWorkerId, int moneyWorkerCashlessId, int supplierId, int[] productIds, int[] amounts, decimal[] procurementCosts, decimal AdditionalCost, bool cashExpense)
+        [HttpPost]
+        public IActionResult CloseSale([FromBody]CloseSaleDto closeSaleDto)
         {
-            var productCosts = productIds.Zip(procurementCosts, (product, cost) => new
-            {
-                Id = product,
-                Cost = cost
-            });
+            decimal productAdditionalCost = closeSaleDto.AdditionalCost / closeSaleDto.Products.Sum(x => x.Amount);
 
-            var products = productCosts.Zip(amounts, (product, amount) => new
-            {
-                Id = product.Id,
-                Cost = product.Cost,
-                Amount = amount
-            });
-
-            decimal productAdditionalCost = AdditionalCost / products.Sum(x => x.Amount);
-
-            foreach (var product in products)
+            foreach (var product in closeSaleDto.Products)
             {
                 _productInformationService.Create(new ProductInformation()
                 {
-                    SaleId = saleId,
+                    SaleId = closeSaleDto.SaleId,
                     Amount = product.Amount,
-                    FinalCost = product.Cost * product.Amount + productAdditionalCost,
-                    ProcurementCost = product.Cost,
+                    FinalCost = product.ProcurementCost * product.Amount + productAdditionalCost,
+                    ProcurementCost = product.ProcurementCost,
                     AdditionalCost = productAdditionalCost,
                     ProductId = product.Id,
-                    ForRealization = realization
+                    ForRealization = closeSaleDto.Realization
                 });
 
                 _postgresContext.ProductOperations.Add(new ProductOperation(
                     product.Id,
                     -product.Amount,
                     DateTime.Now.AddHours(3),
-                    product.Cost,
-                    realization,
-                    supplierId,
+                    product.ProcurementCost,
+                    closeSaleDto.Realization,
+                    closeSaleDto.SupplierId,
                     StorageType.SupplierWarehouse));
             }
 
-            decimal finalCost = products.Sum(x => x.Cost * x.Amount) + AdditionalCost;
+            decimal finalCost = closeSaleDto.Products.Sum(x => x.ProcurementCost * x.Amount)
+                                + closeSaleDto.AdditionalCost;
 
-            if (realization == true)
+            if (closeSaleDto.Realization == true)
             {
-                var supplier = _supplierService.All().FirstOrDefault(x => x.Id == supplierId);
-                supplier.Debt += procurementCosts.Sum();
+                var supplier = _supplierService.All().FirstOrDefault(x => x.Id == closeSaleDto.SupplierId);
+                supplier.Debt += closeSaleDto.Products.Sum(x => x.ProcurementCost);
                 _supplierService.Update(supplier);
             }
 
             _postgresContext.SaveChanges();
 
-            _saleService.ClosePostPayment(saleId, moneyWorkerType, moneyWorkerId, moneyWorkerCashlessId, finalCost);
+            _saleService.ClosePostPayment(
+                closeSaleDto.SaleId,
+                0,
+                closeSaleDto.MoneyWorkerId,
+                closeSaleDto.MoneyWorkerCashlessId,
+                finalCost);
 
             return RedirectToAction("Index");
         }
@@ -2414,6 +2431,9 @@ namespace WebUI.Controllers
 
             if (type == SalesByCategoriesFilterType.MoscowSever)
                 sales = sales.Where(x => x.ShopId == 29 && x.PartnerId == null && x.ForRussian == false);
+
+            if (type == SalesByCategoriesFilterType.Yekaterinburg)
+                sales = sales.Where(x => x.ShopId == 33 && x.PartnerId == null && x.ForRussian == false);
             
             if (type == SalesByCategoriesFilterType.ForRF)
                 sales = sales.Where(x => x.ForRussian == true && x.PartnerId == null);

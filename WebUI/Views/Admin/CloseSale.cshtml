@@ -58,8 +58,8 @@
                     <label>Зачислить безналичные средства на:</label>
                     <select id="chooseMoneyWorkerCashless" class="form-control"
                         onchange="selectMoneyWorkers(event.srcElement.id)">
-                        @if (ViewBag.SaleInformation != null && ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome
-                        != null)
+                        @if (ViewBag.SaleInformation != null
+                             && ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome != null)
                         {
                             <option disabled selected>Счет выбран</option>
                         }
@@ -70,13 +70,20 @@
                         <option value="1">Держатель карты</option>
                         <option value="2">Рассчетный счет</option>
                     </select><br />
-                    <select id="moneyWorkerCashless" v-model='moneyWorkerCashlessId' name="moneyWorkerCashlessId"
-                        class="form-control">
-                        @if (ViewBag.SaleInformation != null && ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome
-                        != null)
+                    <select 
+                        id="moneyWorkerCashless" 
+                        v-model='moneyWorkerCashlessId' 
+                        name="moneyWorkerCashlessId"
+                        class="form-control"
+                    >
+                        @if (ViewBag.SaleInformation != null 
+                             && ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome != null)
                         {
-                            <option value="@ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome">
-                                @ViewBag.SaleInformation.MoneyWorkerTitleForCashlessIncome</option>
+                            <option 
+                                value="@ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome"
+                            >
+                                @ViewBag.SaleInformation.MoneyWorkerTitleForCashlessIncome
+                            </option>
                         }
                         else
                         {
@@ -142,8 +149,8 @@
             cashSum: '@Model.CashSum',
             cashlessSum: '@Model.CashlessSum',
             moneyWorkerCashId: '@ViewBag.SaleInformation.MoneyWorkerIdForIncome',
-            moneyWorkerCashlessId: 0,
-            supplierId: 0,
+            moneyWorkerCashlessId: '@ViewBag.SaleInformation.MoneyWorkerIdForCashlessIncome',
+            supplierId: '@ViewBag.SelectedSupplier.Id',
             realization: true,
             additionalCost: 0,
             totalCost: 0,
@@ -170,8 +177,10 @@
 
                 const products = this.products.map(p => {
                     return {
-                        ...p,
-                        procurementCost: +p.procurementCost
+                        id: +p.id,
+                        amount: +p.amount,
+                        procurementCost: +p.procurementCost,
+                        title: p.title
                     }
                 })
 
@@ -185,7 +194,7 @@
                     additionalCost: +this.additionalCost
                 }
 
-                return fetch("/Admin/CloseSaleNew", {
+                return fetch("/Admin/CloseSale", {
                     method: "POST",
                     headers: {
                         'Content-Type': 'application/json',
@@ -194,6 +203,7 @@
                     credentials: 'include',
                     body: JSON.stringify(closeSaleData)
                 })
+                .then(res => window.location.href = res.url)
             }
         },
         created: function () {
