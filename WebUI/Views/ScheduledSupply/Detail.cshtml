@@ -39,10 +39,12 @@
                             <i class="fa fa-check" aria-hidden="true"></i>
                         </span>
                     </template>
-                    <span class="btn btn-danger" style="margin-right: 10px">
+                    <template v-if='!product.confirmed && product.supplyProductId == 0'>
+                      <span class="btn btn-danger" style="margin-right: 10px">
                         <i class="fa fa-trash" aria-hidden="true" v-on:click="productRemove(product.id)"></i>
-                    </span>
-                    
+                      </span>
+                    </template>
+                                 
                 </div>
                 <button class="btn btn-submit" onclick="send()">Сохранить</button>
                 <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
