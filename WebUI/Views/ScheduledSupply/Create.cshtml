@@ -2,6 +2,18 @@
     ViewData["Title"] = "Create";
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
+<style>
+  .scheduledProduct {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    margin-bottom: 10px;
+    border-bottom: 1px solid #eee;
+  }
+  .scheduledProduct__title {
+    flex-grow: 2;
+  }
+</style>
 
 <div class="row">
     <div class="col-md-2">
@@ -62,10 +74,10 @@
                 <br/>
                                     
                 <div>
-                    <div v-for="product in products">
-                        <b>{{product.title}}</b>
+                    <div v-for="product in products" class="scheduledProduct">
+                        <b class="scheduledProduct__title">{{product.title}}</b>
                         <input type="number" v-model="product.amount" placeholder="Кол-во" class="form-control" style="width: 100px; display: inline-block">
-                        <input type="number" v-model="product.procurementCost" placeholder="Закупочная за шт." class="form-control" style="margin-bottom: 10px; width: 150px; display: inline-block">
+                        <input type="number" v-model="product.procurementCost" placeholder="Закупочная за шт." class="form-control" style="margin-right: 5px; width: 150px; display: inline-block">
                         <span class="btn btn-danger" v-on:click="deleteProduct(product.productId)">
                             <i class="fa fa-trash" aria-hidden="true"></i>
                         </span>
