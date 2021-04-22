@@ -186,7 +186,7 @@
 
                 const closeSaleData = {
                     saleId: +this.saleId,
-                    realization: this.realization,
+                    realization: JSON.parse(this.realization.toLowerCase()),
                     moneyWorkerId: +this.moneyWorkerCashId,
                     moneyWorkerCashlessId: +this.moneyWorkerCashlessId,
                     supplierId: +this.supplierId,
