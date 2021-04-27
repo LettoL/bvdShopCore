@@ -7,6 +7,9 @@ using System.Text;
 using WebUI.ViewModels;
 using Microsoft.EntityFrameworkCore;
 using PostgresData;
+using Handlers.CommandHandlers;
+using Handlers.Commands;
+
 
 namespace WebUI.Controllers
 {
@@ -88,6 +91,58 @@ namespace WebUI.Controllers
                 .ToList();
 
             return Ok(new {scheduledSupplies, suppliers});
+        }
+
+        [HttpGet]
+        public IActionResult Detail(int id)
+        {
+            ViewBag.Id = id;
+
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult Detail([FromBody]EditScheduledDelivery command)
+        {
+            ScheduledDeliveryEditHandler.Execute(command, _postgresContext);
+            ScheduledDeliveryConfirmHandler.Execute(command.DeliveryId, _postgresContext, _shopContext);
+
+            return RedirectToAction("List");
+        }
+
+        [HttpGet]
+        public IActionResult Products(int id)
+        {
+            var shops = _shopContext.Shops
+                .Select(x => new ShopVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+
+            var productsTitles = _shopContext.Products
+                .Select(x => new ProductVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+
+            var products = _postgresContext.ScheduledProductDeliveries.ToList()
+                .Where(x => x.ScheduledDeliveryId == id)
+                .Select(x => new ScheduledProductDeliveryVM()
+                {
+                    Id = x.Id,
+                    Title = productsTitles.FirstOrDefault(z => z.Id == x.ProductId)?.Title ?? "",
+                    Amount = x.Amount,
+                    ShopId = x.ShopId,
+                    Shop = shops.FirstOrDefault(z => z.Id == x.ShopId)?.Title ?? "Магазин не выбран",
+                    ProcurementCost = x.ProcurementCost,
+                    ProductId = x.ProductId,
+                    SupplyProductId = x.SupplyProductId ?? 0
+                })
+                .ToList();
+
+            return Ok(products);
         }
     }
 }
