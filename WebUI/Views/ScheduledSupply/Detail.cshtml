@@ -1,54 +1,88 @@
 ﻿@{
-    ViewData["Title"] = "Detail";
+  ViewData["Title"] = "Detail";
 
-    Layout = "~/Views/Shared/AdminLayout.cshtml";
+  Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
+<style>
+  .productList__actions {
+    margin-top: 40px;
+  }
+
+  .scheduledSupplyProduct {
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+
+    margin-bottom: 20px;
+
+    border-bottom: 1px solid #eee;
+    padding-bottom: 5px;
+  }
+
+  .scheduledSupplyProduct__title {
+    min-width: 390px;
+
+    flex-grow: 2;
+    margin-right: 10px;
+  }
+
+</style>
 
 <div class="row">
-    <div class="col-md-12">
-        <div class="portlet">
-            <div class="portlet-title"></div>
-            <div id="productList" class="portlet-body">
-                <div v-for="product in products" style="display: flex; align-items: center; justify-content: flex-start">
-                    <b style="margin-right: 10px">{{product.title}}</b>
-                    <select v-model="product.shopId" class="form-control" style="width: 250px; display: inline-block; margin-right: 10px">
-                        <option value="0">Магазин не выбран</option>
-                        <option v-for="shop in shops"
-                                v-bind:value="shop.id"
-                                v-bind:disabled="product.supplyProductId > 0">
-                            {{shop.title}}
-                        </option>
-                    </select>
-                    <input type="number"
-                           v-model="product.amount"
-                           class="form-control"
-                           style="width: 100px; display: inline-block; margin-right: 10px"
-                           v-bind:disabled="!product.changes || product.supplyProductId > 0">
-                    <template v-if="!product.changes && !changes && !product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productAmountChange(product)" style="margin-right: 10px">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </span>
-                    </template>
-                    <template v-if="product.changes && !product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productAmountChangeComplete(product)" style="margin-right: 10px">
-                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                        </span>
-                    </template>
-                    <template v-if="!product.confirmed && product.supplyProductId == 0">
-                        <span class="btn btn-dark" v-on:click="productConfirm(product)" style="margin-right: 10px">
-                            <i class="fa fa-check" aria-hidden="true"></i>
-                        </span>
-                    </template>
-                    <span class="btn btn-danger" style="margin-right: 10px">
-                        <i class="fa fa-trash" aria-hidden="true" v-on:click="productRemove(product.id)"></i>
-                    </span>
-                    
-                </div>
-                <button class="btn btn-submit" onclick="send()">Сохранить</button>
-                <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
-            </div>
+  <div class="col-md-12">
+    <div class="portlet">
+      <div class="portlet-title"></div>
+      <div id="productList" class="portlet-body">
+        <div v-for="product in products" class='scheduledSupplyProduct'>
+          <div class='scheduledSupplyProduct__title'>
+            <b>{{product.title}}</b>
+          </div>
+          <div class="scheduledSupplyProduct__shop">
+            <select v-model="product.shopId" class="form-control"
+              style="width: 250px; display: inline-block; margin-right: 10px">
+              <option value="0">Магазин не выбран</option>
+              <option v-for="shop in shops" v-bind:value="shop.id" v-bind:disabled="product.supplyProductId > 0">
+                {{shop.title}}
+              </option>
+            </select>
+          </div>
+
+          <div class="scheduledSupplyProduct__amount">
+            <input type="number" v-model="product.amount" class="form-control"
+              style="width: 100px; display: inline-block; margin-right: 10px"
+              v-bind:disabled="!product.changes || product.supplyProductId > 0">
+          </div>
+
+          <div class='scheduledSupplyProduct__actions'>
+            <template v-if="!product.changes && !changes && !product.confirmed && product.supplyProductId == 0">
+              <span class="btn btn-dark" v-on:click="productAmountChange(product)" style="margin-right: 10px">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </span>
+            </template>
+            <template v-if="product.changes && !product.confirmed && product.supplyProductId == 0">
+              <span class="btn btn-dark" v-on:click="productAmountChangeComplete(product)" style="margin-right: 10px">
+                <i class="fa fa-pencil" aria-hidden="true"></i>
+              </span>
+            </template>
+            <template v-if="!product.confirmed && product.supplyProductId == 0">
+              <span class="btn btn-dark" v-on:click="productConfirm(product)" style="margin-right: 10px">
+                <i class="fa fa-truck" aria-hidden="true"></i>
+              </span>
+            </template>
+            <span class="btn btn-danger" style="margin-right: 10px">
+              <i class="fa fa-trash" aria-hidden="true" v-on:click="productRemove(product.id)"></i>
+            </span>
+          </div>
+
+
         </div>
+        <div class="productList__actions">
+          <button class="btn btn-submit" onclick="send()">Сохранить</button>
+          <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
+        </div>      
+      </div>
     </div>
+  </div>
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
@@ -64,27 +98,27 @@
       changedProduct: undefined
     },
     methods: {
-      productRemove: function (id) {    
+      productRemove: function (id) {
         this.products = this.products.filter(product => product.id !== id);
         console.log(this.products);
       },
       productAmountChange: function (product) {
         this.changes = true
-        this.changedProduct = {...product}
-        
+        this.changedProduct = { ...product }
+
         product.changes = true
       },
       productAmountChangeComplete: function (product) {
         product.changes = false
-        
-        if (product.amount < this.changedProduct.amount){
-          this.changedProduct.amount -= product.amount 
-          this.products.push({...this.changedProduct, shopId: 0, id: 0, prev: this.changedProduct.id})
-          
+
+        if (product.amount < this.changedProduct.amount) {
+          this.changedProduct.amount -= product.amount
+          this.products.push({ ...this.changedProduct, shopId: 0, id: 0, prev: this.changedProduct.id })
+
           this.changedProduct = undefined
         }
         console.log(this.products)
-        
+
         this.changes = false
       },
       productConfirm: function (product) {
@@ -100,11 +134,11 @@
               shopId: +product.shopId,
               amount: +product.amount,
               confirmed: product.confirmed,
-              prev: +product.prev                             
+              prev: +product.prev
             }
           ))
         }
-        
+
         return fetch("/ScheduledSupply/Detail", {
           method: "POST",
           headers: {
@@ -121,29 +155,29 @@
         headers: { 'Content-Type': 'application/json' },
         credentials: 'include'
       })
-      .then((res) => {
-        return res.json()
-      })
-      .then((res) => {        
-        this.shops.push(...res.shops)
-        
-        res.products.forEach(product => {
-          this.products.push({
-            id: product.id, 
-            title: product.title,
-            shop: product.shop,
-            shopId: product.shopId,
-            amount: product.amount,
-            changes: false,
-            confirmed: false,
-            prev: 0,
-            supplyProductId: product.supplyProductId
+        .then((res) => {
+          return res.json()
+        })
+        .then((res) => {
+          this.shops.push(...res.shops)
+
+          res.products.forEach(product => {
+            this.products.push({
+              id: product.id,
+              title: product.title,
+              shop: product.shop,
+              shopId: product.shopId,
+              amount: product.amount,
+              changes: false,
+              confirmed: false,
+              prev: 0,
+              supplyProductId: product.supplyProductId
+            })
           })
         })
-      })
     }
   })
-  
+
   function send() {
     this.ProductList.sendData().then(res => window.location.href = res.url);
   }
