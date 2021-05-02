@@ -1,0 +1,110 @@
+﻿
+@{
+    ViewData["Title"] = "SupplyList";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
+}
+
+<h3 class="page-title">Ожидаемые поставки</h3>
+<div class="row">
+    <div class="col-md-12">
+        <div id="list" class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-head">
+                    Список ожидаемых поставок
+                </div>
+                <div class="portlet-filters">
+                    <select v-model="supplierId" class="form-control">
+                        <option value="0">Выбрать поставщика</option>
+                        <option v-for="supplier in suppliers" :value="supplier.id">{{supplier.title}}</option>
+                    </select>
+                </div>
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Дата</th>
+                                <th>Поставщик</th>
+                                <th>Внесено: {{allPayment}}</th>
+                                <th>Закупочная: {{allProcurementCost}}</th>
+                                <th>Ожидается товара: {{allProductsExpected}}</th>
+                                <th>Магазин</th>
+                                <th>Откуда оплата</th>
+                                <th>Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr v-for="supply in filteredSupplies">
+                                <td>{{supply.date}}</td>
+                                <td>{{supply.supplier}}</td>
+                                <td>{{supply.payment}}</td>
+                                <td>{{supply.procurementCost}}</td>
+                                <td>{{supply.productsExpected}}</td>
+                                <td>{{supply.shopsTitles}}</td>
+                                <td>{{supply.moneyWorkersTitles}}</td>
+                                <td>
+                                    <a :href="'/ManagerScheduledSupply/Detail/' + supply.id" class="btn btn-dark">
+                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+
+  var List = new Vue({
+    el: '#list',
+    data: {
+      supplies: [],
+      suppliers: [],
+      supplierId: 0
+    },
+    computed: {
+      filteredSupplies: function () {
+        return this.supplies
+          .filter(x => +this.supplierId !== 0
+            ? x.supplierId === +this.supplierId
+            : true)
+      },
+      allPayment: function () {
+        if (this.filteredSupplies !== undefined && this.filteredSupplies.length > 0)
+            return this.filteredSupplies.map(x => x.payment).reduce((acc, payment) => acc + payment)
+        return 0
+      },
+      allProcurementCost: function () {
+        if (this.filteredSupplies !== undefined && this.filteredSupplies.length > 0)
+          return this.filteredSupplies.map(x => x.procurementCost).reduce((acc, cost) => acc + cost)
+        return 0
+      },
+      allProductsExpected: function () {
+        if (this.filteredSupplies !== undefined && this.filteredSupplies.length > 0)
+          return this.filteredSupplies.map(x => x.productsExpected).reduce((acc, amount) => acc + amount)
+        return 0
+      }
+    },
+    created: function () {
+      fetch('/ManagerScheduledSupply/getlist', {
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include'
+      })
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {
+        this.suppliers.push(...res.suppliers)
+        this.supplies.push(...res.scheduledSupplies)
+      })
+    }
+  })
+
+</script>
+
