@@ -18,6 +18,7 @@ export const ProductsTable = props => {
             <TableCell>Артикул</TableCell>
             <TableCell>Название</TableCell>
             <TableCell>Количество</TableCell>
+            <TableCell>Забронировано</TableCell>
             <TableCell>Цена</TableCell>
             <TableCell>Себестоимость</TableCell>
             <TableCell>Магазин</TableCell>
@@ -33,6 +34,7 @@ export const ProductsTable = props => {
               <TableCell>{row.code}</TableCell>
               <TableCell>{row.title}</TableCell>
               <TableCell>{row.amount}</TableCell>
+              <TableCell>{row.bookedCount}</TableCell>
               <TableCell>{row.price}</TableCell>
               <TableCell>{row.primeCost}</TableCell>
               <TableCell>{row.shop}</TableCell>

@@ -59,7 +59,7 @@ namespace WebUI.API
                 Margin = x.Margin,
                 Sum = x.Sum,
                 ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
-            });
+            }).ToList();
 
             var result = managers.Select(x => new ManagerDto()
             {

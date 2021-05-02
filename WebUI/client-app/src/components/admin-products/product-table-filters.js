@@ -7,9 +7,9 @@ import TextField from "@material-ui/core/TextField";
 import {makeStyles} from "@material-ui/core/styles";
 import {useStore} from "effector-react";
 import {
-  $filterCategoryId, $filterMinAmount,
+  $filterCategoryId, $filterMinAmount, $filterMinBookedCount,
   $filterShopId, $filterSupplierId, fetchProductsBySupplierFx, fetchProductsFx,
-  setCategoryFilter, setMinAmountFilter,
+  setCategoryFilter, setMinAmountBookedCount, setMinAmountFilter,
   setShopFilter, setSupplierFilter,
   setTitleFilter
 } from "../../models/product-table/product.store";
@@ -32,6 +32,11 @@ export const ProductTableFilters = () => {
   const categories = useStore($categoriesFilter)
   const suppliers = useStore($suppliersFilter)
   const minAmount = useStore($filterMinAmount)
+  const minBookedCount = useStore($filterMinBookedCount)
+
+  const handleChangeMinBookedCount = event => {
+    setMinAmountBookedCount(event.target.value)
+  }
 
   const handleChangeMinAmount = event => {
     setMinAmountFilter(event.target.value)
@@ -121,6 +126,13 @@ export const ProductTableFilters = () => {
           label="Минимальное кол-во"
           onChange={handleChangeMinAmount}
           value={minAmount}
+        />
+      </FormControl>
+      <FormControl className={classes.formControl}>
+        <TextField
+          label="Минимальное забронированное кол-во"
+          onChange={handleChangeMinBookedCount}
+          value={minBookedCount}
         />
       </FormControl>
     </>

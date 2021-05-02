@@ -25,13 +25,14 @@ namespace WebUI.API
         {
             try
             {
-                var result = ProductService.GetAllProducts(_db)
+                var result = ProductService.GetAllProductsInStock(_db)
                     .Select(x => new ProductsAdmin()
                     {
                         Id = x.Id,
                         Code = x.Code,
                         Title = x.Title,
                         Amount = x.Amount,
+                        BookedCount = x.BookedCount,
                         Price = x.Cost,
                         Shop = x.Shop.Title,
                         ShopId = x.Shop.Id,

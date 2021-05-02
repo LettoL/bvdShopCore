@@ -140,7 +140,7 @@ namespace WebUI.Controllers
                     Sum = infoMoneys.Where(x => x.SaleId == s.Id).Sum(x => x.Sum),
                     ShopTitle = s.Shop.Title,
                     ProductTitle = saleProducts
-                        .FirstOrDefault(x => x.SaleId == s.Id).Product.Title,
+                        .FirstOrDefault(x => x.SaleId == s.Id)?.Product.Title ?? "",
                     Rest = s.Sum - infoMoneys.Where(x => x.SaleId == s.Id).Sum(x => x.Sum),
                     Total = s.Sum
                 }).ToList();

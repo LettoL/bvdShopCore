@@ -6,6 +6,7 @@
         public string Code { get; set; }
         public string Title { get; set; }
         public int Amount { get; set; }
+        public int BookedCount { get; set; }
         public decimal Price { get; set; }
         public string Shop { get; set; }
         public int ShopId { get; set; }

@@ -56,6 +56,49 @@ namespace Data.Services
             return result;
         }
 
+        public static ICollection<AllProductsVM> GetAllProductsInStock(ShopContext db)
+        {
+            var bookingProductsAmount = db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.Amount
+                }).ToList();
+
+            var productsInStock = db.SupplyProducts
+                .Select(x => new
+                {
+                    ProductId = x.ProductId,
+                    Amount = x.StockAmount,
+                    PrimeCost = x.ProcurementCost
+                }).ToList();
+            
+            var result = db.Products
+                .Include(x => x.Shop)
+                .Include(x => x.Category)
+                .OrderBy(x => x.Title)
+                .ToList()
+                .Select(x => new AllProductsVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = productsInStock.Where(s => s.ProductId == x.Id)
+                                 .Sum(s => s.Amount), 
+                    Cost = x.Cost,
+                    Shop = x.Shop,
+                    Category = x.Category,
+                    Code = x.Code,
+                    BookedCount = bookingProductsAmount
+                            .Where(z => z.ProductId == x.Id)
+                            .Sum(z => z.Amount),
+                    PrimeCost = productsInStock.Where(s => s.ProductId == x.Id)
+                        .Sum(s => s.Amount * s.PrimeCost)
+                }).ToList();
+
+            return result;
+        }
+
         public static ICollection<AllProductsVM> GetAllProductsBySupplier(ShopContext db, int supplierId)
         {
             var bookingProductsAmount = db.BookingProducts

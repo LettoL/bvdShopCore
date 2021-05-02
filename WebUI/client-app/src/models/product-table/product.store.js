@@ -9,6 +9,7 @@ export const setCategoryFilter = createEvent()
 export const setTitleFilter = createEvent()
 export const setMinAmountFilter = createEvent()
 export const setSupplierFilter = createEvent()
+export const setMinAmountBookedCount = createEvent()
 
 export const fetchProductsFx = createEffect({
   async handler() {
@@ -43,13 +44,18 @@ export const $filterTitle = createStore('')
 export const $filterMinAmount = createStore(0)
   .on(setMinAmountFilter, (_, amount) => amount)
 
+export const $filterMinBookedCount = createStore(0)
+  .on(setMinAmountBookedCount, (_, amount) => amount)
+
 export const $filteredProducts = combine(
   $products,
   $filterShopId,
   $filterCategoryId,
   $filterTitle,
   $filterMinAmount,
-  (products, shopId, categoryId, title, minAmount) => products
+  $filterMinBookedCount,
+  (products, shopId, categoryId,
+      title, minAmount, minBookedCount) => products
     .filter(product => shopId !== 0
       ? product.shopId === shopId
       : true)
@@ -60,4 +66,5 @@ export const $filteredProducts = combine(
       ? product.title.toLowerCase().includes(title.toLowerCase())
       : true)
     .filter(product => product.amount >= minAmount)
+    .filter(product => product.bookedCount >= minBookedCount)
 )
