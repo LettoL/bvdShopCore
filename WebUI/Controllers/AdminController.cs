@@ -1184,6 +1184,27 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
+        public IActionResult GetBookingList() {
+            var result = _bookingService.All()
+                .OrderByDescending(x => x.Id)
+                .Select(x => new BookingListItemVM()
+                {
+                    Date = x.Date.ToString("dd.MM.yyyy"),
+                    Id = x.Id,
+                    Debt = x.Debt,
+                    Pay = x.Pay,
+                    Sum = x.Sum,
+                    Status = x.Status,
+                    ShopId = x.Shop.Id,
+                    ShopTitle = x.Shop.Title,
+                    ProductTitle = _bookingProductService.All()
+                        .Include(z => z.Product).FirstOrDefault(z => z.BookingId == x.Id).Product.Title ?? ""
+                });
+
+            return Ok(result);
+        }
+
+        [HttpGet]
         public IActionResult BookingDetail(int id)
         {
             var userName = HttpContext.User.Identity.Name;
