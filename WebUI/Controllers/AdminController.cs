@@ -1168,19 +1168,7 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            return View(_bookingService.All()
-                .OrderByDescending(x => x.Id)
-                .Select(x => new BookingListVM()
-                {
-                    Date = x.Date,
-                    Id = x.Id,
-                    Debt = x.Debt,
-                    Pay = x.Pay,
-                    Sum = x.Sum,
-                    Status = x.Status,
-                    ProductTitle = _bookingProductService.All()
-                        .Include(z => z.Product).FirstOrDefault(z => z.BookingId == x.Id).Product.Title ?? ""
-                }));
+            return View();
         }
 
         [HttpGet]
