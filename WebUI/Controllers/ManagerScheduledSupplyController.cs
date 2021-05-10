@@ -1,6 +1,4 @@
-﻿
-using System.Collections.Generic;
-using System.Linq;
+﻿using System.Linq;
 using Microsoft.AspNetCore.Mvc;
 using Data;
 using System.Text;
@@ -9,7 +7,6 @@ using Microsoft.EntityFrameworkCore;
 using PostgresData;
 using Handlers.CommandHandlers;
 using Handlers.Commands;
-
 
 namespace WebUI.Controllers
 {
@@ -34,6 +31,9 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult GetList()
         {
+            var userName = HttpContext.User.Identity.Name;
+            var user = _shopContext.Users.FirstOrDefault(u => u.Login == userName);
+            
             var suppliers = _shopContext.Suppliers
                 .Select(x => new SupplierVM()
                 {
@@ -60,6 +60,10 @@ namespace WebUI.Controllers
             
             var scheduledSupplies = _postgresContext.ScheduledDeliveries
                 .Include(x => x.Products)
+                .Where(x => x.Products
+                    .Where(z => z.SupplyProductId == null)
+                    .Select(z => z.ShopId)
+                    .Contains((int)user.ShopId))
                 .ToList()
                 .Select(x => new ScheduledDeliveryVM()
                 {
@@ -107,12 +111,15 @@ namespace WebUI.Controllers
             ScheduledDeliveryEditHandler.Execute(command, _postgresContext);
             ScheduledDeliveryConfirmHandler.Execute(command.DeliveryId, _postgresContext, _shopContext);
 
-            return RedirectToAction("List");
+            return RedirectToAction("SupplyList");
         }
 
         [HttpGet]
         public IActionResult Products(int id)
         {
+            var userName = HttpContext.User.Identity.Name;
+            var user = _shopContext.Users.FirstOrDefault(u => u.Login == userName);
+            
             var shops = _shopContext.Shops
                 .Select(x => new ShopVM()
                 {
@@ -127,8 +134,9 @@ namespace WebUI.Controllers
                     Title = x.Title
                 }).ToList();
 
-            var products = _postgresContext.ScheduledProductDeliveries.ToList()
-                .Where(x => x.ScheduledDeliveryId == id)
+            var products = _postgresContext.ScheduledProductDeliveries
+                .Where(x => x.ScheduledDeliveryId == id && x.ShopId == user.ShopId)
+                .ToList()
                 .Select(x => new ScheduledProductDeliveryVM()
                 {
                     Id = x.Id,

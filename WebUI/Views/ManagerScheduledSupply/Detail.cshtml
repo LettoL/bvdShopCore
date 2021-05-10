@@ -17,7 +17,7 @@
                            style="width: 100px; display: inline-block; margin-right: 10px"
                            v-bind:disabled="!product.changes || product.supplyProductId > 0">
 
-                    <template>
+                    <template v-if="!product.confirmed && product.supplyProductId == 0">
                         <span class="btn btn-dark" v-on:click="productConfirm(product)" style="margin-right: 10px">
                             <i class="fa fa-check" aria-hidden="true"></i>
                         </span>
@@ -25,7 +25,7 @@
 
                 </div>
                 <button class="btn btn-submit" onclick="send()">Сохранить</button>
-                <a href="/ScheduledSupply/List" class="btn btn-dark">Назад</a>
+                <a href="/ManagerScheduledSupply/SupplyList" class="btn btn-dark">Назад</a>
             </div>
         </div>
     </div>
@@ -79,6 +79,7 @@
         return res.json()
       })
       .then((res) => {
+        console.log(res)
         res.forEach(product => {
           this.products.push({
             id: product.id,
