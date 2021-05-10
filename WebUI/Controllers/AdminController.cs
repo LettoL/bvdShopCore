@@ -2478,7 +2478,8 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult AcceptanceRecord() {
+        public IActionResult AcceptanceRecord() 
+        {
             return View();
         }
 
