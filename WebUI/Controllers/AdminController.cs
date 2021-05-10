@@ -2476,6 +2476,12 @@ namespace WebUI.Controllers
             
             return View(result);
         }
+
+        [HttpGet]
+        public IActionResult AcceptanceRecord() {
+            return View();
+        }
+
     }
 }
 

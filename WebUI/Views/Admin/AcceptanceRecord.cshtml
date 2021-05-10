@@ -1,0 +1,184 @@
+
+@{
+    ViewData["Title"] = "AcceptanceRecord";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<style>
+  .portlet-head {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+  .portlet-head .form-control {
+    min-width: 220px;
+    margin-right: 10px;
+  }
+  .portlet-head label {
+    margin-right: 10px;
+
+    min-width: 70px;
+  }
+
+  table {
+    width: 100%
+  }
+
+  table th {
+    font-size: 18px;
+  }
+</style>
+
+<div id="acceptanceRecord">
+  <div class="portlet">
+    <div class="portlet-title">
+      <div class="portlet-head">
+        <select class="form-control">
+          <option value="0">Выбрать поставщика</option>
+          <option>Поставщик</option>
+        </select>
+        <div>
+          <label>Дата с:</label>
+        </div>    
+        <input class="form-control" type='date' />
+        <label>Дата по:</label>
+        <input class="form-control" type='date' />
+        <button class="btn btn-dark">Показать</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="portlet">
+    <div class="portlet-body">
+      <table class="table">
+        <thead>
+          <tr>
+            <th colspan="3"></th>
+            <th>Увеличение долга</th>
+            <th>Уменьшение долга</th>
+          </tr>
+        </thead>
+        <tbody>
+          <template v-for='item in data'>
+            <template v-if='item.products && item.products.length > 0'>
+              <tr>
+                <th colspan="3">Поступление товара от {{item.date}}</th>
+                <th>{{item.products.reduce((a, b) => a + b.price * b.amount, 0)}}</th>
+                <th></th>
+              </tr>
+              <tr v-for='product in item.products'>
+                <td>{{product.title}}</td>
+                <td colspan="2">{{product.amount}} шт. x {{product.price}} руб.</td>
+                <td>{{product.amount * product.price}}</td>
+                <td></td>
+              </tr>
+            </template>
+            <template v-else>
+              <tr>
+                <th colspan="3">Оплата долга от {{item.date}}</th>
+                <th></th>
+                <th>{{item.minusDebt}}</th>
+              </tr>
+              <tr v-for='product in item.products'>
+                <td>{{product.title}}</td>
+                <td colspan="2">{{product.amount}} шт. x {{product.price}} руб.</td>
+                <td>{{product.amount * product.price}}</td>
+                <td>0</td>
+              </tr>
+            </template>
+          </template>
+          <tr>
+            <th colspan="3">Итого</th>
+            <th>Сумма долга 130000 руб</th>
+            <th>Оплачено 10000 руб</th>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+  const testData = [
+    {
+      date: '07.05.2021',
+      products: [
+        {
+          title: 'Тестовый товар 1',
+          amount: 2,
+          price: 10000,
+          plusDebt: 10000,
+        },
+        {
+          title: 'Тестовый товар 2',
+          amount: 1,
+          price: 15000,
+          plusDebt: 15000,
+        }
+      ]
+    },
+    {
+      date: '10.05.2021',
+      products: [
+        {
+          title: 'Тестовый товар 1',
+          amount: 1,
+          price: 5000,
+          plusDebt: 5000,
+        }
+      ]
+    },
+    {
+      date: '11.05.2021',
+      products: [],
+      minusDebt: 10000
+    },
+    {
+      date: '14.05.2021',
+      products: [
+        {
+          title: 'Тестовый товар 1',
+          amount: 2,
+          price: 10000,
+          plusDebt: 10000,
+        }
+      ]
+    },
+    {
+      date: '17.05.2021',
+      products: [
+        {
+          title: 'Тестовый товар 1',
+          amount: 2,
+          price: 10000,
+        },
+        {
+          title: 'Тестовый товар 2',
+          amount: 1,
+          price: 10000,
+        },
+        {
+          title: 'Тестовый товар 3',
+          amount: 2,
+          price: 10000,
+        },
+        {
+          title: 'Тестовый товар 4',
+          amount: 2,
+          price: 10000,
+        },
+      ]
+    },
+  ]
+
+  const List = new Vue({
+    el: '#acceptanceRecord',
+    data: {
+      data: testData,
+    },
+    
+  })
+
+</script>
