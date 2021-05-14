@@ -6,7 +6,7 @@
 
 <h3 class="page-title">Все товары <small>Просмотр и редактирование товаров</small></h3>
 <div id="change_success" hidden class="change_success">Изменение цены прошло успешно</div>
-<div class="row">
+<div id='allProductsComponent' class="row">
     <div class="col-md-12">
         <div class="portlet">
             <div class="portlet-title">
@@ -56,28 +56,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var p in Model)
-                            {
-                                <tr id="@p.Id">
-                                    <td>@p.Code</td>
-                                    <td>@p.Title</td>
-                                    <td>@p.Amount</td>
-                                    <td contenteditable>@p.Cost</td>
-                                    <td>@p.Shop.Title</td>
-                                    <td>@p.Category.Title</td>
-                                    <td>
-                                        <a href="/Product/Detail/@p.Id" class="btn btn-dark">
-                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                                        </a>
-                                        <a href="/Product/Edit/@p.Id" class="btn btn-dark">
-                                            <i class="fa fa-pencil" aria-hidden="true"></i>
-                                        </a>
-                                        <button id="updatePrice" class="btn btn-dark">
-                                            <i class="fa fa fa-check" aria-hidden="true"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
+                            <tr v-for='item in products' id="item.Id">
+                                <td>{{item.code}}</td>
+                                <td>{{item.title}}</td>
+                                <td>{{item.amount}}</td>
+                                <td contenteditable>{{item.cost}}</td>
+                                <td>{{item.shop.title}}</td>
+                                <td>{{item.category.title}}</td>
+                                <td>
+                                    <a href="'/Product/Detail/' + item.id" class="btn btn-dark">
+                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                    </a>
+                                    <a href="'/Product/Edit/' + item.Id" class="btn btn-dark">
+                                        <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <button id="updatePrice" class="btn btn-dark">
+                                        <i class="fa fa fa-check" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -85,6 +82,29 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+    const productsList = new Vue({
+        el: '#allProductsComponent',
+        data: {
+            products: []
+        },
+        created: function () {
+            fetch('/Product/GetAllProducts', {
+                headers: {'Content-Type': 'application/json'},
+                credentials: 'include'
+            })
+            .then((res) => {
+                return res.json()
+            })
+            .then((res) => {
+                this.products = res;
+            })
+        }
+    })
+</script>
 
 <script type="text/javascript">
 
