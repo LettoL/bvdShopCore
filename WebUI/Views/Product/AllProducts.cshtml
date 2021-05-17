@@ -203,7 +203,7 @@
 
             searchData: function(entities, searchQuery) {
                 result = entities;
-                result = result.filter(item => item.title.includes(this.searchQuery));
+                result = result.filter(item => item.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
 
                 return result;
             },
