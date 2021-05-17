@@ -4,6 +4,18 @@
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
 
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .pagination p {
+        margin: 0;
+        margin-left: 10px;
+    }
+</style>
+
 <h3 class="page-title">Все товары <small>Просмотр и редактирование товаров</small></h3>
 <div id="change_success" hidden class="change_success">Изменение цены прошло успешно</div>
 <div id='allProductsComponent' class="row">
@@ -15,25 +27,17 @@
                 </div>
                 <div class="portlet-filters">
                     <form id="productFilter" style="display: inline-block" >
-                        <select name="shopId" id="shopFilter"  class="form-control" style="width: 200px; display: inline-block">
-                            <option value="0" disabled selected>Выбрать Магазин</option>
-                            <option value="0">Все</option>
-                            @foreach (var s in ViewBag.Shops)
-                            {
-                                <option value="@s.Id">@s.Title</option>
-                            }
+                        <select name="shopId" v-model='filterState.shopId' class="form-control" style="width: 200px; display: inline-block">
+                            <option :value="null"> Все Магазины</option>
+                            <option v-for='item in shops' :value="item.id">{{item.title}}</option>
                         </select>
-                        <select name="categoryId" id="categoryFilter" class="form-control" style="width: 200px; display: inline-block">
-                            <option value="0" disabled selected>Выбрать Категорию</option>
-                            <option value="0">Все</option>
-                            @foreach (var c in ViewBag.Categories)
-                            {
-                                <option value="@c.Id">@c.Title</option>
-                            }
+                        <select name="categoryId" v-model='filterState.categoryId' class="form-control" style="width: 200px; display: inline-block">
+                            <option :value="null">Все Категории</option>
+                            <option v-for='item in categories' :value="item.id">{{item.title}}</option>
                         </select>
                   
-                        <input id="searchProduct" type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
-                        <button type="submit" class="btn btn-dark" style="vertical-align: top">Поиск</button>
+                        <input id="searchProduct" v-model='searchQuery' type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
+                       
                     </form>
                 </div>
                 <div class="portlet-action">
@@ -56,27 +60,38 @@
                             </tr>
                         </thead>
                         <tbody>
-                            <tr v-for='item in products' id="item.Id">
+                            <tr v-for='item in displayedData' id="item.Id">
                                 <td>{{item.code}}</td>
                                 <td>{{item.title}}</td>
                                 <td>{{item.amount}}</td>
                                 <td contenteditable>{{item.cost}}</td>
-                                <td>{{item.shop.title}}</td>
-                                <td>{{item.category.title}}</td>
+                                <td>{{item.shopTitle}}</td>
+                                <td>{{item.categoryTitle}}</td>
                                 <td>
-                                    <a href="'/Product/Detail/' + item.id" class="btn btn-dark">
+                                    <a :href="'/Product/Detail/' + item.id" class="btn btn-dark">
                                         <i class="fa fa-arrow-right" aria-hidden="true"></i>
                                     </a>
-                                    <a href="'/Product/Edit/' + item.Id" class="btn btn-dark">
+                                    <a :href="'/Product/Edit/' + item.Id" class="btn btn-dark">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
                                     </a>
-                                    <button id="updatePrice" class="btn btn-dark">
+                                    <button v-on:click='updatePrice' id="updatePrice" class="btn btn-dark">
                                         <i class="fa fa fa-check" aria-hidden="true"></i>
                                     </button>
                                 </td>
                             </tr>
                         </tbody>
                     </table>
+                    <div class="pagination">                       
+                        <button class="btn btn-dark" v-on:click='prevPage'><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
+                        <button class="btn btn-light" v-for='page in pagination.pages.slice(startPage, startPage + pagination.buttonsCount)' v-on:click='setPage(page)'>{{page}}</button>
+                        <button class="btn btn-dark" v-on:click='nextPage'><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+
+                        <p>
+                            Страница <b>{{pagination.currentPage}}</b> из <b>{{pagination.pages.length}}</b>
+                        </p>
+                        
+
+                    </div>
                 </div>
             </div>
         </div>
@@ -89,81 +104,111 @@
     const productsList = new Vue({
         el: '#allProductsComponent',
         data: {
-            products: []
+            products: [],
+            categories: [],
+            shops: [],
+            
+            pagination: {
+                pages: [],
+                currentPage: 1,
+                entitiesPerPage: 50,
+
+                buttonsCount: 5
+            },
+
+            filterState: {
+                shopId: null,
+                categoryId: null,
+            },
+
+            searchQuery: ''
         },
         created: function () {
-            fetch('/Product/GetAllProducts', {
-                headers: {'Content-Type': 'application/json'},
-                credentials: 'include'
-            })
-            .then((res) => {
-                return res.json()
-            })
-            .then((res) => {
-                this.products = res;
-            })
-        }
-    })
-</script>
-
-<script type="text/javascript">
-
-    let form = document.getElementById('productFilter');
-
-    let categoryId = 0;
-    let shopId = 0;
-    let userId = @ViewBag.UserId;
-    let title = null;
-    let all = "true";
-
-    form.addEventListener('submit', filter);
-
-    function filter(event) {
-
-        event.preventDefault();
-
-        shopId = document.getElementById('shopFilter').value;
-        categoryId = document.getElementById('categoryFilter').value;
-        title = document.getElementById('searchProduct').value;
-
-        let ProductFilterVM = {
-            ProductFiltrationModel: {
-                categoryId: categoryId,
-                shopId: shopId,
-                title: title,
-                all: all
+            this.getProducts();
+            this.getCategories();
+            this.getShops();
+        },
+        methods: {
+            getProducts: function () {
+                fetch('/Product/GetAllProducts', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.products = res;             
+                })
             },
-            userId: userId
-        }
+            getCategories: function() {
+                fetch('/Category/Get', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.categories = res;
+                })
+            },
+            getShops: function() {
+                fetch('/Shop/Get', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.shops = res;
+                })
+            },
 
-        $('#result').load(
-            "/Product/Filter",
-            ProductFilterVM
-        );
+            nextPage: function() {
+                if(this.pagination.pages.length > this.pagination.currentPage) {
+                    this.pagination.currentPage++;
+                }
+                    
+            },
 
-    }
+            prevPage: function() {
+                if(this.pagination.currentPage > 1)
+                    this.pagination.currentPage--;
+            },
 
-    let price;
-    let productId;
+            setPages: function(entities) {
+                this.pagination.pages = [];
+                const pagesCount = Math.ceil(entities.length / this.pagination.entitiesPerPage);
+                for(let index = 1; index <= pagesCount; index++) {
+                    this.pagination.pages.push(index);
+                }
 
-    let table = document.getElementById('result');
-    table.addEventListener('input', function (event) {
-        price = +event.target.innerText.replace(',', '.');
-        productId = +event.srcElement.parentElement.id;
-    });
+            },
 
+            setPage: function(pageNumber) {
+                this.pagination.currentPage = pageNumber;
+            },
 
-    table.addEventListener('click', function (event) {
-        if (event.srcElement.id == "updatePrice" || event.srcElement.parentElement.id == "updatePrice") {
-            if (isNaN(price))
-                alert('Цена должна быть числом')
+            filterData: function (entities, filterState) {
+                let result = entities;
+                for(let key in filterState) {
+                    if(this.filterState[key])
+                        result = result.filter(item => item[key] === this.filterState[key])
+                }
 
-            var changeProduct = {
-                price: JSON.stringify(price).replace('.', ','),
-                productId: productId
-            }
+                return result;
+            },
 
-            if (!isNaN(price)) {
+            searchData: function(entities, searchQuery) {
+                result = entities;
+                result = result.filter(item => item.title.includes(this.searchQuery));
+
+                return result;
+            },
+
+            updatePrice: function (product) {
                 fetch('/Product/ChangePrice', {
                     method: "POST",
                     headers: {
@@ -181,8 +226,36 @@
                         
                 })
             }
-            
-        }       
-    });
+
+        },
+        computed: {
+            displayedData: function() {
+                let result = [...this.products];
+
+                result = this.filterData(result, this.filterState);
+
+                if(this.searchQuery)
+                    result = this.searchData(result, this.searchQuery)
+
+                const start = this.pagination.currentPage * this.pagination.entitiesPerPage - this.pagination.entitiesPerPage;
+                const end = this.pagination.entitiesPerPage * this.pagination.currentPage;
+
+                this.setPages(result);
+                return result.slice(start, end);
+            },
+            startPage: function () {
+                if(this.pagination.currentPage - this.pagination.buttonsCount < 0)
+                    return 0;
+
+                if(this.pagination.currentPage === this.pagination.pages)
+                    return this.pagination.pages - this.pagination.buttonsCount;
+
+                return this.pagination.currentPage - this.pagination.buttonsCount;
+            }
+        }
+    })
+
+
 
 </script>
+

@@ -80,7 +80,20 @@ namespace WebUI.Controllers
 
         [HttpGet]
         public IActionResult GetAllProducts() {
-            var result = ProductService.GetAllProducts(_db);
+            var result = ProductService.GetAllProducts(_db)
+                .Select(x => new AllProductsDTO() {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = x.Amount,
+                    Cost = x.Cost,
+                    ShopId = x.Shop.Id,
+                    ShopTitle = x.Shop.Title,
+                    CategoryId = x.Category.Id,
+                    CategoryTitle = x.Category.Title,
+                    Code = x.Code,
+                    BookedCount = x.BookedCount,
+                    PrimeCost = x.PrimeCost
+                });
 
             return Ok(result);
         }
