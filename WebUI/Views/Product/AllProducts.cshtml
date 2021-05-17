@@ -64,7 +64,7 @@
                                 <td>{{item.code}}</td>
                                 <td>{{item.title}}</td>
                                 <td>{{item.amount}}</td>
-                                <td contenteditable>{{item.cost}}</td>
+                                <td contenteditable v-on:input='changeCost($event.target.innerText, item)'>{{item.cost}}</td>
                                 <td>{{item.shopTitle}}</td>
                                 <td>{{item.categoryTitle}}</td>
                                 <td>
@@ -74,7 +74,7 @@
                                     <a :href="'/Product/Edit/' + item.Id" class="btn btn-dark">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
                                     </a>
-                                    <button v-on:click='updatePrice' id="updatePrice" class="btn btn-dark">
+                                    <button v-on:click='updateCost(item)' id="updatePrice" class="btn btn-dark">
                                         <i class="fa fa fa-check" aria-hidden="true"></i>
                                     </button>
                                 </td>
@@ -208,7 +208,21 @@
                 return result;
             },
 
-            updatePrice: function (product) {
+            changeCost(cost, product) {
+                product.cost = cost;
+            },
+            updateCost: function (product) {
+                const changeProduct = {
+                    price: product.cost.replace(',', '.'),
+                    productId: product.id
+                }
+
+                console.log(changeProduct);
+
+                if(isNaN(changeProduct.price)){
+                    alert('Цена должна быть числом')
+                }
+                    
                 fetch('/Product/ChangePrice', {
                     method: "POST",
                     headers: {
