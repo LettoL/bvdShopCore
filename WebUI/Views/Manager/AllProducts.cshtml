@@ -1,11 +1,24 @@
-﻿
-@{
+﻿@{
     ViewData["Title"] = "AllProducts";
     Layout = "~/Views/Shared/ManagerLayout.cshtml";
 }
-<h3 class="page-title">Все товары <small>Просмотр товаров</small></h3>
+
+
+<style>
+    .pagination {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+    }
+    .pagination p {
+        margin: 0;
+        margin-left: 10px;
+    }
+</style>
+
+<h3 class="page-title">Все товары <small>Просмотр и редактирование товаров</small></h3>
 <div id="change_success" hidden class="change_success">Изменение цены прошло успешно</div>
-<div class="row">
+<div id='allProductsComponent' class="row">
     <div class="col-md-12">
         <div class="portlet">
             <div class="portlet-title">
@@ -13,30 +26,22 @@
                     Список товаров
                 </div>
                 <div class="portlet-filters">
-                    <form id="productFilter" style="display: inline-block;" >
-                        <select name="shopId" id="shopFilter" class="form-control" style="width: 200px; display: inline-block">
-                            <option value="0" disabled selected>Выбрать Магазин</option>
-                            <option value="0">Все</option>
-                            @foreach (var s in ViewBag.Shops)
-                            {
-                                <option value="@s.Id">@s.Title</option>
-                            }
+                    <form id="productFilter" style="display: inline-block" >
+                        <select name="shopId" v-model='filterState.shopId' class="form-control" style="width: 200px; display: inline-block">
+                            <option :value="null"> Все Магазины</option>
+                            <option v-for='item in shops' :value="item.id">{{item.title}}</option>
                         </select>
-                        <select name="categoryId" id="categoryFilter" onchange="filter(event)" class="form-control" style="width: 200px; display: inline-block">
-                            <option value="0" disabled selected>Выбрать Категорию</option>
-                            <option value="0">Все</option>
-                            @foreach (var c in ViewBag.Categories)
-                            {
-                                <option value="@c.Id">@c.Title</option>
-                            }
+                        <select name="categoryId" v-model='filterState.categoryId' class="form-control" style="width: 200px; display: inline-block">
+                            <option :value="null">Все Категории</option>
+                            <option v-for='item in categories' :value="item.id">{{item.title}}</option>
                         </select>
-
-                        <input id="searchProduct" type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
-                        <button type="submit" class="btn btn-dark" style="vertical-align: top">Поиск</button>
+                  
+                        <input id="searchProduct" v-model='searchQuery' type="text" name="title" class="form-control" style="width: 200px; display: inline-block" placeholder="Поиск по названию" />
+                       
                     </form>
                 </div>
                 <div class="portlet-action">
-
+                   
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -56,93 +61,148 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var p in Model)
-                            {
-                                <tr id="@p.Id">
-                                    <td>@p.Code</td>
-                                    <td>@p.Title</td>
-                                    <td>@p.Amount</td>
-                                    <td contenteditable>@p.Cost</td>
-                                    <td>@p.Shop.Title</td>
-                                    <td>@p.BookedCount</td>
-                                    <td>@p.Category.Title</td>
-                                    <td>
-                                        <button id="updatePrice" class="btn btn-dark">
-                                                <i class="fa fa fa-check" aria-hidden="true"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                            }
+                            <tr v-for='item in displayedData' id="item.Id">
+                                <td>{{item.code}}</td>
+                                <td>{{item.title}}</td>
+                                <td>{{item.amount}}</td>
+                                <td contenteditable v-on:input='changeCost($event.target.innerText, item)'>{{item.cost}}</td>
+                                <td>{{item.shopTitle}}</td>
+                                <td>{{item.bookedCount}}</td>
+                                <td>{{item.categoryTitle}}</td>
+                                <td>
+                                    <button v-on:click='updateCost(item)' id="updatePrice" class="btn btn-dark">
+                                        <i class="fa fa fa-check" aria-hidden="true"></i>
+                                    </button>
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
+                    <div class="pagination">                       
+                        <button class="btn btn-dark" v-on:click='prevPage'><i class="fa fa-arrow-left" aria-hidden="true"></i></button>
+                        <button class="btn btn-light" v-for='page in pagination.pages.slice(startPage, startPage + pagination.buttonsCount)' v-on:click='setPage(page)'>{{page}}</button>
+                        <button class="btn btn-dark" v-on:click='nextPage'><i class="fa fa-arrow-right" aria-hidden="true"></i></button>
+
+                        <p>
+                            Страница <b>{{pagination.currentPage}}</b> из <b>{{pagination.pages.length}}</b>
+                        </p>
+                        
+
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 
-
-
-
-<script type="text/javascript">
-
-    let form = document.getElementById('productFilter');
-
-    let categoryId = 0;
-    let shopId = 0;
-    let userId = @ViewBag.UserId;
-    let title = null;
-    let all = "true";
-
-    form.addEventListener('submit', filter);
-
-    function filter(event) {
-
-        event.preventDefault();
-
-        shopId = document.getElementById('shopFilter').value;
-        categoryId = document.getElementById('categoryFilter').value;
-        title = document.getElementById('searchProduct').value;
-
-        let ProductFilterVM = {
-            ProductFiltrationModel: {
-                categoryId: categoryId,
-                shopId: shopId,
-                title: title,
-                all: all
+<script>
+    const productsList = new Vue({
+        el: '#allProductsComponent',
+        data: {
+            products: [],
+            categories: [],
+            shops: [],
+            
+            pagination: {
+                pages: [],
+                currentPage: 1,
+                entitiesPerPage: 50,
+                buttonsCount: 5
             },
-            userId: userId
-        }
-
-        $('#result').load(
-            "/Product/Filter",
-            ProductFilterVM
-        );
-
-    }
-
-    let price;
-    let productId;
-
-    let table = document.getElementById('result');
-    table.addEventListener('input', function (event) {
-        price = +event.target.innerText.replace(',', '.');
-        productId = +event.srcElement.parentElement.id;
-    });
-
-
-    table.addEventListener('click', function (event) {
-        if (event.srcElement.id == "updatePrice" || event.srcElement.parentElement.id == "updatePrice") {
-            if (isNaN(price))
-                alert('Цена должна быть числом')
-
-            var changeProduct = {
-                price: JSON.stringify(price).replace('.', ','),
-                productId: productId
-            }
-
-            if (!isNaN(price)) {
+            filterState: {
+                shopId: null,
+                categoryId: null,
+            },
+            searchQuery: ''
+        },
+        created: function () {
+            this.getProducts();
+            this.getCategories();
+            this.getShops();
+        },
+        methods: {
+            getProducts: function () {
+                fetch('/Manager/GetAllProducts', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.products = res;             
+                })
+            },
+            getCategories: function() {
+                fetch('/Category/Get', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.categories = res;
+                })
+            },
+            getShops: function() {
+                fetch('/Shop/Get', {
+                    headers: {'Content-Type': 'application/json'},
+                    credentials: 'include'
+                    })
+                    .then((res) => {
+                        return res.json()
+                    })
+                    .then((res) => {
+                        this.shops = res;
+                })
+            },
+            nextPage: function() {
+                if(this.pagination.pages.length > this.pagination.currentPage) {
+                    this.pagination.currentPage++;
+                }
+                    
+            },
+            prevPage: function() {
+                if(this.pagination.currentPage > 1)
+                    this.pagination.currentPage--;
+            },
+            setPages: function(entities) {
+                this.pagination.pages = [];
+                const pagesCount = Math.ceil(entities.length / this.pagination.entitiesPerPage);
+                for(let index = 1; index <= pagesCount; index++) {
+                    this.pagination.pages.push(index);
+                }
+            },
+            setPage: function(pageNumber) {
+                this.pagination.currentPage = pageNumber;
+            },
+            filterData: function (entities, filterState) {
+                let result = entities;
+                for(let key in filterState) {
+                    if(this.filterState[key])
+                        result = result.filter(item => item[key] === this.filterState[key])
+                }
+                return result;
+            },
+            searchData: function(entities, searchQuery) {
+                result = entities;
+                result = result.filter(item => item.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
+                return result;
+            },
+            changeCost(cost, product) {
+                product.cost = cost;
+            },
+            updateCost: function (product) {
+                const changeProduct = {
+                    price: product.cost.replace(',', '.'),
+                    productId: product.id
+                }
+                if(isNaN(changeProduct.price)){
+                    alert('Цена должна быть числом')
+                }
+                    
                 fetch('/Product/ChangePrice', {
                     method: "POST",
                     headers: {
@@ -154,14 +214,30 @@
                     if (res.ok == true) {
                         let change_success = document.getElementById('change_success');
                         change_success.hidden = false;
-
                         setTimeout(() => change_success.hidden = true, 1200)
                     }
                         
-
                 })
-            }           
+            }
+        },
+        computed: {
+            displayedData: function() {
+                let result = [...this.products];
+                result = this.filterData(result, this.filterState);
+                if(this.searchQuery)
+                    result = this.searchData(result, this.searchQuery)
+                const start = this.pagination.currentPage * this.pagination.entitiesPerPage - this.pagination.entitiesPerPage;
+                const end = this.pagination.entitiesPerPage * this.pagination.currentPage;
+                this.setPages(result);
+                return result.slice(start, end);
+            },
+            startPage: function () {
+                if(this.pagination.currentPage - this.pagination.buttonsCount < 0)
+                    return 0;
+                if(this.pagination.currentPage === this.pagination.pages)
+                    return this.pagination.pages - this.pagination.buttonsCount;
+                return this.pagination.currentPage - this.pagination.buttonsCount;
+            }
         }
-    });
-
+    })
 </script>

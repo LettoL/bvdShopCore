@@ -19,6 +19,7 @@ using Sale = Data.Entities.Sale;
 using Shop = Data.Entities.Shop;
 using Supplier = Data.Entities.Supplier;
 using User = Data.Entities.User;
+using WebUI.Dtos;
 
 namespace WebUI.Controllers
 {
@@ -671,11 +672,28 @@ namespace WebUI.Controllers
             User user = _userService.All().First(u => u.Login == userName);
             Shop shop = _shopService.All().First(s => s.Id == user.ShopId);
 
-            ViewBag.Categories = _categoryService.All();
-            ViewBag.Shops = _shopService.All();
             ViewBag.UserId = user.Id;
 
-            return View(ProductService.GetAllProducts(_db));
+            return View();
+        }
+
+        public IActionResult GetAllProducts() {
+            var result = ProductService.GetAllProducts(_db)
+                .Select(x => new AllProductsDTO() {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = x.Amount,
+                    Cost = x.Cost,
+                    ShopId = x.Shop.Id,
+                    ShopTitle = x.Shop.Title,
+                    CategoryId = x.Category.Id,
+                    CategoryTitle = x.Category.Title,
+                    Code = x.Code,
+                    BookedCount = x.BookedCount,
+                    PrimeCost = x.PrimeCost
+                });
+
+            return Ok(result);
         }
 
         [HttpGet]
