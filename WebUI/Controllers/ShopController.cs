@@ -37,6 +37,16 @@ namespace WebUI.Controllers
                 Turnover = _shopService.Turnover(x.Id)
             }));
         }
+        [HttpGet]
+        public IActionResult Get() {
+            var result = _shopService.All().ToList().Select(x => new ShopVM()
+            {
+                Id = x.Id,
+                Title = x.Title,
+            });
+
+            return Ok(result);
+        }
 
         [HttpGet]
         public IActionResult Create()

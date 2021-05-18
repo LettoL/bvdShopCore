@@ -75,9 +75,27 @@ namespace WebUI.Controllers
             ViewBag.Categories = _categoryService.All();
             ViewBag.Shops = _shopService.All();
 
-            var result = ProductService.GetAllProducts(_db);
+            return View();
+        }
 
-            return View(result);
+        [HttpGet]
+        public IActionResult GetAllProducts() {
+            var result = ProductService.GetAllProducts(_db)
+                .Select(x => new AllProductsDTO() {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = x.Amount,
+                    Cost = x.Cost,
+                    ShopId = x.Shop.Id,
+                    ShopTitle = x.Shop.Title,
+                    CategoryId = x.Category.Id,
+                    CategoryTitle = x.Category.Title,
+                    Code = x.Code,
+                    BookedCount = x.BookedCount,
+                    PrimeCost = x.PrimeCost
+                });
+
+            return Ok(result);
         }
 
         [HttpGet]
