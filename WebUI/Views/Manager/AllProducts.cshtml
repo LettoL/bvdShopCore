@@ -168,9 +168,14 @@
                 if(this.pagination.currentPage > 1)
                     this.pagination.currentPage--;
             },
-            setPages: function(entities) {
-                this.pagination.pages = [];
+            setPages: function(entities) {          
                 const pagesCount = Math.ceil(entities.length / this.pagination.entitiesPerPage);
+                      
+                if(pagesCount !== this.pagination.pages.length)
+                    this.pagination.currentPage = 1;
+
+                this.pagination.pages = [];
+
                 for(let index = 1; index <= pagesCount; index++) {
                     this.pagination.pages.push(index);
                 }
@@ -184,11 +189,13 @@
                     if(this.filterState[key])
                         result = result.filter(item => item[key] === this.filterState[key])
                 }
+
                 return result;
             },
             searchData: function(entities, searchQuery) {
                 result = entities;
                 result = result.filter(item => item.title.toLowerCase().includes(this.searchQuery.toLowerCase()));
+
                 return result;
             },
             changeCost(cost, product) {
@@ -229,6 +236,7 @@
                 const start = this.pagination.currentPage * this.pagination.entitiesPerPage - this.pagination.entitiesPerPage;
                 const end = this.pagination.entitiesPerPage * this.pagination.currentPage;
                 this.setPages(result);
+
                 return result.slice(start, end);
             },
             startPage: function () {
