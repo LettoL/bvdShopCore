@@ -32,7 +32,7 @@ namespace WebUI.API
             return Ok(result);
         }
 
-        [HttpGet("byDates")]
+        [HttpPost("byDates")]
         public IActionResult GetByDates([FromBody] DatesFilter datesFilter)
         {
             var productInformationsByDates = _shopContext.ProductInformations
