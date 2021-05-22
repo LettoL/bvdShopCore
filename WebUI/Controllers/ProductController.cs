@@ -70,10 +70,10 @@ namespace WebUI.Controllers
 
         public IActionResult AllProducts()
         {
-            var userName = HttpContext.User.Identity.Name;
+            /*var userName = HttpContext.User.Identity.Name;
             ViewBag.UserId = _userService.All().First(u => u.Login == userName).Id;
             ViewBag.Categories = _categoryService.All();
-            ViewBag.Shops = _shopService.All();
+            ViewBag.Shops = _shopService.All();*/
 
             return View();
         }

@@ -668,11 +668,10 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult AllProducts()
         {
-            var userName = HttpContext.User.Identity.Name;
+            /*var userName = HttpContext.User.Identity.Name;
             User user = _userService.All().First(u => u.Login == userName);
-            Shop shop = _shopService.All().First(s => s.Id == user.ShopId);
 
-            ViewBag.UserId = user.Id;
+            ViewBag.UserId = user.Id;*/
 
             return View();
         }
