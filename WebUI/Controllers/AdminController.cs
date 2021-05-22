@@ -2482,6 +2482,10 @@ namespace WebUI.Controllers
         {
             return View();
         }
+        [HttpGet]
+        public IActionResult SaledProducts() {
+            return View();
+        }
 
     }
 }

@@ -1,0 +1,206 @@
+
+@{
+    ViewData["Title"] = "SaledProducts";
+    Layout = "~/Views/Shared/AdminLayout.cshtml";
+}
+
+<style>
+  .portlet-title {
+    padding-left: 0px;
+  }
+
+  .portlet-filters {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+  }
+
+  .portlet-filters select {
+    margin-right: 5px
+  }
+
+  .portlet-filters label {
+    margin-left: 5px;
+
+    min-width: 70px;
+  }
+
+  .portlet-filters button {
+    margin-left: 10px;
+  }
+
+</style>
+
+<h3 class="page-title">Проданные товары</h3> 
+<div id='saledProducts' class="row">
+    <div class="col-md-12">
+        <div class="portlet">
+            <div class="portlet-title">
+                <div class="portlet-filters">
+                    <select v-model="filterState.supplierId" class="form-control">
+                        <option :value="null">Выбрать поставщика</option>
+                        <option v-for='item in suppliers' :value='item.id'>{{item.title}}</option>
+                    </select>
+                    <select v-model="filterState.shopId" class="form-control">
+                        <option :value="null">Выбрать магазин</option>
+                        <option v-for='item in shops' :value='item.id'>{{item.title}}</option>     
+                    </select>
+                    <select v-model="filterState.categoryId" class="form-control">
+                        <option :value="null">Выбрать категорию</option>
+                        <option v-for='item in categories'>{{item.title}}</option>                       
+                    </select>
+
+                    <label>Дата с:</label>
+                    <input v-model='dateFrom' class="form-control" type='date' />
+                    <label>Дата по:</label>
+                    <input v-model='dateFor' class="form-control" type='date' />
+                    <button class="btn btn-dark" v-on:click='getSaledProductsByDates'>Показать по датам</button>
+                </div>                  
+            </div>
+            <div class="portlet-body">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                          <tr>
+                              <th>Название</th>
+                              <th>Количество</th>
+                              <th>Магазин</th>
+                          </tr>
+                        </thead>
+                        <tbody>
+                          <tr v-for="item in saledProducts">
+                              <td>{{item.title}}</td>
+                              <td>{{item.amount}}</td>
+                              <td>{{item.shopTitle}}</td>
+                          </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<script src='https://cdn.jsdelivr.net/npm/vue-json-excel@0.3.0/dist/vue-json-excel.umd.min.js'></script>
+
+<script>
+  Vue.component('downloadExcel', JsonExcel)
+
+  const saledProductsList = new Vue({
+    el: '#saledProducts',
+    data: {
+      saledProducts: [],
+      filterState: {
+        shopId: null,
+        categoryId: null,
+        supplierId: null
+      },
+
+      dateFrom: null,
+      dateFor: null,
+
+      categories: [],
+      shops: [],
+      suppliers: []
+    },
+    created: function () {
+      this.getCategories();
+      this.getShops();
+      this.getSuppliers();
+      this.getTodaySaledProducts();
+    },
+    methods: {
+      getTodaySaledProducts: function () {
+        fetch('/api/SaledProducts/', {
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            method: 'GET'
+          })
+            .then((res) => {
+              return res.json()
+            })
+            .then((res) => {
+              this.saledProducts = res;             
+            })
+      },
+      filterData: function(entities, filterState) {
+        let result = entities;
+
+        for(let key in filterState) {
+            if(this.filterState[key])
+              result = result.filter(item => item[key] === this.filterState[key])
+        }
+
+        return result;
+      },
+      getSaledProductsByDates: function() {
+        const body = {
+          from: this.dateFrom,
+          to: this.dateFor
+        }
+
+        fetch('/api/SaledProducts/byDates', {
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include',
+            method: 'POST',
+            body: JSON.stringify(body)
+          })
+            .then((res) => {
+              return res.json()
+            })
+            .then((res) => {
+              this.saledProducts = res;             
+          })
+      },
+
+      getCategories: function() {
+          fetch('/Category/Get', {
+              headers: {'Content-Type': 'application/json'},
+              credentials: 'include'
+              })
+              .then((res) => {
+                  return res.json()
+              })
+              .then((res) => {
+                  this.categories = res;
+          })
+      },
+      getShops: function() {
+          fetch('/Shop/Get', {
+              headers: {'Content-Type': 'application/json'},
+              credentials: 'include'
+              })
+              .then((res) => {
+                  return res.json()
+              })
+              .then((res) => {
+                  this.shops = res;
+          })
+      },
+      getSuppliers: function() {
+          fetch('/api/Suppliers', {
+            headers: {'Content-Type': 'application/json'},
+            credentials: 'include'
+          })
+          .then((res) => {
+            return res.json()
+          })
+          .then((res) => {
+            this.suppliers = res;
+          })
+      }
+    },
+    computed: {
+      displayedData: function() {
+        let result = [...this.saledProducts];
+
+        result = this.filterData(result);
+
+        return result;
+      }
+    }
+
+  })
+</script>
