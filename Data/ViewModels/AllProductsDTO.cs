@@ -1,4 +1,4 @@
-namespace WebUI.Dtos
+namespace Data.ViewModels
 {
     public class AllProductsDTO
     {

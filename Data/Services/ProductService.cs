@@ -10,9 +10,9 @@ namespace Data.Services
 {
     public static class ProductService
     {
-        public static ICollection<AllProductsVM> GetAllProducts(ShopContext db)
+        public static ICollection<AllProductsDTO> GetAllProducts(ShopContext db)
         {
-            var bookingProductsAmount = db.BookingProducts
+            /*var bookingProductsAmount = db.BookingProducts
                 .Where(x => x.Booking.Status == BookingStatus.Open)
                 .Select(x => new
                 {
@@ -51,7 +51,79 @@ namespace Data.Services
                         .Sum(z => z.Amount),
                     PrimeCost = productsInStock.Where(s => s.ProductId == x.Id)
                         .Sum(s => s.Amount * s.PrimeCost)
+                }).ToList();*/
+
+            /*var bookingProductsAmount = db.BookingProducts
+                .Where(x => x.Booking.Status == BookingStatus.Open)
+                .GroupBy(x => x.BookingId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.Amount)
                 }).ToList();
+            
+            var productsInStock = db.SupplyProducts
+                .GroupBy(x => x.ProductId)
+                .Select(x => new
+                {
+                    ProductId = x.Key,
+                    Amount = x.Sum(z => z.StockAmount),
+                    PrimeCost = x.Sum(z => z.ProcurementCost * z.StockAmount)
+                }).ToList();
+            
+            var result = db.Products
+                .Include(x => x.Shop)
+                .Include(x => x.Category)
+                .OrderBy(x => x.Title)
+                .ToList()
+                .Join(productsInStock.DefaultIfEmpty(),
+                    p => p.Id,
+                    ps => ps.ProductId,
+                    (p, ps) => new
+                    {
+                        Id = p.Id,
+                        Title = p.Title,
+                        Cost = p.Cost,
+                        Shop = p.Shop,
+                        Category = p.Category,
+                        Code = p.Code,
+                        PrimeCost = ps.PrimeCost,
+                        AmountOnStock = ps.Amount
+                    })
+                .Select(x => new AllProductsVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Amount = x.AmountOnStock
+                             - bookingProductsAmount.FirstOrDefault(z => z.ProductId == x.Id)?.Amount ?? 0,
+                    Cost = x.Cost,
+                    Shop = x.Shop,
+                    Category = x.Category,
+                    Code = x.Code,
+                    BookedCount = bookingProductsAmount
+                        .FirstOrDefault(z => z.ProductId == x.Id)?.Amount ?? 0,
+                    PrimeCost = x.PrimeCost
+                }).ToList();*/
+
+            var result = db.Test1s.FromSqlRaw(
+                   "SELECT Products.Id, Products.Code, Products.Cost, Products.Title, sp.StockAmount, sp.PrimeCost, bp.BookingAmount, Products.CategoryId, Categories.Title as CategoryTitle, Products.ShopId, MoneyWorkers.Title as ShopTitle FROM Products LEFT JOIN (SELECT ProductId, SUM(StockAmount) as StockAmount, SUM(StockAmount * ProcurementCost) as PrimeCost FROM SupplyProducts WHERE StockAmount > 0 GROUP BY ProductId) as sp ON Id = sp.ProductId LEFT JOIN (SELECT ProductId, Sum(Amount) as BookingAmount FROM BookingProducts INNER JOIN Bookings ON BookingId = Bookings.Id AND Bookings.Status = 1 GROUP BY ProductId) as bp ON Id = bp.ProductId INNER JOIN Categories ON CategoryId = Categories.Id INNER JOIN MoneyWorkers ON ShopId = MoneyWorkers.Id")
+               .ToList()
+               .Select(x => new AllProductsDTO()
+               {
+                   Id = x.Id,
+                   Title = x.Title,
+                   Amount = x.StockAmount ?? 0 - x.BookingAmount ?? 0,
+                   Cost = x.Cost ?? 0,
+                   ShopId = x.ShopId,
+                   ShopTitle = x.ShopTitle,
+                   CategoryId = x.CategoryId,
+                   CategoryTitle = x.CategoryTitle,
+                   Code = x.Code,
+                   BookedCount = x.BookingAmount ?? 0,
+                   PrimeCost = x.PrimeCost ?? 0
+               })
+               .OrderBy(x => x.Title)
+               .ToList();
 
             return result;
         }

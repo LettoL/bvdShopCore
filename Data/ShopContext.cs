@@ -37,6 +37,8 @@ namespace Data
         
         public DbSet<AvailableProduct> AvailableProducts { get; set; }
 
+        public DbSet<Test1> Test1s { get; set; }
+        
         public ShopContext(DbContextOptions<ShopContext> options) : base(options) { }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
@@ -45,5 +47,20 @@ namespace Data
             
             base.OnModelCreating(modelBuilder);
         }
+    }
+
+    public class Test1
+    {
+        public int Id { get; set; }
+        public string Title { get; set; }
+        public decimal? Cost { get; set; }
+        public string Code { get; set; }
+        public int? StockAmount { get; set; }
+        public decimal? PrimeCost { get; set; }
+        public int? BookingAmount { get; set; }
+        public int CategoryId { get; set; }
+        public string CategoryTitle { get; set; }
+        public int ShopId { get; set; }
+        public string ShopTitle { get; set; }
     }
 }
