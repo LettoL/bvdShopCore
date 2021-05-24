@@ -35,9 +35,34 @@ namespace WebUI.API
         [HttpPost("byDates")]
         public IActionResult GetByDates([FromBody] DatesFilter datesFilter)
         {
-            var productInformationsByDates = _shopContext.ProductInformations
-                .Where(x => x.Sale.Date.Date >= datesFilter.From.Date
-                            && x.Sale.Date.Date <= datesFilter.To.Date);
+            DateTime? from = null;
+            DateTime? to = null;
+
+            if (datesFilter.From != null)
+            {
+                var buf = datesFilter.From.Split('-');
+                from = new DateTime(
+                    Convert.ToInt32(buf[0]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[2]));
+            }
+            
+            if (datesFilter.To != null)
+            {
+                var buf = datesFilter.To.Split('-');
+                to = new DateTime(
+                    Convert.ToInt32(buf[0]),
+                    Convert.ToInt32(buf[1]),
+                    Convert.ToInt32(buf[2]));
+            }
+
+            var productInformationsByDates = _shopContext.ProductInformations.AsQueryable();
+
+            if (from != null)
+                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date >= from);
+
+            if (to != null)
+                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date <= to);
 
             var result = GetSoldProducts(productInformationsByDates);
 
@@ -77,7 +102,7 @@ namespace WebUI.API
 
     public class DatesFilter
     {
-        public DateTime From { get; set; }
-        public DateTime To { get; set; }
+        public string From { get; set; }
+        public string To { get; set; }
     }
 }
