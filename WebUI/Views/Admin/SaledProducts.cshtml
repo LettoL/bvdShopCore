@@ -43,9 +43,9 @@
                     </select>
                     <select v-model="filterState.categoryId" class="form-control">
                         <option :value="null">Выбрать категорию</option>
-                        <option v-for='item in categories'>{{item.title}}</option>                       
+                        <option v-for='item in categories' :value='item.id'>{{item.title}}</option>                       
                     </select>
-                    <select v-model="filterState.supplierId" class="form-control">
+                    <select v-model="filterState.suppliersId" class="form-control">
                         <option :value="null">Выбрать поставщика</option>
                         <option v-for='item in suppliers' :value='item.id'>{{item.name}}</option>
                     </select>
@@ -102,7 +102,7 @@
       filterState: {
         shopId: null,
         categoryId: null,
-        supplierId: null
+        suppliersId: null
       },
 
       dateFrom: null,
@@ -143,7 +143,7 @@
 
         for(let key in filterState) {
             if(this.filterState[key])
-              result = result.filter(item => item[key] === this.filterState[key])
+              result = result.filter(item => item[key].length ? item[key].includes(this.filterState[key]) : item[key] === this.filterState[key])
         }
 
         return result;
