@@ -36,11 +36,7 @@
     <div class="col-md-12">
         <div class="portlet">
             <div class="portlet-title">
-                <div class="portlet-filters">
-                    <select v-model="filterState.supplierId" class="form-control">
-                        <option :value="null">Выбрать поставщика</option>
-                        <option v-for='item in suppliers' :value='item.id'>{{item.title}}</option>
-                    </select>
+                <div class="portlet-filters">                 
                     <select v-model="filterState.shopId" class="form-control">
                         <option :value="null">Выбрать магазин</option>
                         <option v-for='item in shops' :value='item.id'>{{item.title}}</option>     
@@ -49,13 +45,24 @@
                         <option :value="null">Выбрать категорию</option>
                         <option v-for='item in categories'>{{item.title}}</option>                       
                     </select>
+                    <select v-model="filterState.supplierId" class="form-control">
+                        <option :value="null">Выбрать поставщика</option>
+                        <option v-for='item in suppliers' :value='item.id'>{{item.name}}</option>
+                    </select>
 
                     <label>Дата с:</label>
                     <input v-model='dateFrom' class="form-control" type='date' />
                     <label>Дата по:</label>
                     <input v-model='dateFor' class="form-control" type='date' />
-                    <button class="btn btn-dark" v-on:click='getSaledProductsByDates'>Показать по датам</button>
-                </div>                  
+                    <button class="btn btn-dark" v-on:click='getSaledProductsByDates' style="margin-right: 5px">Поиск по датам</button>
+                    <download-excel 
+                      class="btn btn-dark"
+                      :data="displayedData"
+                      :fields="jsonFields"
+                      :name='exportName'>
+                      Экспорт
+                    </download-excel>
+                </div>                                 
             </div>
             <div class="portlet-body">
                 <div class="table-responsive">
@@ -68,7 +75,7 @@
                           </tr>
                         </thead>
                         <tbody>
-                          <tr v-for="item in saledProducts">
+                          <tr v-for="item in displayedData">
                               <td>{{item.title}}</td>
                               <td>{{item.amount}}</td>
                               <td>{{item.shopTitle}}</td>
@@ -103,7 +110,13 @@
 
       categories: [],
       shops: [],
-      suppliers: []
+      suppliers: [],
+
+      jsonFields: {
+      "Товар": "title",
+      "Количество": "amount",
+      "Магазин": "shopTitle",   
+      },
     },
     created: function () {
       this.getCategories();
@@ -190,15 +203,31 @@
           .then((res) => {
             this.suppliers = res;
           })
-      }
+      },
+      formateDate: function(date) {
+          var d = new Date(date),
+          month = '' + (d.getMonth() + 1),
+          day = '' + d.getDate(),
+          year = d.getFullYear();
+
+          if (month.length < 2) 
+              month = '0' + month;
+          if (day.length < 2) 
+              day = '0' + day;
+
+          return [day, month, year].join('-');
+        }
     },
     computed: {
       displayedData: function() {
         let result = [...this.saledProducts];
 
-        result = this.filterData(result);
+        result = this.filterData(result, this.filterState);
 
         return result;
+      },
+      exportName: function() {
+        return `Проданные_Товары${this.dateFrom ? '_с ' + this.formateDate(this.dateFrom) : ''}${this.dateFor ? '_по ' + this.formateDate(this.dateFor) : ''}`
       }
     }
 
