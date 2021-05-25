@@ -65,13 +65,16 @@
                 </div>                                 
             </div>
             <div class="portlet-body">
-                <div class="table-responsive">
+                <div v-if='loading'>
+                  <b>Загрузка...</b>
+                </div>
+                <div class="table-responsive" v-if='!loading'>
                     <table class="table table-striped">
                         <thead>
                           <tr>
-                              <th>Название</th>
-                              <th>Количество</th>
-                              <th>Магазин</th>
+                              <th v-on:click='setSortState("title")' style='cursor: pointer'>Название</th>
+                              <th v-on:click='setSortState("amount")' style='cursor: pointer'>Количество</th>
+                              <th v-on:click='setSortState("shopTitle")' style='cursor: pointer'>Магазин</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -98,11 +101,16 @@
   const saledProductsList = new Vue({
     el: '#saledProducts',
     data: {
+      loading: false,
       saledProducts: [],
       filterState: {
         shopId: null,
         categoryId: null,
         suppliersId: null
+      },
+      sortState: {
+        key: 'amount',
+        direction: 'DESC'
       },
 
       dateFrom: null,
@@ -113,9 +121,9 @@
       suppliers: [],
 
       jsonFields: {
-      "Товар": "title",
-      "Количество": "amount",
-      "Магазин": "shopTitle",   
+        "Товар": "title",
+        "Количество": "amount",
+        "Магазин": "shopTitle",   
       },
     },
     created: function () {
@@ -135,8 +143,15 @@
               return res.json()
             })
             .then((res) => {
-              this.saledProducts = res;             
+              this.saledProducts = this.sortData(res, this.sortState);             
             })
+      },
+      setSortState: function(key) {
+        this.sortState.key = key;
+
+        this.sortState.direction = this.sortState.direction === 'ASC' ? 'DESC' : 'ASC';
+
+        this.saledProducts = this.sortData(this.saledProducts, this.sortState);
       },
       filterData: function(entities, filterState) {
         let result = entities;
@@ -148,7 +163,32 @@
 
         return result;
       },
+      sortData: function(entities, sortState) {
+        if(sortState.direction === 'ASC')
+          return entities.sort((a, b) => { 
+            if(a[sortState.key] > b[sortState.key]) {
+              return 1
+            }
+            if(a[sortState.key] < b[sortState.key]) {
+              return -1
+            }
+            return 0;
+          })
+
+        if(sortState.direction === 'DESC')
+          return entities.sort((a, b) => {
+            if(b[sortState.key] > a[sortState.key]) {
+              return 1
+            }
+            if(b[sortState.key] < a[sortState.key]) {
+              return -1
+            }
+            return 0;
+          })
+      },
       getSaledProductsByDates: function() {
+        this.loading = true;
+
         const body = {
           from: this.dateFrom,
           to: this.dateFor
@@ -164,7 +204,8 @@
               return res.json()
             })
             .then((res) => {
-              this.saledProducts = res;             
+              this.loading = false;
+              this.saledProducts = this.sortData(res, this.sortState);             
           })
       },
 
