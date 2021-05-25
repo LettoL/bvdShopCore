@@ -147,9 +147,12 @@
             })
       },
       setSortState: function(key) {
-        this.sortState.key = key;
-
-        this.sortState.direction = this.sortState.direction === 'ASC' ? 'DESC' : 'ASC';
+        if(this.sortState.key === key)
+          this.sortState.direction = this.sortState.direction === 'ASC' ? 'DESC' : 'ASC';
+        else {
+          this.sortState.key = key;
+          this.sortState.direction = 'DESC';
+        }
 
         this.saledProducts = this.sortData(this.saledProducts, this.sortState);
       },
