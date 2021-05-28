@@ -59,10 +59,10 @@ namespace WebUI.API
             var productInformationsByDates = _shopContext.ProductInformations.AsQueryable();
 
             if (from != null)
-                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date >= from);
+                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date.Date >= from);
 
             if (to != null)
-                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date <= to);
+                productInformationsByDates = productInformationsByDates.Where(x => x.Sale.Date.Date <= to);
 
             var result = GetSoldProducts(productInformationsByDates);
 
@@ -82,13 +82,17 @@ namespace WebUI.API
                     Title = x.Product.Title,
                 }).ToList()
                 .Where(x => x.ProductId != null)
-                .GroupBy(x => x.ProductId)
+                .GroupBy(x => new
+                {
+                    x.ProductId,
+                    x.ShopId
+                })
                 .Select(x => new SaledProductsVM()
                 {
-                    ProductId = (int)x.Key,
+                    ProductId = (int)x.Key.ProductId,
                     Amount = x.Sum(z => z.Amount),
                     CategoryId = x.FirstOrDefault().CategoryId,
-                    ShopId = x.FirstOrDefault().ShopId,
+                    ShopId = x.Key.ShopId,
                     SuppliersId = x.Where(z => z.SupplierId != null)
                         .Select(z => (int)z.SupplierId).ToList(),
                     Title = x.FirstOrDefault().Title,
