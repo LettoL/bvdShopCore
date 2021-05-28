@@ -50,10 +50,8 @@
                         <option v-for='item in suppliers' :value='item.id'>{{item.name}}</option>
                     </select>
 
-                    <label>Дата с:</label>
-                    <input v-model='dateFrom' class="form-control" type='date' />
-                    <label>Дата по:</label>
-                    <input v-model='dateFor' class="form-control" type='date' />
+                    <input id='dateFilter1' placeholder="Дата с:" class="form-control" type='text' />
+                    <input id='dateFilter2' placeholder="Дата по:" class="form-control" type='text' />
                     <button class="btn btn-dark" v-on:click='getSaledProductsByDates' style="margin-right: 5px">Поиск по датам</button>
                     <download-excel 
                       class="btn btn-dark"
@@ -65,13 +63,16 @@
                 </div>                                 
             </div>
             <div class="portlet-body">
-                <div class="table-responsive">
+                <div v-if='loading'>
+                  <b>Загрузка...</b>
+                </div>
+                <div class="table-responsive" v-if='!loading'>
                     <table class="table table-striped">
                         <thead>
                           <tr>
-                              <th>Название</th>
-                              <th>Количество</th>
-                              <th>Магазин</th>
+                              <th v-on:click='setSortState("title")' style='cursor: pointer'>Название</th>
+                              <th v-on:click='setSortState("amount")' style='cursor: pointer'>Количество</th>
+                              <th v-on:click='setSortState("shopTitle")' style='cursor: pointer'>Магазин</th>
                           </tr>
                         </thead>
                         <tbody>
@@ -91,6 +92,9 @@
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 <script src='https://cdn.jsdelivr.net/npm/vue-json-excel@0.3.0/dist/vue-json-excel.umd.min.js'></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+
 
 <script>
   Vue.component('downloadExcel', JsonExcel)
@@ -98,11 +102,16 @@
   const saledProductsList = new Vue({
     el: '#saledProducts',
     data: {
+      loading: false,
       saledProducts: [],
       filterState: {
         shopId: null,
         categoryId: null,
         suppliersId: null
+      },
+      sortState: {
+        key: 'amount',
+        direction: 'DESC'
       },
 
       dateFrom: null,
@@ -113,9 +122,9 @@
       suppliers: [],
 
       jsonFields: {
-      "Товар": "title",
-      "Количество": "amount",
-      "Магазин": "shopTitle",   
+        "Товар": "title",
+        "Количество": "amount",
+        "Магазин": "shopTitle",   
       },
     },
     created: function () {
@@ -125,6 +134,12 @@
       this.getTodaySaledProducts();
     },
     methods: {
+      setDateFrom: function(value) {
+        this.dateFrom = value;
+      },
+      setDateFor: function(value) {
+        this.dateFor = value;
+      },
       getTodaySaledProducts: function () {
         fetch('/api/SaledProducts/', {
             headers: {'Content-Type': 'application/json'},
@@ -135,8 +150,18 @@
               return res.json()
             })
             .then((res) => {
-              this.saledProducts = res;             
+              this.saledProducts = this.sortData(res, this.sortState);             
             })
+      },
+      setSortState: function(key) {
+        if(this.sortState.key === key)
+          this.sortState.direction = this.sortState.direction === 'ASC' ? 'DESC' : 'ASC';
+        else {
+          this.sortState.key = key;
+          this.sortState.direction = 'DESC';
+        }
+
+        this.saledProducts = this.sortData(this.saledProducts, this.sortState);
       },
       filterData: function(entities, filterState) {
         let result = entities;
@@ -148,10 +173,35 @@
 
         return result;
       },
+      sortData: function(entities, sortState) {
+        if(sortState.direction === 'ASC')
+          return entities.sort((a, b) => { 
+            if(a[sortState.key] > b[sortState.key]) {
+              return 1
+            }
+            if(a[sortState.key] < b[sortState.key]) {
+              return -1
+            }
+            return 0;
+          })
+
+        if(sortState.direction === 'DESC')
+          return entities.sort((a, b) => {
+            if(b[sortState.key] > a[sortState.key]) {
+              return 1
+            }
+            if(b[sortState.key] < a[sortState.key]) {
+              return -1
+            }
+            return 0;
+          })
+      },
       getSaledProductsByDates: function() {
+        this.loading = true;
+
         const body = {
-          from: this.dateFrom,
-          to: this.dateFor
+          from: this.formateDate(this.dateFrom),
+          to: this.formateDate(this.dateFor)
         }
 
         fetch('/api/SaledProducts/byDates', {
@@ -164,7 +214,8 @@
               return res.json()
             })
             .then((res) => {
-              this.saledProducts = res;             
+              this.loading = false;
+              this.saledProducts = this.sortData(res, this.sortState);             
           })
       },
 
@@ -205,18 +256,9 @@
           })
       },
       formateDate: function(date) {
-          var d = new Date(date),
-          month = '' + (d.getMonth() + 1),
-          day = '' + d.getDate(),
-          year = d.getFullYear();
-
-          if (month.length < 2) 
-              month = '0' + month;
-          if (day.length < 2) 
-              day = '0' + day;
-
-          return [day, month, year].join('-');
-        }
+          const result = date.split('.').reverse().join('-');
+          return result;
+      }
     },
     computed: {
       displayedData: function() {
@@ -227,9 +269,60 @@
         return result;
       },
       exportName: function() {
-        return `Проданные_Товары${this.dateFrom ? '_с ' + this.formateDate(this.dateFrom) : ''}${this.dateFor ? '_по ' + this.formateDate(this.dateFor) : ''}`
+        return `Проданные_Товары${this.dateFrom ? '_с ' + this.dateFrom : ''}${this.dateFor ? '_по ' + this.dateFor : ''}`
       }
     }
 
   })
+</script>
+
+<script type="text/javascript">
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker({
+          onSelect: function (dateText) {
+            saledProductsList.setDateFrom(dateText)
+          },     
+        });
+        $("#dateFilter2").datepicker({
+          onSelect: function (dateText) {
+            saledProductsList.setDateFor(dateText)
+          }
+        });
+    });
 </script>
