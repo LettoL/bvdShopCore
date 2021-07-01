@@ -464,6 +464,7 @@ namespace WebUI.Controllers
         public IActionResult SalesWithPartners()
         {
             ViewBag.Partners = _db.Partners.ToList();
+            var infoMoneys = _db.InfoMonies.ToList();
 
             return View(_db.Sales
                 .Where(s => s.Payment == true && s.PartnerId != null)
@@ -474,13 +475,8 @@ namespace WebUI.Controllers
                     Date = x.Date.ToString("dd.MM.yyyy"),
                     Sum = x.Sum,
                     ShopTitle = x.Shop.Title,
-                    HasAdditionalProduct = x.SalesProducts
-                                               .FirstOrDefault(sp => sp.Additional) != null
-                        ? true
-                        : false,
-                    BuyerTitle = _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id) != null
-                        ? _db.Partners.FirstOrDefault(s => x.PartnerId == s.Id).Title
-                        : "Обычный покупатель",
+                    HasAdditionalProduct = x.SalesProducts.Any(x => x.Additional),
+                    BuyerTitle = x.Partner.Title,
                     Comment = x.Comment
                 }).ToList()
                 .Select(x => new SaleVM
@@ -490,11 +486,7 @@ namespace WebUI.Controllers
                     Sum = x.Sum,
                     ShopTitle = x.ShopTitle,
                     HasAdditionalProduct = x.HasAdditionalProduct,
-                    PaymentType = _infoMoneyService.All().Count(s => s.SaleId == x.Id) > 1
-                        ? PaymentType.Mixed
-                        : _infoMoneyService.All().FirstOrDefault(s => s.SaleId == x.Id) != null
-                            ? _infoMoneyService.All().FirstOrDefault(s => s.SaleId == x.Id).PaymentType
-                            : PaymentType.Cash, //Пиздец
+                    PaymentType = _saleInfoService.PaymentType(x.Id, infoMoneys),
                     BuyerTitle = x.BuyerTitle,
                     Comment = x.Comment
                 }));
