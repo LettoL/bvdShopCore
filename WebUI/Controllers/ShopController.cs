@@ -90,5 +90,16 @@ namespace WebUI.Controllers
 
             return RedirectToAction("Index", "Shop");
         }
+        
+        [HttpGet]
+        public IActionResult ShopList() {
+            var result = _shopService.All().ToList().Select(x => new ShopVM()
+            {
+                Id = x.Id,
+                Title = x.Title,          
+            });
+
+            return Ok(result);
+        }
     }
 }

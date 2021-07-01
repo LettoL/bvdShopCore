@@ -5,14 +5,32 @@
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
 
+<style>
+  .filters {
+    padding-top: 15px;
+    margin-left: 20px;
+  }
+</style>
+
 <h3 class="page-title">Забронированные товары</h3>
 <div class="row">
     <div class="col-md-12">
 
-        <div class="portlet">
+        <div id='list' class="portlet">
             <div class="portlet-title">
-                <div class="portlet-head">
+                <div class="portlet-head" style='margin-right: 20px'>
                     Список Забронированных товаров
+                </div>
+                <div class='filters'>
+                  <select v-model='filterState.shopId' class="form-control" style="width: 200px; display: inline-block">
+                    <option selected :value='null'>Все магазины</option>
+                    <option v-for='item in shops' :value='item.id'>{{item.title}}</option>
+                  </select>
+                  <select v-model='filterState.status' class="form-control" style="width: 200px; display: inline-block">
+                    <option selected :value='null'>Все статусы</option>
+                    <option :value='1'>Открыта</option>
+                    <option :value='2'>Закрыта</option>
+                  </select>
                 </div>
                 <div class="clearfix"></div>
             </div>
@@ -22,6 +40,7 @@
                         <thead>
                             <tr>
                                 <th>Номер</th>
+                                <th>Магазин</th>
                                 <th>Дата</th>
                                 <th>Сумма</th>
                                 <th>Внесено</th>
@@ -32,30 +51,21 @@
                             </tr>
                         </thead>
                         <tbody>
-                            @foreach (var s in Model)
-                            {
-                                <tr>
-                                    <td>@s.Id</td>
-                                    <td>@s.Date.ToString("dd.MM.yyyy")</td>
-                                    <td>@s.Sum</td>
-                                    <td>@s.Pay</td>
-                                    <td>@s.Debt</td>
-                                    @if(s.Status == BookingStatus.Close)
-                                    {
-                                        <td>Закрыта</td>
-                                    }
-                                    else
-                                    {
-                                        <td>Открыта</td>
-                                    }
-                                    <td>@s.ProductTitle</td>
-                                    <td>
-                                        <a href="/Admin/BookingDetail/@s.Id" class="btn btn-dark">
-                                            <i class="fa fa-arrow-right" aria-hidden="true"></i>
-                                        </a>                                                                            
-                                    </td>
-                                </tr>
-                            }
+                            <tr v-for='item in filteredBookings'>
+                                <td>{{item.id}}</td>
+                                <td>{{item.shopTitle}}</td>
+                                <td>{{item.date}}</td>
+                                <td>{{item.sum}}</td>
+                                <td>{{item.pay}}</td>
+                                <td>{{item.debt}}</td>
+                                <td>{{item.status === 1 ? 'Открыта' : 'Закрыта'}}</td>
+                                <td>{{item.productTitle}}</td>
+                                <td>
+                                    <a :href="'/Admin/BookingDetail/' + item.id" class="btn btn-dark">
+                                        <i class="fa fa-arrow-right" aria-hidden="true"></i>
+                                    </a>                                                                            
+                                </td>
+                            </tr>
                         </tbody>
                     </table>
                 </div>
@@ -63,3 +73,56 @@
         </div>
     </div>
 </div>
+
+<script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+
+<script>
+
+  var List = new Vue({
+    el: '#list',
+    data: {
+      bookings: [],
+      shops: [],
+      filterState: {
+        shopId: null,
+        status: null
+      }
+    },
+    computed: {
+      filteredBookings: function () {
+        let result = [...this.bookings];
+
+        for(let key in this.filterState) {
+          if(this.filterState[key])
+            result = result.filter(item => item[key] === this.filterState[key])
+        }
+
+        return result;
+      }    
+    },
+    created: function () {
+      fetch('/Admin/GetBookingList', {
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include'
+      })
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {
+        this.bookings.push(...res)
+      })
+
+      fetch('/Shop/ShopList', {
+        headers: {'Content-Type': 'application/json'},
+        credentials: 'include'
+      })
+      .then((res) => {
+        return res.json()
+      })
+      .then((res) => {
+        this.shops.push(...res)
+      })
+    }
+  })
+
+</script>

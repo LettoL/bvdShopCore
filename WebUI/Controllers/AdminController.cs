@@ -1168,19 +1168,28 @@ namespace WebUI.Controllers
             if (_userService.All().First(u => u.Login == userName).Role != Role.Administrator)
                 return RedirectToAction("Login", "Account");
             
-            return View(_bookingService.All()
+            return View();
+        }
+
+        [HttpGet]
+        public IActionResult GetBookingList() {
+            var result = _bookingService.All()
                 .OrderByDescending(x => x.Id)
-                .Select(x => new BookingListVM()
+                .Select(x => new BookingListItemVM()
                 {
-                    Date = x.Date,
+                    Date = x.Date.ToString("dd.MM.yyyy"),
                     Id = x.Id,
                     Debt = x.Debt,
                     Pay = x.Pay,
                     Sum = x.Sum,
                     Status = x.Status,
+                    ShopId = x.Shop.Id,
+                    ShopTitle = x.Shop.Title,
                     ProductTitle = _bookingProductService.All()
                         .Include(z => z.Product).FirstOrDefault(z => z.BookingId == x.Id).Product.Title ?? ""
-                }));
+                });
+
+            return Ok(result);
         }
 
         [HttpGet]
