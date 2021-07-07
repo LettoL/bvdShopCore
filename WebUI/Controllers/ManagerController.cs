@@ -518,9 +518,17 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult BookingCloseAdditional(int id)
         {
-            return PartialView(_bookingService
+            var result = _bookingService
                 .All()
-                .FirstOrDefault(b => b.Id == id));
+                .Where(x => x.Status == BookingStatus.Open)
+                .FirstOrDefault(b => b.Id == id);
+
+            if (result == null)
+            {
+                return Ok("Бронирование не найдено или закрыто");
+            }
+            
+            return PartialView(result);
         }
 
         //TODO: В сервис это говно

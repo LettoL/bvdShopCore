@@ -3,21 +3,22 @@
 *@
 
 
-<form  style="margin-top: 40px; padding-bottom: 20px;" method="post" action="/Manager/BookingClose" id="closeBooking">
+<form style="margin-top: 40px; padding-bottom: 20px;" method="post" action="/Manager/BookingClose" id="closeBooking">
+    @if(Model == null) {<h5>lalalalalla</h5>}
     <h5>Номер Заявки: @Model.Id</h5>
-    <input hidden name="id" value="@Model.Id" /><br />
+    <input hidden name="id" value="@Model.Id"/><br/>
     <label>Внести наличные средства (<b>Остаток: @Model.Debt</b>)</label>
-    <input class="form-control" type="text" name="cashSum" /><br />
+    <input class="form-control" type="text" name="cashSum"/><br/>
     <label>Внести безналичные средства</label>
     <input class="form-control" type="text" name="cashlessSum"/>
-    <br />
-    
+    <br/>
+
     <label>Перевести безналичные средства на:</label>
     <select id="moneyWorkerType" class="form-control" onchange="selectMoneyWorkers()">
         <option value="null">Не отправлять</option>
         <option value="1">Держатель Карты</option>
         <option value="2">Рассчетный Счет</option>
-    </select> <br />
+    </select> <br/>
 
     <select id="moneyWorkerId" class="form-control" name="moneyWorkerId">
         <option disabled selected value="null">Выбрать</option>
