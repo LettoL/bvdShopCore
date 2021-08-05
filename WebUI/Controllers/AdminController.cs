@@ -2585,7 +2585,12 @@ namespace WebUI.Controllers
             var fromDate = new DateTime(2021, 5, 1);
             var forDate = new DateTime(2021, 6, 1);
 
-            var a = _db.InfoProducts.Where(x => x.Date >= fromDate && x.Date <= forDate && x.Type == InfoProductType.Supply).ToList();
+            var a = _db.InfoProducts
+                .Where(x => x.Date >= fromDate 
+                            && x.Date <= forDate 
+                            && x.Type == InfoProductType.Supply
+                            && x.SupplierId == supplierId)
+                .ToList();
             
             var suppliedProducts = _db.SupplyProducts
                 .Where(x => x.SupplierId == supplierId)
@@ -2619,7 +2624,43 @@ namespace WebUI.Controllers
                 .OrderBy(x => x.Date)
                 .ToList();
             
-            return Ok();
+            return Ok(new AcceptanceRecordDto()
+            {
+                Dates = new List<AcceptanceRecordDate>()
+                {
+                    new AcceptanceRecordDate()
+                    {
+                        Date = new DateTime(2021, 8, 1),
+                        Payments = new List<AcceptanceRecordPayment>()
+                        {
+                            new AcceptanceRecordPayment(){Sum = 1000}
+                        },
+                        Supplieds = new List<AcceptanceRecordSupplied>()
+                        {
+                            new AcceptanceRecordSupplied()
+                            {
+                                Amount = 2,
+                                PriceSum = 10000,
+                                PriceOfUnit = 5000,
+                                ProductTitle = "Product1"
+                            }
+                        }
+                    },
+                    new AcceptanceRecordDate()
+                    {
+                        Supplieds = new List<AcceptanceRecordSupplied>()
+                        {
+                            new AcceptanceRecordSupplied()
+                            {
+                                Amount = 3,
+                                PriceSum = 30000,
+                                PriceOfUnit = 10000,
+                                ProductTitle = "Product2"
+                            }
+                        }
+                    }
+                }
+            });
         }
         
         [HttpGet]
