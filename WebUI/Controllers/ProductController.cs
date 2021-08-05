@@ -164,7 +164,7 @@ namespace WebUI.Controllers
                 Title = x.Title,
                 Cost = x.Cost,
                 Category = x.Category,
-            }));
+            }).ToList());
         }
 
         [HttpGet]

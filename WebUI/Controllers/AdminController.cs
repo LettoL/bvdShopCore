@@ -322,15 +322,35 @@ namespace WebUI.Controllers
                 })
                 .ToListAsync();
 
-            var salesWithManager = sales.Select(x => new
+            /*var salesWithManager = sales.Select(x => new
             {
                 SaleId = x.SaleId,
                 Margin = x.Margin,
                 Sum = x.Sum,
                 ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
-            });
+            });*/
 
-            var managers1 = managers.Select(x => new
+            var salesWithManager = sales.Join(saleManagers,
+                s => s.SaleId,
+                sm => sm.SaleId,
+                (s, sm) => new
+                {
+                    SaleId = s.SaleId,
+                    Margin = s.Margin,
+                    Sum = s.Sum,
+                    ManagerId = sm.ManagerId
+                }).ToList();
+
+            var salesWithManagerGroup = salesWithManager
+                .GroupBy(x => x.ManagerId,
+                    (managerId, sales) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = sales.Sum(x => x.Sum),
+                        Margin = sales.Sum(x => x.Margin)
+                    }).ToList();
+
+            /*var managers1 = managers.Select(x => new
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -340,17 +360,60 @@ namespace WebUI.Controllers
                 BookingIds = bookingManagers
                     .Where(z => z.ManagerId == x.Id)
                     .Select(z => z.BookingId).ToList()
-            }).ToList();
+            }).ToList();*/
 
             var infoMoneys = _db.InfoMonies
                 .Where(x => x.SaleId != null || x.BookingId != null)
                 .ToList();
 
-            var a = infoMoneys
-                .Where(x => x.SaleId != null && (x.SaleId == 699 || x.SaleId == 700))
-                .Sum(x => x.Sum);
+
+            var bookingManagersWithSum = bookingManagers
+                .Join(
+                    infoMoneys.Where(x => x.BookingId != null && x.SaleId == null),
+                    m => m.BookingId,
+                    im => im.BookingId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var salesManagersWithSum = saleManagers
+                .Join(
+                    infoMoneys.Where(x => x.SaleId != null),
+                    m => m.SaleId,
+                    im => im.SaleId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var managersWithSum = salesManagersWithSum.Select(x => new
+            {
+                ManagerId = x.ManagerId,
+                Sum = x.Sum + (bookingManagersWithSum
+                    .FirstOrDefault(z => z.ManagerId == x.ManagerId)?
+                    .Sum ?? 0)
+            }).ToList();
             
-            var result = managers1.Select(x => new ManagerDto()
+           /* var result1 = managers1.Select(x => new ManagerDto()
             {
                 Id = x.Id,
                 Name = x.Name,
@@ -365,7 +428,30 @@ namespace WebUI.Controllers
                                     && z.BookingId != null
                                     && x.BookingIds.Contains((int)z.BookingId))
                         .Sum(z => z.Sum)
-            }).ToList();
+            }).ToList();*/
+
+           var result = managers
+               .Join(salesWithManagerGroup,
+                   m => m.Id,
+                   s => s.ManagerId,
+                   (m, s) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = s.Margin,
+                       Sum = 0
+                   })
+               .Join(managersWithSum,
+                   m => m.Id,
+                   sm => sm.ManagerId,
+                   (m, sm) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = m.Margin,
+                       Sum = sm.Sum
+                   })
+               .ToList();
             
             return View(result);
         }
@@ -2491,11 +2577,56 @@ namespace WebUI.Controllers
         {
             return View();
         }
+
         [HttpGet]
-        public IActionResult SaledProducts() {
+        public IActionResult AcceptanceRecordData(string fromDateStr, string forDateStr, int supplierId)
+        {
+            supplierId = 1;
+            var fromDate = new DateTime(2021, 5, 1);
+            var forDate = new DateTime(2021, 6, 1);
+
+            var a = _db.InfoProducts.Where(x => x.Date >= fromDate && x.Date <= forDate && x.Type == InfoProductType.Supply).ToList();
+            
+            var suppliedProducts = _db.SupplyProducts
+                .Where(x => x.SupplierId == supplierId)
+                .Select(x => new
+                {
+                    Id = x.Id,
+                    ProductId = x.ProductId,
+                    ProductTitle = x.Product.Title,
+                    Amount = x.TotalAmount,
+                    Price = x.ProcurementCost,
+                    TotalPrice = x.ProcurementCost * x.TotalAmount,
+                    SupplyHistoryId = x.SupplyHistoryId
+                })
+                .Join(_db.InfoProducts.Where(x => x.Date >= fromDate && x.Date <= forDate && x.Type == InfoProductType.Supply),
+                    sp => sp.SupplyHistoryId,
+                    ip => ip.SupplyHistoryId,
+                    (sp, ip) => new
+                    {
+                        Id = sp.Id,
+                        ProductId = sp.ProductId,
+                        ProductTitle = sp.ProductTitle,
+                        Amount = sp.Amount,
+                        Price = sp.Price,
+                        TotalPrice = sp.TotalPrice,
+                        SupplyHistoryId = sp.SupplyHistoryId,
+                        Date = ip.Date
+                    })
+                .ToList()
+                .GroupBy(x => x.Id)
+                .Select(x => x.Last())
+                .OrderBy(x => x.Date)
+                .ToList();
+            
+            return Ok();
+        }
+        
+        [HttpGet]
+        public IActionResult SaledProducts() 
+        {
             return View();
         }
-
     }
 }
 
