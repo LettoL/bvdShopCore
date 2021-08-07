@@ -33,16 +33,16 @@
   <div class="portlet">
     <div class="portlet-title">
       <div class="portlet-head">
-        <select class="form-control">
+        <select class="form-control" v-model='searchParams.supplierId'>
           <option value="0">Выбрать поставщика</option>
-          <option>Поставщик</option>
+          <option v-for="item in suppliers" :key='item.id' :value="item.id">{{item.title}}</option>
         </select>
         <div>
           <label>Дата с:</label>
         </div>    
-        <input class="form-control" type='date' />
+        <input class="form-control" type='date' v-model='searchParams.dateFromStr'/>
         <label>Дата по:</label>
-        <input class="form-control" type='date' />
+        <input class="form-control" type='date' v-model='searchParams.dateForStr'/>
         <button v-on:click='getData()' class="btn btn-dark">Показать</button>
       </div>
     </div>
@@ -51,47 +51,27 @@
   <div class="portlet">
     <div class="portlet-body">
       <table class="table">
-        <thead>
-          <tr>
-            <th colspan="3"></th>
-            <th>Стоимость товара</th>
-            <th>Сумма оплаты</th>
-          </tr>
-        </thead>
         <tbody>
-          <template v-for='item in data'>
-            <template v-if='item.products && item.products.length > 0'>
+          <template v-if='!dates.length'><h4>Введите параметры поиска...</h4></template>
+          <template v-for='item in dates'>
+            <tr>
+              <th colspan="6">{{item.date}}</th>
+            </tr>
+            <tr>
+              <th colspan="3">Название</th>
+              <th>К-во</th>
+              <th>Цена за шт.</th>
+              <th>Сумма</th>
+            </tr>
+            <template v-for='supply in item.supplieds'>
               <tr>
-                <th colspan="3">Поступление товара от {{item.date}}</th>
-                <th>{{item.products.reduce((a, b) => a + b.price * b.amount, 0)}}</th>
-                <th></th>
-              </tr>
-              <tr v-for='product in item.products'>
-                <td>{{product.title}}</td>
-                <td colspan="2">{{product.amount}} шт. x {{product.price}} руб.</td>
-                <td>{{product.amount * product.price}}</td>
-                <td></td>
-              </tr>
-            </template>
-            <template v-else>
-              <tr>
-                <th colspan="3">Оплата от {{item.date}}</th>
-                <th></th>
-                <th>{{item.minusDebt}}</th>
-              </tr>
-              <tr v-for='product in item.products'>
-                <td>{{product.title}}</td>
-                <td colspan="2">{{product.amount}} шт. x {{product.price}} руб.</td>
-                <td>{{product.amount * product.price}}</td>
-                <td>0</td>
+                <td colspan="3">{{supply.productTitle}}</td>
+                <td>{{supply.amount}}</td>
+                <td>{{supply.priceOfUnit}}</td>
+                <td>{{supply.priceSum}}</td>
               </tr>
             </template>
           </template>
-          <tr>
-            <th colspan="3">Итого</th>
-            <th>Товара на сумму 130000 руб</th>
-            <th>Оплачено 10000 руб</th>
-          </tr>
         </tbody>
       </table>
     </div>
@@ -101,90 +81,37 @@
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
 
 <script>
-  const testData = [
-    {
-      date: '07.05.2021',
-      products: [
-        {
-          title: 'Тестовый товар 1',
-          amount: 2,
-          price: 10000,
-          plusDebt: 10000,
-        },
-        {
-          title: 'Тестовый товар 2',
-          amount: 1,
-          price: 15000,
-          plusDebt: 15000,
-        }
-      ]
-    },
-    {
-      date: '10.05.2021',
-      products: [
-        {
-          title: 'Тестовый товар 1',
-          amount: 1,
-          price: 5000,
-          plusDebt: 5000,
-        }
-      ]
-    },
-    {
-      date: '11.05.2021',
-      products: [],
-      minusDebt: 10000
-    },
-    {
-      date: '14.05.2021',
-      products: [
-        {
-          title: 'Тестовый товар 1',
-          amount: 2,
-          price: 10000,
-          plusDebt: 10000,
-        }
-      ]
-    },
-    {
-      date: '17.05.2021',
-      products: [
-        {
-          title: 'Тестовый товар 1',
-          amount: 2,
-          price: 10000,
-        },
-        {
-          title: 'Тестовый товар 2',
-          amount: 1,
-          price: 10000,
-        },
-        {
-          title: 'Тестовый товар 3',
-          amount: 2,
-          price: 10000,
-        },
-        {
-          title: 'Тестовый товар 4',
-          amount: 2,
-          price: 10000,
-        },
-      ]
-    },
-  ]
 
   const List = new Vue({
     el: '#acceptanceRecord',
     data: {
-      data: testData,
+      dates: [],
+      suppliers: [],
+      searchParams: {
+        dateFromStr: '',
+        dateForStr: '',
+        supplierId: 0
+      }
     },
     methods: {
       getData: function () {
-        console.log(1);
-        fetch('/Admin/AcceptanceRecordData')
+        fetch('/Admin/AcceptanceRecordData?' + new URLSearchParams({
+          fromDateStr: this.searchParams.dateFromStr,
+          forDateStr: this.searchParams.dateForStr,
+          supplierId: this.searchParams.supplierId
+        }))
           .then(data => data.json())
-          .then(data => console.log(data))
+          .then(data => this.dates = data.dates)
+      },
+      logData: function() {
+        console.log(this.dates)
       }
+    },
+    created: function() {
+      fetch('/Supplier/GetAll')
+        .then(data => data.json())
+        
+        .then(suppliers => this.suppliers = suppliers)
     }   
   })
 

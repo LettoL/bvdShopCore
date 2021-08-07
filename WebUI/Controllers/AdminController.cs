@@ -2579,9 +2579,8 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult AcceptanceRecordData(/*string fromDateStr, string forDateStr, int supplierId*/)
+        public IActionResult AcceptanceRecordData(string fromDateStr, string forDateStr, int supplierId)
         {
-            var supplierId = 1;
             var fromDate = new DateTime(2021, 5, 1);
             var forDate = new DateTime(2021, 6, 1);
 
