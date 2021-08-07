@@ -2636,7 +2636,9 @@ namespace WebUI.Controllers
             
             return Ok(new AcceptanceRecordDto()
             {
-                Dates = result
+                Dates = result,
+                PriceSumTotal = 100000,
+                PaymentSumTotal = 100000
             });
         }
         

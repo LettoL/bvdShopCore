@@ -6,6 +6,8 @@ namespace WebUI.Dtos
     public class AcceptanceRecordDto
     {
         public ICollection<AcceptanceRecordDate> Dates { get; set; } = new HashSet<AcceptanceRecordDate>();
+        public decimal PriceSumTotal { get; set; }
+        public decimal PaymentSumTotal { get; set; }
     }
 
     public class AcceptanceRecordDate
@@ -13,6 +15,7 @@ namespace WebUI.Dtos
         public string Date { get; set; }
         public ICollection<AcceptanceRecordSupplied> Supplieds { get; set; } = new HashSet<AcceptanceRecordSupplied>();
         public ICollection<AcceptanceRecordPayment> Payments { get; set; } = new HashSet<AcceptanceRecordPayment>();
+       
     }
 
     public class AcceptanceRecordSupplied
