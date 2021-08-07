@@ -43,7 +43,7 @@
         <input class="form-control" type='date' />
         <label>Дата по:</label>
         <input class="form-control" type='date' />
-        <button class="btn btn-dark">Показать</button>
+        <button v-on:click='getData()' class="btn btn-dark">Показать</button>
       </div>
     </div>
   </div>
@@ -178,7 +178,14 @@
     data: {
       data: testData,
     },
-    
+    methods: {
+      getData: function () {
+        console.log(1);
+        fetch('/Admin/AcceptanceRecordData')
+          .then(data => data.json())
+          .then(data => console.log(data))
+      }
+    }   
   })
 
 </script>
