@@ -51,24 +51,34 @@
   <div class="portlet">
     <div class="portlet-body">
       <table class="table">
-        <tbody>
-          <template v-if='!dates.length'><h4>Введите параметры поиска...</h4></template>
-          <template v-for='item in dates'>
+        <template v-if='!dates.length'><h4>Введите параметры поиска...</h4></template>
+        <tbody v-if='dates.length'>         
+          <tr>
+            <th colspan='2'></th>
+            <th>Стоимость товара</th>
+            <th>Сумма оплаты</th>
+          </tr> 
+          <template v-for='item in dates'>             
             <tr>
-              <th colspan="6">{{item.date}}</th>
-            </tr>
-            <tr>
-              <th colspan="3">Название</th>
-              <th>К-во</th>
-              <th>Цена за шт.</th>
-              <th>Сумма</th>
-            </tr>
-            <template v-for='supply in item.supplieds'>
+              <th colspan='4'>Дата: {{item.date}}</th>
+            </tr>     
+            <tr v-if='item.supplieds.length'>
+              <th colspan='4'>Поступление товара</th>
+            </tr>  
+            <template v-for='supply in item.supplieds'>                              
               <tr>
-                <td colspan="3">{{supply.productTitle}}</td>
-                <td>{{supply.amount}}</td>
-                <td>{{supply.priceOfUnit}}</td>
-                <td>{{supply.priceSum}}</td>
+                <td>{{supply.productTitle}}</td>
+                <td>{{supply.amount}} шт. x {{supply.priceOfUnit}} руб.</td>
+                <td>{{supply.priceSum}} руб</td>
+              </tr>
+            </template>
+            <tr v-if='item.payments.length'>
+              <th colspan='4'>Оплата</th>
+            </tr> 
+            <template v-for='payment in item.payments'>                      
+              <tr>
+                <td colspan='3'></td>
+                <td>{{payment.sum}} руб.</td>
               </tr>
             </template>
           </template>
