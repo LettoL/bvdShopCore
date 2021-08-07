@@ -10,7 +10,7 @@ namespace WebUI.Dtos
 
     public class AcceptanceRecordDate
     {
-        public DateTime Date { get; set; }
+        public string Date { get; set; }
         public ICollection<AcceptanceRecordSupplied> Supplieds { get; set; } = new HashSet<AcceptanceRecordSupplied>();
         public ICollection<AcceptanceRecordPayment> Payments { get; set; } = new HashSet<AcceptanceRecordPayment>();
     }

@@ -2579,21 +2579,20 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult AcceptanceRecordData(string fromDateStr, string forDateStr, int supplierId)
+        public IActionResult AcceptanceRecordData(/*string fromDateStr, string forDateStr, int supplierId*/)
         {
-            supplierId = 1;
+            var supplierId = 1;
             var fromDate = new DateTime(2021, 5, 1);
             var forDate = new DateTime(2021, 6, 1);
 
-            var a = _db.InfoProducts
-                .Where(x => x.Date >= fromDate 
-                            && x.Date <= forDate 
-                            && x.Type == InfoProductType.Supply
-                            && x.SupplierId == supplierId)
+            var payments = _postgresContext.SupplierPayments
+                .Where(x => x.SupplierId == supplierId
+                            && x.DateTime >= fromDate
+                            && x.DateTime <= forDate)
                 .ToList();
             
-            var suppliedProducts = _db.SupplyProducts
-                .Where(x => x.SupplierId == supplierId)
+            var result = _db.SupplyProducts
+                .Where(x => x.SupplierId == supplierId && x.TotalAmount > 0)
                 .Select(x => new
                 {
                     Id = x.Id,
@@ -2621,45 +2620,24 @@ namespace WebUI.Controllers
                 .ToList()
                 .GroupBy(x => x.Id)
                 .Select(x => x.Last())
+                .GroupBy(x => x.Date.Date)
+                .Select(x => new AcceptanceRecordDate()
+                {
+                    Date = x.Key.ToString("dd.MM.yyyy"),
+                    Supplieds = x.Select(z => new AcceptanceRecordSupplied()
+                    {
+                        Amount = z.Amount,
+                        ProductTitle = z.ProductTitle,
+                        PriceSum = z.TotalPrice,
+                        PriceOfUnit = z.Price
+                    }).ToList()
+                })
                 .OrderBy(x => x.Date)
                 .ToList();
             
             return Ok(new AcceptanceRecordDto()
             {
-                Dates = new List<AcceptanceRecordDate>()
-                {
-                    new AcceptanceRecordDate()
-                    {
-                        Date = new DateTime(2021, 8, 1),
-                        Payments = new List<AcceptanceRecordPayment>()
-                        {
-                            new AcceptanceRecordPayment(){Sum = 1000}
-                        },
-                        Supplieds = new List<AcceptanceRecordSupplied>()
-                        {
-                            new AcceptanceRecordSupplied()
-                            {
-                                Amount = 2,
-                                PriceSum = 10000,
-                                PriceOfUnit = 5000,
-                                ProductTitle = "Product1"
-                            }
-                        }
-                    },
-                    new AcceptanceRecordDate()
-                    {
-                        Supplieds = new List<AcceptanceRecordSupplied>()
-                        {
-                            new AcceptanceRecordSupplied()
-                            {
-                                Amount = 3,
-                                PriceSum = 30000,
-                                PriceOfUnit = 10000,
-                                ProductTitle = "Product2"
-                            }
-                        }
-                    }
-                }
+                Dates = result
             });
         }
         

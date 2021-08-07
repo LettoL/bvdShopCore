@@ -28,6 +28,7 @@ namespace WebUI.API
         public async Task<IActionResult> Get()
         {
             var saleManagers = await _postgresContext.SaleManagersOld.ToListAsync();
+            var bookingManagers = await _postgresContext.BookingManagersOld.ToListAsync();
 
             var salesId = saleManagers.Select(x => x.SaleId).ToList();
             var sales = await _db.Sales
@@ -43,7 +44,7 @@ namespace WebUI.API
             var deletedManagersId = await _postgresContext.DeletedManagers
                 .Select(x => x.Id)
                 .ToListAsync();
-
+            
             var managers = await _postgresContext.Managers
                 .Where(x => !deletedManagersId.Contains(x.Id))
                 .Select(x => new
@@ -53,25 +54,99 @@ namespace WebUI.API
                 })
                 .ToListAsync();
 
-            var salesWithManager = sales.Select(x => new
+            var salesWithManager = sales.Join(saleManagers,
+                s => s.SaleId,
+                sm => sm.SaleId,
+                (s, sm) => new
+                {
+                    SaleId = s.SaleId,
+                    Margin = s.Margin,
+                    Sum = s.Sum,
+                    ManagerId = sm.ManagerId
+                }).ToList();
+
+            var salesWithManagerGroup = salesWithManager
+                .GroupBy(x => x.ManagerId,
+                    (managerId, sales) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = sales.Sum(x => x.Sum),
+                        Margin = sales.Sum(x => x.Margin)
+                    }).ToList();
+
+            var infoMoneys = _db.InfoMonies
+                .Where(x => x.SaleId != null || x.BookingId != null)
+                .ToList();
+
+
+            var bookingManagersWithSum = bookingManagers
+                .Join(
+                    infoMoneys.Where(x => x.BookingId != null && x.SaleId == null),
+                    m => m.BookingId,
+                    im => im.BookingId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var salesManagersWithSum = saleManagers
+                .Join(
+                    infoMoneys.Where(x => x.SaleId != null),
+                    m => m.SaleId,
+                    im => im.SaleId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var managersWithSum = salesManagersWithSum.Select(x => new
             {
-                SaleId = x.SaleId,
-                Margin = x.Margin,
-                Sum = x.Sum,
-                ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
+                ManagerId = x.ManagerId,
+                Sum = x.Sum + (bookingManagersWithSum
+                    .FirstOrDefault(z => z.ManagerId == x.ManagerId)?
+                    .Sum ?? 0)
             }).ToList();
 
-            var result = managers.Select(x => new ManagerDto()
-            {
-                Id = x.Id,
-                Name = x.Name,
-                Margin = salesWithManager
-                    .Where(z => z.ManagerId == x.Id)
-                    .Sum(z => z.Margin),
-                Sum = salesWithManager
-                    .Where(z => z.ManagerId == x.Id)
-                    .Sum(z => z.Sum)
-            }).ToList();
+           var result = managers
+               .Join(salesWithManagerGroup,
+                   m => m.Id,
+                   s => s.ManagerId,
+                   (m, s) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = s.Margin,
+                       Sum = 0
+                   })
+               .Join(managersWithSum,
+                   m => m.Id,
+                   sm => sm.ManagerId,
+                   (m, sm) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = m.Margin,
+                       Sum = sm.Sum
+                   })
+               .ToList();
             
             return Ok(result);
         }
@@ -100,6 +175,7 @@ namespace WebUI.API
         public async Task<IActionResult> Filter([FromBody] ManagerFilter query)
         {
             var saleManagers = await _postgresContext.SaleManagersOld.ToListAsync();
+            var bookingManagers = await _postgresContext.BookingManagersOld.ToListAsync();
 
             var salesId = saleManagers.Select(x => x.SaleId).ToList();
             var sales = await _db.Sales
@@ -113,19 +189,30 @@ namespace WebUI.API
                 })
                 .ToListAsync();
 
+            var infoMoneys = await _db.InfoMonies
+                .Where(x => x.SaleId != null || x.BookingId != null)
+                .ToListAsync();
+
             if (query.StartDate != null)
             {
                 var date = DateTime.Parse(query.StartDate, new CultureInfo("ru-RU"));
                 sales = sales.Where(x => x.Date.Date >= date.Date).ToList();
+                infoMoneys = infoMoneys.Where(x => x.Date.Date >= date.Date).ToList();
             }
 
             if (query.EndDate != null)
             {
                 var date = DateTime.Parse(query.EndDate, new CultureInfo("ru-RU"));
                 sales = sales.Where(x => x.Date.Date <= date.Date).ToList();
+                infoMoneys = infoMoneys.Where(x => x.Date.Date <= date.Date).ToList();
             }
 
+            var deletedManagersId = await _postgresContext.DeletedManagers
+                .Select(x => x.Id)
+                .ToListAsync();
+            
             var managers = await _postgresContext.Managers
+                .Where(x => !deletedManagersId.Contains(x.Id))
                 .Select(x => new
                 {
                     Id = x.Id,
@@ -133,25 +220,94 @@ namespace WebUI.API
                 })
                 .ToListAsync();
 
-            var salesWithManager = sales.Select(x => new
-            {
-                SaleId = x.SaleId,
-                Margin = x.Margin,
-                Sum = x.Sum,
-                ManagerId = saleManagers.FirstOrDefault(z => z.SaleId == x.SaleId).ManagerId
-            });
+            var salesWithManager = sales.Join(saleManagers,
+                s => s.SaleId,
+                sm => sm.SaleId,
+                (s, sm) => new
+                {
+                    SaleId = s.SaleId,
+                    Margin = s.Margin,
+                    Sum = s.Sum,
+                    ManagerId = sm.ManagerId
+                }).ToList();
 
-            var result = managers.Select(x => new ManagerDto()
+            var salesWithManagerGroup = salesWithManager
+                .GroupBy(x => x.ManagerId,
+                    (managerId, sales) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = sales.Sum(x => x.Sum),
+                        Margin = sales.Sum(x => x.Margin)
+                    }).ToList();
+
+            var bookingManagersWithSum = bookingManagers
+                .Join(
+                    infoMoneys.Where(x => x.BookingId != null && x.SaleId == null),
+                    m => m.BookingId,
+                    im => im.BookingId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var salesManagersWithSum = saleManagers
+                .Join(
+                    infoMoneys.Where(x => x.SaleId != null),
+                    m => m.SaleId,
+                    im => im.SaleId,
+                    (m, im) => new
+                    {
+                        ManagerId = m.ManagerId,
+                        Sum = im.Sum
+                    })
+                .GroupBy(
+                    x => x.ManagerId,
+                    (managerId, infos) => new
+                    {
+                        ManagerId = managerId,
+                        Sum = infos.Sum(x => x.Sum)
+                    })
+                .ToList();
+
+            var managersWithSum = salesManagersWithSum.Select(x => new
             {
-                Id = x.Id,
-                Name = x.Name,
-                Margin = salesWithManager
-                    .Where(z => z.ManagerId == x.Id)
-                    .Sum(z => z.Margin),
-                Sum = salesWithManager
-                    .Where(z => z.ManagerId == x.Id)
-                    .Sum(z => z.Sum)
+                ManagerId = x.ManagerId,
+                Sum = x.Sum + (bookingManagersWithSum
+                    .FirstOrDefault(z => z.ManagerId == x.ManagerId)?
+                    .Sum ?? 0)
             }).ToList();
+
+           var result = managers
+               .Join(salesWithManagerGroup,
+                   m => m.Id,
+                   s => s.ManagerId,
+                   (m, s) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = s.Margin,
+                       Sum = 0
+                   })
+               .Join(managersWithSum,
+                   m => m.Id,
+                   sm => sm.ManagerId,
+                   (m, sm) => new ManagerDto()
+                   {
+                       Id = m.Id,
+                       Name = m.Name,
+                       Margin = m.Margin,
+                       Sum = sm.Sum
+                   })
+               .ToList();
             
             return Ok(result);
         }
