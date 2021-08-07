@@ -275,5 +275,12 @@ namespace WebUI.Controllers
 
             return RedirectToAction("Index", "Supplier");
         }
+
+        [HttpGet]
+        public IActionResult GetAll() {
+            var result = this._supplierService.All();
+
+            return Ok(result);
+        }
     }
 }

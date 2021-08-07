@@ -2579,9 +2579,8 @@ namespace WebUI.Controllers
         }
 
         [HttpGet]
-        public IActionResult AcceptanceRecordData(/*string fromDateStr, string forDateStr, int supplierId*/)
+        public IActionResult AcceptanceRecordData(string fromDateStr, string forDateStr, int supplierId)
         {
-            var supplierId = 1;
             var fromDate = new DateTime(2021, 5, 1);
             var forDate = new DateTime(2021, 6, 1);
 
@@ -2637,7 +2636,9 @@ namespace WebUI.Controllers
             
             return Ok(new AcceptanceRecordDto()
             {
-                Dates = result
+                Dates = result,
+                PriceSumTotal = 100000,
+                PaymentSumTotal = 100000
             });
         }
         
