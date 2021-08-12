@@ -2581,13 +2581,25 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult AcceptanceRecordData(string fromDateStr, string forDateStr, int supplierId)
         {
-            var fromDate = new DateTime(2021, 5, 1);
-            var forDate = new DateTime(2021, 6, 1);
+            DateTime fromDate = new DateTime();
+            DateTime forDate = new DateTime();
+
+            if (fromDateStr != null)
+                fromDate = DateTime.Parse(fromDateStr, CultureInfo.CreateSpecificCulture("ru-RU"));
+            else
+                return BadRequest("Первая дата не указана");
+
+            if (forDateStr != null)
+                forDate = DateTime.Parse(forDateStr, CultureInfo.CreateSpecificCulture("ru-RU"));
+            else
+                return BadRequest("Вторая дата не указана");
 
             var payments = _postgresContext.SupplierPayments
                 .Where(x => x.SupplierId == supplierId
                             && x.DateTime >= fromDate
                             && x.DateTime <= forDate)
+                .ToList()
+                .GroupBy(x => x.DateTime.Date)
                 .ToList();
             
             var result = _db.SupplyProducts
@@ -2633,12 +2645,37 @@ namespace WebUI.Controllers
                 })
                 .OrderBy(x => x.Date)
                 .ToList();
+
+            foreach (var payment in payments)
+            {
+                var existDay = result
+                    .FirstOrDefault(x => x.Date == payment.Key.ToString("dd.MM.yyyy"));
+                
+                if(existDay != null)
+                    existDay.Payments = payment.Select(x => new AcceptanceRecordPayment()
+                    {
+                        Sum = x.Sum
+                    }).ToList();
+                else
+                {
+                    result.Add(new AcceptanceRecordDate()
+                    {
+                        Date = payment.Key.ToString("dd.MM.yyyy"),
+                        Payments = payment.Select(x => new AcceptanceRecordPayment()
+                        {
+                            Sum = x.Sum
+                        }).ToList()
+                    });
+                }
+            }
             
             return Ok(new AcceptanceRecordDto()
             {
-                Dates = result,
-                PriceSumTotal = 100000,
-                PaymentSumTotal = 100000
+                Dates = result.OrderBy(x => x.Date).ToList(),
+                PriceSumTotal = result.Sum(x => 
+                    x.Supplieds.Sum(z => z.PriceSum)),
+                PaymentSumTotal = result.Sum(x =>
+                    x.Payments.Sum(z => z.Sum))
             });
         }
         
