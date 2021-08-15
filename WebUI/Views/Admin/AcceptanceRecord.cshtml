@@ -1,8 +1,8 @@
-
 @{
     ViewData["Title"] = "AcceptanceRecord";
     Layout = "~/Views/Shared/AdminLayout.cshtml";
 }
+
 
 <style>
   .portlet-head {
@@ -16,14 +16,11 @@
   }
   .portlet-head label {
     margin-right: 10px;
-
     min-width: 70px;
   }
-
   table {
     width: 100%
   }
-
   table th {
     font-size: 18px;
   }
@@ -40,9 +37,9 @@
         <div>
           <label>Дата с:</label>
         </div>    
-        <input class="form-control" type='date' v-model='searchParams.dateFromStr'/>
+        <input id='dateFilter1' placeholder="Дата с:" class="form-control" type='text' />
         <label>Дата по:</label>
-        <input class="form-control" type='date' v-model='searchParams.dateForStr'/>
+        <input id='dateFilter2' placeholder="Дата по:" class="form-control" type='text' />
         <button v-on:click='getData()' class="btn btn-dark">Показать</button>
       </div>
     </div>
@@ -96,9 +93,10 @@
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/vue@2.5.16/dist/vue.js"></script>
+<link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
 
 <script>
-
   const List = new Vue({
     el: '#acceptanceRecord',
     data: {
@@ -120,6 +118,16 @@
           .then(data => data.json())
           .then(data => this.records = data)
       },
+      setDateFrom: function(value) {
+        this.searchParams.dateFromStr = this.formateDate(value);
+      },
+      setDateFor: function(value) {
+        this.searchParams.dateForStr = this.formateDate(value);
+      },
+      formateDate: function(date) {
+          const result = date.split('.').reverse().join('-');
+          return result;
+      }
     },
     created: function() {
       fetch('/Supplier/GetAll')
@@ -127,6 +135,58 @@
         
         .then(suppliers => this.suppliers = suppliers)
     }   
+    
   })
 
+</script>
+
+<script>
+    (function (factory) {
+        if (typeof define === "function" && define.amd) {
+
+            define(["../widgets/datepicker"], factory);
+        } else {
+
+            factory(jQuery.datepicker);
+        }
+    }(function (datepicker) {
+
+        datepicker.regional.ru = {
+            closeText: "Закрыть",
+            prevText: "&#x3C;Пред",
+            nextText: "След&#x3E;",
+            currentText: "Сегодня",
+            monthNames: ["Январь", "Февраль", "Март", "Апрель", "Май", "Июнь",
+                "Июль", "Август", "Сентябрь", "Октябрь", "Ноябрь", "Декабрь"],
+            monthNamesShort: ["Янв", "Фев", "Мар", "Апр", "Май", "Июн",
+                "Июл", "Авг", "Сен", "Окт", "Ноя", "Дек"],
+            dayNames: ["воскресенье", "понедельник", "вторник", "среда", "четверг", "пятница", "суббота"],
+            dayNamesShort: ["вск", "пнд", "втр", "срд", "чтв", "птн", "сбт"],
+            dayNamesMin: ["Вс", "Пн", "Вт", "Ср", "Чт", "Пт", "Сб"],
+            weekHeader: "Нед",
+            dateFormat: "dd.mm.yy",
+            firstDay: 1,
+            isRTL: false,
+            showMonthAfterYear: false,
+            yearSuffix: ""
+        };
+        datepicker.setDefaults(datepicker.regional.ru);
+
+        return datepicker.regional.ru;
+
+    }));
+
+    $(function () {
+        $.datepicker.setDefaults($.datepicker.regional["ru"]);
+        $("#dateFilter1").datepicker({
+          onSelect: function (dateText) {
+            List.setDateFrom(dateText)
+          },     
+        });
+        $("#dateFilter2").datepicker({
+          onSelect: function (dateText) {
+            List.setDateFor(dateText)
+          }
+        });
+    });
 </script>
