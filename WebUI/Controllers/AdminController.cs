@@ -2590,7 +2590,7 @@ namespace WebUI.Controllers
                 return BadRequest("Первая дата не указана");
 
             if (forDateStr != null)
-                forDate = DateTime.Parse(forDateStr, CultureInfo.CreateSpecificCulture("ru-RU"));
+                forDate = DateTime.Parse(forDateStr, CultureInfo.CreateSpecificCulture("ru-RU")).AddDays(1);
             else
                 return BadRequest("Вторая дата не указана");
 
@@ -2600,6 +2600,26 @@ namespace WebUI.Controllers
                             && x.DateTime <= forDate)
                 .ToList()
                 .GroupBy(x => x.DateTime.Date)
+                .ToList();
+
+            var productsFromSupplierStockGrp = _postgresContext.ProductOperations
+                .Where(x => x.SupplierId == supplierId
+                            && x.StorageType == StorageType.SupplierWarehouse
+                            && x.DateTime >= fromDate
+                            && x.DateTime <= forDate)
+                .ToList()
+                .Join(_db.Products.Select(x => new {Id = x.Id, Title = x.Title}).ToList(),
+                    pfs => pfs.ProductId,
+                    p => p.Id,
+                    (pfs, p) => new
+                    {
+                        Amount = Math.Abs(pfs.Amount),
+                        ProductTitle = p.Title,
+                        PriceSum = pfs.Cost * Math.Abs(pfs.Amount),
+                        PriceOfUnit = pfs.Cost,
+                        Date = pfs.DateTime
+                    })
+                .GroupBy(x => x.Date.Date)
                 .ToList();
             
             var result = _db.SupplyProducts
@@ -2645,6 +2665,36 @@ namespace WebUI.Controllers
                 })
                 .OrderBy(x => x.Date)
                 .ToList();
+
+            foreach (var productFromStockGrp in productsFromSupplierStockGrp)
+            {
+                var existDay = result
+                    .FirstOrDefault(x => x.Date == productFromStockGrp.Key.ToString("dd.MM.yyyy"));
+
+                if (existDay != null)
+                    existDay.Supplieds
+                        .Concat(productFromStockGrp.Select(x => new AcceptanceRecordSupplied()
+                        {
+                            Amount = x.Amount,
+                            ProductTitle = x.ProductTitle,
+                            PriceSum = x.PriceSum,
+                            PriceOfUnit = x.PriceOfUnit
+                        }).ToList());
+                else
+                {
+                    result.Add(new AcceptanceRecordDate()
+                    {
+                        Date = productFromStockGrp.Key.ToString("dd.MM.yyyy"),
+                        Supplieds = productFromStockGrp.Select(x => new AcceptanceRecordSupplied()
+                        {
+                            Amount = x.Amount,
+                            ProductTitle = x.ProductTitle,
+                            PriceSum = x.PriceSum,
+                            PriceOfUnit = x.PriceOfUnit
+                        }).ToList()
+                    });
+                }
+            }
 
             foreach (var payment in payments)
             {
