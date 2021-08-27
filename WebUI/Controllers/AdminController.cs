@@ -199,15 +199,19 @@ namespace WebUI.Controllers
             if (user.Role == Role.Manager)
                 ViewBag.Layout = "~/Views/Shared/ManagerLayout.cshtml";
             
+            var deletedManagersId = _postgresContext.DeletedManagers
+                .Select(x => x.Id)
+                .ToList();
             
             var managers = _postgresContext.Managers
+                .Where(x => !deletedManagersId.Contains(x.Id))
                 .Select(x => new
                 {
                     Id = x.Id,
                     Name = x.Name
                 }).ToList();
 
-            ViewBag.Managers = _postgresContext.Managers.ToList();
+            ViewBag.Managers = _postgresContext.Managers.Where(x => !deletedManagersId.Contains(x.Id)).ToList();
             
             var result = _postgresContext.ManagerPayments
                 .OrderByDescending(x => x.Id)
