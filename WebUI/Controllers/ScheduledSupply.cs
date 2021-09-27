@@ -9,13 +9,16 @@ using Domain.Entities;
 using Domain.Entities.Olds;
 using Handlers.CommandHandlers;
 using Handlers.Commands;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using PostgresData;
+using WebUI.QueriesHandlers;
 using WebUI.ViewModels;
 
 namespace WebUI.Controllers
 {
+    [Authorize]
     public class ScheduledSupply : Controller
     {
         private readonly PostgresContext _postgresContext;
@@ -38,7 +41,7 @@ namespace WebUI.Controllers
                     Title = x.Title
                 }).ToList();
 
-            var suppliers = _shopContext.Suppliers
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
                 .Select(x => new SupplierVM()
                 {
                     Id = x.Id,
@@ -161,6 +164,147 @@ namespace WebUI.Controllers
                 _postgresContext.SaveChanges();
 
                 return RedirectToAction("List");
+            }
+            catch (Exception e)
+            {
+                return BadRequest(e.Message);
+            }
+        }
+
+        [HttpGet]
+        public IActionResult CreateByManager()
+        {
+            var products = _shopContext.Products
+                .Select(x => new ProductVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+
+            var categories = _shopContext.Categories
+                .Select(x => new CategoryVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+
+            ViewBag.Products = products;
+            ViewBag.Suppliers = suppliers;
+            ViewBag.Categories = categories;
+            
+            return View();
+        }
+
+        [HttpPost]
+        public IActionResult CreateByManager([FromBody] CreateScheduledDeliveryVM scheduledDelivery)
+        {
+            try
+            {
+                var userName = HttpContext.User.Identity.Name;
+                var user = _shopContext.Users.FirstOrDefault(u => u.Login == userName);
+
+                if (user?.ShopId == null)
+                    return BadRequest("Пользователь не авторизован");
+
+                scheduledDelivery.ShopId = (int)user.ShopId;
+                
+                
+                var products = new List<ScheduledProductDelivery>();
+
+                foreach (var product in scheduledDelivery.Products)
+                {
+                    ScheduledProductDelivery productDelivery;
+
+                    if (product.ProductId != 0)
+                    {
+                        productDelivery = new ScheduledProductDelivery(product.ProductId, product.Amount,
+                            scheduledDelivery.SupplierId, product.ProcurementCost);
+                    }
+                    else
+                    {
+                        var existingProduct = _shopContext.Products
+                            .FirstOrDefault(x => x.Title == product.Title);
+
+                        if (existingProduct == null)
+                        {
+                            var newProduct = _shopContext.Products.Add(new Product()
+                            {
+                                Title = product.Title,
+                                Code = product.Code,
+                                ShopId = 1,
+                                CategoryId = scheduledDelivery.CategoryId,
+                                Cost = product.ProcurementCost
+                            });
+                            _shopContext.SaveChanges();
+
+                            productDelivery = new ScheduledProductDelivery(newProduct.Entity.Id, product.Amount,
+                                scheduledDelivery.SupplierId, product.ProcurementCost);
+                        }
+                        else
+                        {
+                            productDelivery = new ScheduledProductDelivery(existingProduct.Id, product.Amount,
+                                scheduledDelivery.SupplierId, product.ProcurementCost);
+                        }
+                    }
+
+                    if (scheduledDelivery.ShopId > 0)
+                        productDelivery.ShopId = scheduledDelivery.ShopId;
+
+                    products.Add(productDelivery);
+                }
+
+                var createdSchedulerDelivery = _postgresContext.ScheduledDeliveries
+                    .Add(new ScheduledDelivery(
+                        scheduledDelivery.SupplierId,
+                        scheduledDelivery.DepositedSum,
+                        products));
+
+                var supplier = _shopContext.Suppliers.FirstOrDefault(x => x.Id == scheduledDelivery.SupplierId);
+
+                var infoMoney = _shopContext.InfoMonies.Add(new InfoMoney()
+                {
+                    Sum = -scheduledDelivery.DepositedSum,
+                    PaymentType = PaymentType.Cashless,
+                    MoneyWorkerId = scheduledDelivery.MoneyWorkerId,
+                    MoneyOperationType = MoneyOperationType.Expense,
+                    Date = DateTime.Now.AddHours(3),
+                    Comment = supplier?.Title ?? ""
+                }).Entity;
+
+                var expense = _shopContext.Expenses.Add(new Expense()
+                {
+                    InfoMoney = infoMoney,
+                    ExpenseCategoryId = 4
+                });
+
+                _shopContext.SaveChanges();
+
+                // _postgresContext.SupplierPayments.Add(
+                //     new SupplierPayment(scheduledDelivery.DepositedSum, scheduledDelivery.SupplierId, DateTime.Now.AddHours(3)));
+                _postgresContext.ExpensesOld.Add(
+                    new ExpenseOld(
+                        expense.Entity.Id,
+                        scheduledDelivery.ShopId > 0 ? scheduledDelivery.ShopId : 1));
+
+                _postgresContext.SaveChanges();
+
+                _postgresContext.ScheduledDeliveryPayments.Add(new ScheduledDeliveryPayment()
+                {
+                    InfoMoneyId = infoMoney.Id,
+                    ScheduledDeliveryId = createdSchedulerDelivery.Entity.Id,
+                    MoneyWorkerId = scheduledDelivery.MoneyWorkerId
+                });
+
+                _postgresContext.SaveChanges();
+
+                return RedirectToAction("SupplyList", "ManagerScheduledSupply");
             }
             catch (Exception e)
             {
@@ -398,7 +542,7 @@ namespace WebUI.Controllers
         [HttpGet]
         public IActionResult GetList()
         {
-            var suppliers = _shopContext.Suppliers
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
                 .Select(x => new SupplierVM()
                 {
                     Id = x.Id,
@@ -474,7 +618,7 @@ namespace WebUI.Controllers
                     Title = x.Title
                 }).ToList();
 
-            var suppliers = _shopContext.Suppliers
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
                 .Select(x => new SupplierVM()
                 {
                     Id = x.Id,
@@ -511,7 +655,7 @@ namespace WebUI.Controllers
                     Title = x.Title
                 }).ToList();
 
-            var suppliers = _shopContext.Suppliers
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
                 .Select(x => new SupplierVM()
                 {
                     Id = x.Id,

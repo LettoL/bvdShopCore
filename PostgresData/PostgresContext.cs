@@ -38,6 +38,7 @@ namespace PostgresData
         public DbSet<ScheduledProductDelivery> ScheduledProductDeliveries { get; set; }
         public DbSet<ScheduledDelivery> ScheduledDeliveries { get; set; }
         public DbSet<ScheduledDeliveryPayment> ScheduledDeliveryPayments { get; set; }
+        public DbSet<SupplierInfo> SuppliersInfos { get; set; }
         
         //public PostgresContext(DbContextOptions<PostgresContext> options) : base(options) {}
 

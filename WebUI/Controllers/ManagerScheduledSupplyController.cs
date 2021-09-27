@@ -7,6 +7,7 @@ using Microsoft.EntityFrameworkCore;
 using PostgresData;
 using Handlers.CommandHandlers;
 using Handlers.Commands;
+using WebUI.QueriesHandlers;
 
 namespace WebUI.Controllers
 {
@@ -34,7 +35,7 @@ namespace WebUI.Controllers
             var userName = HttpContext.User.Identity.Name;
             var user = _shopContext.Users.FirstOrDefault(u => u.Login == userName);
             
-            var suppliers = _shopContext.Suppliers
+            var suppliers = SupplierHandlers.Get(_postgresContext, _shopContext)
                 .Select(x => new SupplierVM()
                 {
                     Id = x.Id,

@@ -1,6 +1,6 @@
 ﻿@{
     ViewData["Title"] = "Create";
-    Layout = "~/Views/Shared/AdminLayout.cshtml";
+    Layout = "~/Views/Shared/ManagerLayout.cshtml";
 }
 
 <style>
@@ -47,15 +47,6 @@
                     @foreach (var c in ViewBag.Categories)
                     {
                         <option value="@c.Id">@c.Title</option>
-                    }
-                </select>
-                
-                <label>Магазин для поставки</label>
-                <select v-model="shopId" class="form-control" name="shopId">
-                    <option value="0">Не выбран</option>
-                    @foreach (var s in ViewBag.Shops)
-                    {
-                        <option value="@s.Id">@s.Title</option>
                     }
                 </select>
                 
@@ -121,7 +112,6 @@
           sum: 0,
           categoryId: 1,
           moneyWorkerId: 0,
-          shopId: 0
         },
         methods: {
           sendData: function () {
@@ -139,12 +129,11 @@
               supplierId: +this.supplierId,
               moneyWorkerId: +this.moneyWorkerId,
               categoryId: +this.categoryId,
-              shopId: +this.shopId
+              shopId: 0
             }
             
-            console.log(scheduledDelivery)
             
-            return fetch("/ScheduledSupply/Create", {
+            return fetch("/ScheduledSupply/CreateByManager", {
               method: "POST",
               headers: {
                 'Content-Type': 'application/json',
@@ -233,7 +222,7 @@
           
           const productsProperties = productsText.split('\n').map(x => x.split('\t'));
                     
-          const products = productsProperties.filter(x => x.length > 6).map(x => {         
+          const products = productsProperties.filter(x => x.length > 6).map(x => {
             return {
               number: +(x[0].replace(',', '.').replace(/\s+/g,'')),
               code: x[1],
@@ -259,7 +248,7 @@
             let moneyWorkerSelect = document.getElementById('chooseMoneyWorker');
             let moneyWorkerValue = moneyWorkerSelect.options[moneyWorkerSelect.selectedIndex].value;
     
-            fetch('/Admin/GetMoneyWorkers/' + moneyWorkerValue,
+            fetch('/Manager/GetMoneyWorkersForSale/' + moneyWorkerValue,
                     {
                         headers: { "Content-Type": "application/json" },
                         credentials: 'include'
@@ -288,6 +277,5 @@
               $('#netroj').prop('disabled', true)
               return true
             })
-
 </script>
 

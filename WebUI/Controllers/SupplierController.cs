@@ -7,6 +7,7 @@ using Domain.Entities.Olds;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using PostgresData;
+using WebUI.QueriesHandlers;
 using WebUI.ViewModels;
 
 namespace WebUI.Controllers
@@ -33,20 +34,6 @@ namespace WebUI.Controllers
         public IActionResult Index()
         {
             var suppliersInfoInit = _postgresContext.SupplierInfoInits.ToList();
-
-           /* var a = _shopContext.Products
-                .Where(x => x.ShopId == 33)
-                .Select(x => x.Id)
-                .ToList();*/
-
-           /*var test = _postgresContext.ProductOperations
-               .Where(x => x.SupplierId == 57)
-               .ToList();
-           var test1 = suppliersInfoInit.Where(x => x.SupplierId == 57).ToList();
-
-           var test2 = _supplyProductService.All()
-               .Where(p => p.SupplierId == 57)
-               .Sum(p => p.StockAmount * p.ProcurementCost);*/
             
             var operations = _postgresContext.ProductOperations
                // .Where(x => a.Contains(x.ProductId))
@@ -72,44 +59,7 @@ namespace WebUI.Controllers
                     RepaymentsSum = x.Sum(z => z.Sum)
                 }).ToList();
 
-            /*_postgresContext.SupplierInfoInits.RemoveRange(_postgresContext.SupplierInfoInits.ToList());
-            _postgresContext.SaveChanges();*/
-            
-            /*var result = _supplierService.All().Select(x => new SupplierVM()
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Phone = x.Phone,
-                Email = x.Email,
-                Debt = x.Debt,
-                CostRealizationProductOnStock = _supplyProductService.All()
-                    .Where(p => p.SupplierId == x.Id)
-                    .Sum(p => p.RealizationAmount * p.ProcurementCost),
-                CostProductOnStock = _supplyProductService.All()
-                    .Where(p => p.SupplierId == x.Id)
-                    .Sum(p => p.StockAmount * p.ProcurementCost)
-            }).ToList();
-
-            foreach (var supplier in result)
-            {
-                _postgresContext.SupplierInfoInits.Add(new SupplierInfoInit(
-                    supplier.Id,
-                    supplier.Debt,
-                    supplier.CostRealizationProductOnStock,
-                    supplier.CostProductOnStock));
-            }
-            _postgresContext.SaveChanges();*/
-
-            var result = _supplierService.All().Select(x => new SupplierVM()
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Phone = x.Phone,
-                Email = x.Email,
-                Debt = 0,
-                CostRealizationProductOnStock = 0,
-                CostProductOnStock = 0
-            }).ToList();
+            var result = SupplierHandlers.Get(_postgresContext, _shopContext);
 
             foreach (var supplierVm in result)
             {
@@ -185,17 +135,40 @@ namespace WebUI.Controllers
                     SupplierId = x.Key,
                     RepaymentsSum = x.Sum(z => z.Sum)
                 }).ToList();
+            
+            var supplierInfos = _postgresContext.SuppliersInfos
+                .ToList();
 
-            var result = _supplierService.All().Select(x => new SupplierVM()
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Phone = x.Phone,
-                Email = x.Email,
-                Debt = 0,
-                CostRealizationProductOnStock = 0,
-                CostProductOnStock = 0
-            }).ToList();
+            var removedSuppliers = supplierInfos
+                .Where(x => x.Removed)
+                .Select(x => x.SupplierId)
+                .ToList();
+
+            var result = _supplierService.All()
+                .ToList()
+                .Where(x => !removedSuppliers.Contains(x.Id))
+                .Join(supplierInfos,
+                    s => s.Id,
+                    i => i.SupplierId,
+                    (s, i) => new
+                    {
+                        Id = s.Id,
+                        Title = s.Title,
+                        Phone = s.Phone,
+                        Email = s.Email,
+                        Order = i.Order
+                    })
+                .OrderBy(x => x.Order)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Phone = x.Phone,
+                    Email = x.Email,
+                    Debt = 0,
+                    CostRealizationProductOnStock = 0,
+                    CostProductOnStock = 0
+                }).ToList();
 
             foreach (var supplierVm in result)
             {
@@ -242,7 +215,11 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult Create(Supplier obj)
         {
-            _supplierService.Create(obj);
+            //_supplierService.Create(obj);
+            var supplier = _shopContext.Suppliers.Add(obj);
+            _shopContext.SaveChanges();
+
+            _postgresContext.SuppliersInfos.Add(new SupplierInfo(supplier.Entity.Id, 1000));
 
             return RedirectToAction("Index");
         }
