@@ -183,7 +183,7 @@
                 ? x.categoryId === +this.filterCategory
                 : true)
             .filter(x => this.filterTitle !== ''
-                ? x.title.includes(this.filterTitle)
+                ? x.title.toLowerCase().includes(this.filterTitle)
                 : true)
         }
       },
