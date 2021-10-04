@@ -37,7 +37,6 @@ namespace WebUI.Controllers
         private readonly IBaseObjectService<BookingProduct> _bookingProductService;
         private readonly IBaseObjectService<SupplyProduct> _supplyProduct;
         private readonly IBaseObjectService<SaleProduct> _saleProductService;
-        private readonly IBaseObjectService<Supplier> _supplierService;
         private readonly IBaseObjectService<SaleInformation> _saleInformationService;
         private readonly IBaseObjectService<ExpenseCategory> _expenseCategoryService;
         private readonly IBaseObjectService<Expense> _expenseService;
@@ -61,7 +60,6 @@ namespace WebUI.Controllers
             IBaseObjectService<Category> categoryService,
             IBaseObjectService<SupplyProduct> supplyProduct,
             IBaseObjectService<SaleProduct> saleProductService,
-            IBaseObjectService<Supplier> supplierSerivce,
             IBaseObjectService<SaleInformation> saleInformationService,
             IBaseObjectService<ExpenseCategory> expenseCategoryService,
             IBaseObjectService<Expense> expenseService,
@@ -85,7 +83,6 @@ namespace WebUI.Controllers
             _categoryService = categoryService;
             _supplyProduct = supplyProduct;
             _saleProductService = saleProductService;
-            _supplierService = supplierSerivce;
             _saleInformationService = saleInformationService;
             _expenseCategoryService = expenseCategoryService;
             _expenseService = expenseService;

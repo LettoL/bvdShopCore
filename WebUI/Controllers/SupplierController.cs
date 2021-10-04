@@ -220,6 +220,7 @@ namespace WebUI.Controllers
             _shopContext.SaveChanges();
 
             _postgresContext.SuppliersInfos.Add(new SupplierInfo(supplier.Entity.Id, 1000));
+            _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
         }

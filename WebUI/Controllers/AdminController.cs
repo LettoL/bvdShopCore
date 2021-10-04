@@ -1020,7 +1020,12 @@ namespace WebUI.Controllers
                 return RedirectToAction("Login", "Account");
             
             ViewBag.Products = _productService.All();
-            ViewBag.Suppliers = _supplierService.All();
+            ViewBag.Suppliers = SupplierHandlers.Get(_postgresContext, _db)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
             ViewBag.Shops = _shopService.All();
 
             return View();
@@ -1081,13 +1086,14 @@ namespace WebUI.Controllers
                     SupplierId = x.Key,
                     RepaymentsSum = x.Sum(z => z.Sum)
                 }).ToList();
-            
-            var result = _supplierService.All().Select(x => new Supplier()
-            {
-                Id = x.Id,
-                Title = x.Title,
-                Debt = 0
-            }).ToList();
+
+            var result = SupplierHandlers.Get(_postgresContext, _db)
+                .Select(x => new Supplier()
+                {
+                    Id = x.Id,
+                    Title = x.Title,
+                    Debt = 0
+                }).ToList();
             
             foreach (var supplierVm in result)
             {
@@ -1554,7 +1560,13 @@ namespace WebUI.Controllers
             
             Sale sale = _saleService.All().FirstOrDefault(s => s.Id == id);
 
-            ViewBag.Suppliers = _supplierService.All();
+            ViewBag.Suppliers = SupplierHandlers.Get(_postgresContext, _db)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
+            
             var saleInformation = _db.SaleInformations
                 .Include(x => x.MoneyWorkerForExpense)
                 .Include(x => x.MoneyWorkerForIncome)
@@ -1833,7 +1845,12 @@ namespace WebUI.Controllers
             
             Sale sale = _saleService.All().FirstOrDefault(s => s.Id == id);
 
-            ViewBag.Suppliers = _supplierService.All();
+            ViewBag.Suppliers = SupplierHandlers.Get(_postgresContext, _db)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
 
             var saleProducts = _saleProductService
                 .All()
