@@ -167,7 +167,8 @@ namespace WebUI.Controllers
                     Email = x.Email,
                     Debt = 0,
                     CostRealizationProductOnStock = 0,
-                    CostProductOnStock = 0
+                    CostProductOnStock = 0,
+                    Order = x.Order
                 }).ToList();
 
             foreach (var supplierVm in result)
@@ -213,13 +214,20 @@ namespace WebUI.Controllers
         }
 
         [HttpPost]
-        public IActionResult Create(Supplier obj)
+        public IActionResult Create(int id, string title, string email, string phone, int order)
         {
             //_supplierService.Create(obj);
-            var supplier = _shopContext.Suppliers.Add(obj);
+            var supplier = _shopContext.Suppliers.Add(new Supplier()
+            {
+                Id = id,
+                Title = title,
+                Email = email,
+                Phone = phone,
+                Debt = 0
+            });
             _shopContext.SaveChanges();
 
-            _postgresContext.SuppliersInfos.Add(new SupplierInfo(supplier.Entity.Id, 1000));
+            _postgresContext.SuppliersInfos.Add(new SupplierInfo(supplier.Entity.Id, order));
             _postgresContext.SaveChanges();
 
             return RedirectToAction("Index");
@@ -229,11 +237,15 @@ namespace WebUI.Controllers
         public IActionResult Edit(int id)
         {
             Supplier supplier = _supplierService.All().First(u => u.Id == id);
+            ViewBag.Order = _postgresContext.SuppliersInfos
+                .FirstOrDefault(x => x.SupplierId == supplier.Id)?
+                .Order ?? 1000;
+            
             return View(supplier);
         }
 
         [HttpPost]
-        public IActionResult Edit(int id, string title, string email, string phone)
+        public IActionResult Edit(int id, string title, string email, string phone, int order)
         {
             _supplierService.Update(new Supplier()
             {
@@ -243,14 +255,32 @@ namespace WebUI.Controllers
                 Phone = phone
             });
 
+            var info = _postgresContext.SuppliersInfos
+                .FirstOrDefault(x => x.SupplierId == id);
+
+            if (info == null)
+                throw new Exception("Не найдена информация о поставщике");
+            
+            info.Order = order;
+
+            _postgresContext.SaveChanges();
+
             return RedirectToAction("Index", "Supplier");
         }
 
-        [HttpPost]
+        [HttpGet]
         public IActionResult Delete(int id)
         {
-            _supplierService.Delete(id);
+            var info = _postgresContext.SuppliersInfos
+                .FirstOrDefault(x => x.SupplierId == id);
 
+            if (info == null)
+                throw new Exception("Информация о поставщике не найден");
+
+            info.Removed = true;
+
+            _postgresContext.SaveChanges();
+            
             return RedirectToAction("Index", "Supplier");
         }
 

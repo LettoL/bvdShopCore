@@ -23,6 +23,7 @@
                     <table class="table table-striped" id="result">
                         <thead>
                         <tr>
+                            <th>Номер</th>
                             <th>Название</th>
                             <th>Телефон</th>
                             <th>Email</th>
@@ -36,6 +37,7 @@
                         @foreach (var s in Model)
                         {
                             <tr>
+                                <td>@s.Order</td>
                                 <td>@s.Title</td>
                                 <td>@s.Phone</td>
                                 <td>@s.Email</td>
@@ -45,6 +47,9 @@
                                 <td>
                                     <a href="/Supplier/Edit/@s.Id" class="btn btn-dark">
                                         <i class="fa fa-pencil" aria-hidden="true"></i>
+                                    </a>
+                                    <a href="/Supplier/Delete/@s.Id" class="btn btn-danger deleteForm">
+                                        <i class="fa fa-trash" aria-hidden="true"></i>
                                     </a>
                                 </td>
                             </tr>

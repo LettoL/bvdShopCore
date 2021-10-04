@@ -141,9 +141,7 @@
               categoryId: +this.categoryId,
               shopId: +this.shopId
             }
-            
-            console.log(scheduledDelivery)
-            
+                        
             return fetch("/ScheduledSupply/Create", {
               method: "POST",
               headers: {

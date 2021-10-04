@@ -1,6 +1,7 @@
 ﻿<table class="table table-striped" id="result">
     <thead>
     <tr>
+        <th>Номер</th>
         <th>Название</th>
         <th>Телефон</th>
         <th>Email</th>
@@ -14,6 +15,7 @@
     @foreach (var s in Model)
     {
         <tr>
+            <td>@s.Order</td>
             <td>@s.Title</td>
             <td>@s.Phone</td>
             <td>@s.Email</td>

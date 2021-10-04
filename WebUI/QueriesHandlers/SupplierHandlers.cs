@@ -41,7 +41,8 @@ namespace WebUI.QueriesHandlers
                     Email = x.Email,
                     Debt = 0,
                     CostRealizationProductOnStock = 0,
-                    CostProductOnStock = 0
+                    CostProductOnStock = 0,
+                    Order = x.Order
                 }).ToList();
 
             return result;

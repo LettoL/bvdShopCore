@@ -11,6 +11,7 @@ namespace WebUI.ViewModels
         public decimal Debt { get; set; }
         public decimal CostRealizationProductOnStock { get; set; }
         public decimal CostProductOnStock { get; set; }
+        public int Order { get; set; }
 
         public static explicit operator Supplier(SupplierVM objVM)
         {
