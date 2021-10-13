@@ -102,22 +102,21 @@ namespace Data.Services.Concrete
                         SaleId = sale.Id,
                         SaleType = SaleType.DefferedSale
                     });
-                /*if(obj.PaymentType == PaymentType.Cash)
-                    db.SaleInformations.Add(new SaleInformation()
-                    {
-                        MoneyWorkerForIncomeId = shop.Id,
-                        SaleId = sale.Id,
-                        SaleType = SaleType.DefferedSale
-                    });
-                else
-                    db.SaleInformations.Add(new SaleInformation()
-                    {
-                        MoneyWorkerForIncomeId = shop.Id == 0 ? null : obj.MoneyWorkerId,
-                        SaleId = sale.Id,
-                        SaleType = SaleType.DefferedSale
-                    });*/
             }
-                
+
+            if (sale.Partner == null)
+            {
+                foreach (var product in obj.Products)
+                {
+                    var curProduct = db.Products.FirstOrDefault(x => x.Id == product.Id);
+
+                    if (curProduct == null) throw new Exception("Товар не найден");
+                    
+                    curProduct.Cost = product.Cost;
+
+                    db.Products.Update(curProduct);
+                }
+            }
 
             decimal primeCost = 0;
 
