@@ -532,6 +532,12 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult BookingClose(int id, decimal cashSum, decimal cashlessSum, int moneyWorkerId, bool cashless)
         {
+            var userName = HttpContext.User.Identity.Name;
+            User user = _userService.All().First(u => u.Login == userName);
+
+            if (user == null)
+                throw new Exception("Пользователь не найден");
+            
             Booking booking = _bookingService.All().First(b => b.Id == id);
             booking.Debt -= (cashSum + cashlessSum);
             booking.Pay += (cashSum + cashlessSum);
@@ -540,9 +546,6 @@ namespace WebUI.Controllers
                 booking.Status = BookingStatus.Close;
 
             _bookingService.Update(booking);
-
-            var userName = HttpContext.User.Identity.Name;
-            User user = _userService.All().First(u => u.Login == userName);
 
             if (cashSum > 0)
             {

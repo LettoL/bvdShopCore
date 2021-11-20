@@ -145,9 +145,13 @@ namespace WebUI.Controllers
 
                 _shopContext.SaveChanges();
 
-                // _postgresContext.SupplierPayments.Add(
-                //     new SupplierPayment(scheduledDelivery.DepositedSum, scheduledDelivery.SupplierId, DateTime.Now.AddHours(3)));
-                _postgresContext.ExpensesOld.Add(
+                 _postgresContext.SupplierPayments.Add(
+                     new SupplierPayment(
+                         scheduledDelivery.DepositedSum,
+                         scheduledDelivery.SupplierId,
+                         DateTime.Now.AddHours(3)));
+                
+                 _postgresContext.ExpensesOld.Add(
                     new ExpenseOld(
                         expense.Entity.Id,
                         scheduledDelivery.ShopId > 0 ? scheduledDelivery.ShopId : 1));
@@ -286,8 +290,12 @@ namespace WebUI.Controllers
 
                 _shopContext.SaveChanges();
 
-                // _postgresContext.SupplierPayments.Add(
-                //     new SupplierPayment(scheduledDelivery.DepositedSum, scheduledDelivery.SupplierId, DateTime.Now.AddHours(3)));
+                _postgresContext.SupplierPayments.Add(
+                    new SupplierPayment(
+                        scheduledDelivery.DepositedSum, 
+                        scheduledDelivery.SupplierId, 
+                        DateTime.Now.AddHours(3)));
+                 
                 _postgresContext.ExpensesOld.Add(
                     new ExpenseOld(
                         expense.Entity.Id,
@@ -399,8 +407,12 @@ namespace WebUI.Controllers
             
             _shopContext.SaveChanges();
 
-            //_postgresContext.SupplierPayments.Add(
-            //    new SupplierPayment(payment.Sum, supply.SupplierId, DateTime.Now.AddHours(3)));
+            _postgresContext.SupplierPayments.Add(
+                new SupplierPayment(
+                    payment.Sum,
+                    supply.SupplierId,
+                    DateTime.Now.AddHours(3)));
+            
             _postgresContext.ExpensesOld.Add(
                 new ExpenseOld(expense.Entity.Id, payment.ShopId));
 

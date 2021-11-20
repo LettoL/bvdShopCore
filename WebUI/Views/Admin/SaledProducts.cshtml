@@ -263,13 +263,15 @@
     computed: {
       displayedData: function() {
         let result = [...this.saledProducts];
+        console.log(1)
 
         result = this.filterData(result, this.filterState);
 
         return result;
       },
       exportName: function() {
-        return `Проданные_Товары${this.dateFrom ? '_с ' + this.dateFrom : ''}${this.dateFor ? '_по ' + this.dateFor : ''}`
+        return "Проданные товары"
+        //return `Проданные_Товары${this.dateFrom ? '_с ' + this.dateFrom : ''}${this.dateFor ? '_по ' + this.dateFor : ''}`
       }
     }
 
