@@ -12,6 +12,5 @@ namespace Data.Services.Abstract
         decimal Balance();
 
         decimal SaleSum(int id);
-        
     }
 }

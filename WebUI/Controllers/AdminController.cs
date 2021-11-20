@@ -1547,7 +1547,7 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult MoneyTransfer(MoneyTransferVM moneyTransfer)
         {
-            MoneyTransferHandler.MoneyTransfer(moneyTransfer, _postgresContext, _db);
+            MoneyTransferHandler.MoneyTransfer(moneyTransfer, _db);
             return RedirectToAction("Index");
         }
 

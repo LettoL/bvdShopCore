@@ -26,7 +26,7 @@ namespace Data.Services.Concrete
 
             return base.Create(obj);
         }
-
+        
         public decimal GetMoneyWorkerBalance(ShopContext db, int moneyWorkerId)
         {
             var balance = db.InfoMonies.Where(im => im.MoneyWorkerId == moneyWorkerId)

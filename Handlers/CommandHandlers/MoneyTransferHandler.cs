@@ -9,9 +9,9 @@ namespace Handlers.CommandHandlers
 {
     public static class MoneyTransferHandler
     {
-        public static void MoneyTransfer(MoneyTransferVM moneyTransfer, PostgresContext postgresContext, ShopContext shopContext)
+        public static void MoneyTransfer(MoneyTransferVM moneyTransfer, ShopContext shopContext)
         {
-            var prevInfoMoney = shopContext.InfoMonies.Add(new InfoMoney()
+            var prevInfoMoney = new InfoMoney()
             {
                 Sum = -moneyTransfer.Sum,
                 PaymentType = moneyTransfer.PrevMoneyWorkerType == 3 || moneyTransfer.NextMoneyWorkerType == 3 //Проверка на магазин
@@ -20,25 +20,26 @@ namespace Handlers.CommandHandlers
                 MoneyOperationType = MoneyOperationType.Transfer,
                 MoneyWorkerId = moneyTransfer.PrevMoneyWorkerID,
                 Date = DateTime.Now.AddHours(3),
-            });
-            var nextInfoMoney = shopContext.InfoMonies.Add(new InfoMoney()
-                {
-                    Sum = moneyTransfer.Sum,
-                    PaymentType = moneyTransfer.PrevMoneyWorkerType == 3 || moneyTransfer.NextMoneyWorkerType == 3 //Проверка на магазин
+            };
+            var nextInfoMoney = new InfoMoney()
+            {
+                Sum = moneyTransfer.Sum,
+                PaymentType =
+                    moneyTransfer.PrevMoneyWorkerType == 3 ||
+                    moneyTransfer.NextMoneyWorkerType == 3 //Проверка на магазин
                         ? PaymentType.Cash
                         : PaymentType.Cashless,
-                    MoneyOperationType = MoneyOperationType.Transfer,
-                    MoneyWorkerId = moneyTransfer.NextMoneyWorkerID,
-                    Date = DateTime.Now.AddHours(3),
-            });
-            shopContext.SaveChanges();
-            var prevId = prevInfoMoney.Entity.Id;
-            var nextId = nextInfoMoney.Entity.Id;
-            shopContext.MoneyTransfers.Add( new MoneyTransfer()
+                MoneyOperationType = MoneyOperationType.Transfer,
+                MoneyWorkerId = moneyTransfer.NextMoneyWorkerID,
+                Date = DateTime.Now.AddHours(3),
+            };
+            var moneyTransferAdd = new MoneyTransfer()
             {
-                PrevInfoMoneyId = prevId,
-                NextInfoMoneyId = nextId
-            });
+                PrevInfoMoney = prevInfoMoney,
+                NextInfoMoney = nextInfoMoney,
+            };
+            shopContext.MoneyTransfers.Add(moneyTransferAdd);
+            shopContext.SaveChanges();
         }
     }
 }
