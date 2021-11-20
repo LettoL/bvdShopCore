@@ -286,7 +286,12 @@ namespace WebUI.Controllers
 
         [HttpGet]
         public IActionResult GetAll() {
-            var result = this._supplierService.All();
+            var result = SupplierHandlers.Get(_postgresContext, _shopContext)
+                .Select(x => new SupplierVM()
+                {
+                    Id = x.Id,
+                    Title = x.Title
+                }).ToList();
 
             return Ok(result);
         }
