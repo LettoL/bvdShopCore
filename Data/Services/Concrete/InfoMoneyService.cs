@@ -26,7 +26,7 @@ namespace Data.Services.Concrete
 
             return base.Create(obj);
         }
-
+        
         public decimal GetMoneyWorkerBalance(ShopContext db, int moneyWorkerId)
         {
             var balance = db.InfoMonies.Where(im => im.MoneyWorkerId == moneyWorkerId)
@@ -46,39 +46,6 @@ namespace Data.Services.Concrete
         public decimal SaleSum(int id)
         {
             return this.All().Where(x => x.SaleId == id).Sum(x => x.Sum);
-        }
-
-        public void MoneyTransfer(MoneyTransferVM moneyTransfer)
-        {
-            InfoMoney prevInfoMoney = new InfoMoney()
-            {
-                Sum = -moneyTransfer.Sum,
-                PaymentType = moneyTransfer.PrevMoneyWorkerType == 3 || moneyTransfer.NextMoneyWorkerType == 3 //Проверка на магазин
-                    ? PaymentType.Cash 
-                    : PaymentType.Cashless,
-                MoneyOperationType = MoneyOperationType.Transfer,
-                MoneyWorkerId = moneyTransfer.PrevMoneyWorkerID,
-            };
-
-            var createdPrevInfoMoney = Create(prevInfoMoney);
-
-            InfoMoney nextInfoMoney = new InfoMoney()
-            {
-                Sum = moneyTransfer.Sum,
-                PaymentType = moneyTransfer.PrevMoneyWorkerType == 3 || moneyTransfer.NextMoneyWorkerType == 3 //Проверка на магазин
-                    ? PaymentType.Cash
-                    : PaymentType.Cashless,
-                MoneyOperationType = MoneyOperationType.Transfer,
-                MoneyWorkerId = moneyTransfer.NextMoneyWorkerID,
-            };
-
-            var createdNextInfoMoney = Create(nextInfoMoney);
-
-            _moneyTransferService.Create(new MoneyTransfer()
-            {
-                PrevInfoMoneyId = createdPrevInfoMoney.Id,
-                NextInfoMoneyId = createdNextInfoMoney.Id
-            });
         }
     }
 }

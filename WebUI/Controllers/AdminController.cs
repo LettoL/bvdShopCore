@@ -18,6 +18,7 @@ using Data.ViewModels;
 using Domain.Entities;
 using Domain.Entities.Olds;
 using Domain.Entities.Supplies;
+using Handlers.CommandHandlers;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -1546,8 +1547,7 @@ namespace WebUI.Controllers
         [HttpPost]
         public IActionResult MoneyTransfer(MoneyTransferVM moneyTransfer)
         {
-            _infoMoneyService.MoneyTransfer(moneyTransfer);
-
+            MoneyTransferHandler.MoneyTransfer(moneyTransfer, _db);
             return RedirectToAction("Index");
         }
 
