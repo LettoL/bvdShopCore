@@ -435,7 +435,15 @@ namespace WebUI.Controllers
                         .Sum(z => z.Sum)
             }).ToList();*/
 
-           var result = managers
+           var result = managers.Select(x => new ManagerDto()
+           {
+               Id = x.Id,
+               Name = x.Name,
+               Margin = salesWithManagerGroup.FirstOrDefault(z => z.ManagerId == x.Id)?.Margin ?? 0,
+               Sum = managersWithSum.FirstOrDefault(z => z.ManagerId == x.Id)?.Sum ?? 0
+           }).ToList();
+
+           /*var result = managers
                .Join(salesWithManagerGroup,
                    m => m.Id,
                    s => s.ManagerId,
@@ -456,7 +464,7 @@ namespace WebUI.Controllers
                        Margin = m.Margin,
                        Sum = sm.Sum
                    })
-               .ToList();
+               .ToList();*/
             
             return View(result);
         }
